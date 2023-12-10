@@ -1,21 +1,16 @@
-const cloudinary = require("cloudinary").v2;
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
+// Server file
 
-cloudinary.config({
-  cloud_name: process.env.cloudinary_cloud_name,
-  api_key: process.env.cloudinary_api_key,
-  api_secret: process.env.cloudinary_api_secret,
-});
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "CollabMate",
-    allowedFormats: ["jpeg", "png", "jpg"],
-  },
-});
+const express = require("express");
+const app = express();
+const db = require("./config/db");
+const port = process.env.PORT || 3000;
 
-module.exports = {
-  cloudinary,
-  storage,
-};
+app.use(express.json());
+
+// routes
+
+app.listen(port, () => console.log(`Node JS server listening on port ${port}`));
