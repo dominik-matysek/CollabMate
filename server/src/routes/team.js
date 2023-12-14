@@ -3,7 +3,7 @@ const router = express.Router();
 const teams = require("../controllers/team");
 const { verifyToken, verifyAdmin } = require("../middlewares/auth");
 
-router.post("/create", verifyToken, verifyAdmin, teams.createTeam);
+router.post("/", verifyToken, verifyAdmin, teams.createTeam);
 
 router.get("/", verifyToken, verifyAdmin, teams.getAllTeams);
 

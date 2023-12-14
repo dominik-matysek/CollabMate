@@ -1,6 +1,6 @@
 const Team = require("../models/team");
 const User = require("../models/user");
-const Project = require("../models/project");
+const Calendar = require("../models/calendar");
 
 // Create a team
 exports.createTeam = async (req, res) => {
@@ -24,7 +24,7 @@ exports.createTeam = async (req, res) => {
 		});
 
 		// Automatically create a calendar for the team
-		const newCalendar = new Calendar({ team: newTeam._id });
+		const newCalendar = new Calendar();
 		newTeam.calendar = newCalendar._id;
 
 		// Save the team and the calendar
@@ -96,7 +96,7 @@ exports.editTeam = async (req, res) => {
 			return res.status(404).json({ message: "Team not found" });
 		}
 
-		res.status(200).json(updatedTeam);
+		res.status(200).json({ team: updatedTeam });
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: "Internal Server Error" });
@@ -142,11 +142,15 @@ exports.deleteTeam = async (req, res) => {
 exports.addMemberToTeam = async (req, res) => {
 	try {
 		const teamId = req.params.id; // Extract team ID from params
-		const { searchKey } = req.body; // New: Extract search key from request body
+		const { searchKey } = req.body; // Extract search key from request body
 
 		// Search for the user by name or email
 		const user = await User.findOne({
-			$or: [{ name: searchKey }, { email: searchKey }],
+			$or: [
+				{ firstName: searchKey },
+				{ lastName: searchKey },
+				{ email: searchKey },
+			],
 		});
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
@@ -174,3 +178,69 @@ exports.addMemberToTeam = async (req, res) => {
 };
 
 // Remove user from a team
+exports.removeMemberFromTeam = async (req, res) => {
+	try {
+		const teamId = req.params.id;
+		const userId = req.body.userId; // Extract user ID from request body
+
+		// Remove the user from the team's members
+		const updatedTeam = await Team.findByIdAndUpdate(
+			teamId,
+			{ $pull: { members: userId } },
+			{ new: true }
+		);
+
+		if (!updatedTeam) {
+			return res.status(404).json({ message: "Team not found" });
+		}
+
+		res.status(200).json({
+			message: "Member removed from the team successfully",
+			team: updatedTeam,
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+// Get members of a team
+exports.getMembers = async (req, res) => {
+	try {
+		const teamId = req.params.id;
+
+		// Fetch the team and populate the members
+		const team = await Team.findById(teamId).populate(
+			"members",
+			"firstName lastName email"
+		);
+
+		if (!team) {
+			return res.status(404).json({ message: "Team not found" });
+		}
+
+		res.status(200).json({ members: team.members });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+// Get projects of a team
+exports.getAllProjects = async (req, res) => {
+	try {
+		const teamId = req.params.id;
+
+		// Fetch the team and populate the projects
+		const team = await Team.findById(teamId).populate("projects", "name");
+
+		if (!team) {
+			return res.status(404).json({ message: "Team not found" });
+		}
+
+		res.status(200).json({ projects: team.projects });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: "Internal Server Error" });
+	}
+};

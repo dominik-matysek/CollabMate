@@ -9,6 +9,6 @@ router.post("/login", users.login);
 
 router.get("/authenticate", verifyToken, users.authenticate);
 
-router.post("/update/profile/:id", verifyToken, users.updateProfile);
+router.post("/profile/:id/update", verifyToken, users.updateProfile);
 
 module.exports = router;

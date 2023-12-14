@@ -3,14 +3,14 @@ const router = express.Router();
 const calendars = require("../controllers/calendar");
 const verify = require("../middlewares/auth");
 
-router.post("/create-event", verify, calendars.createEvent);
+router.post("/:teamId/create-event", verify, calendars.createEvent);
 
-router.get("/events", verify, calendars.getAllEvents);
+router.get("/:teamId/events", verify, calendars.getAllEvents);
 
-router.get("/events/:id", verify, calendars.getEventById);
+router.get("/:teamId/events/:id", verify, calendars.getEventById);
 
-router.post("/events/:id/edit", verify, calendars.editEvent);
+router.post("/:teamId/events/:id/edit", verify, calendars.editEvent);
 
-router.delete("/events/:id", verify, calendars.deleteEvent);
+router.delete("/:teamId/events/:id", verify, calendars.deleteEvent);
 
 module.exports = router;

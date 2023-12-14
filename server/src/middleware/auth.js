@@ -29,7 +29,18 @@ const verifyAdmin = (req, res, next) => {
 	}
 };
 
+const verifyLeader = (req, res, next) => {
+	if (req.user && req.user.role === "TEAM LEADER") {
+		// User is an admin, allow the request to proceed
+		next();
+	} else {
+		// User is not an admin, send a 403
+		res.status(403).json({ message: "Permission denied." });
+	}
+};
+
 module.exports = {
 	verifyToken,
 	verifyAdmin,
+	verifyLeader,
 };

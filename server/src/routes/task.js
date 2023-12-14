@@ -3,7 +3,7 @@ const router = express.Router();
 const tasks = require("../controllers/task");
 const verify = require("../middlewares/auth");
 
-router.post("/create", verify, tasks.createTask);
+router.post("/:projectId/create", verify, tasks.createTask);
 
 router.get("/:id", verify, tasks.getTaskById);
 

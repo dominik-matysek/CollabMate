@@ -3,7 +3,9 @@ const router = express.Router();
 const comments = require("../controllers/comment");
 const verify = require("../middlewares/auth");
 
-router.post("/create", verify, comments.createComment);
+router.post("/:taskId/create", verify, comments.createComment);
+
+router.put("/:id/edit", verify, comments.editComment);
 
 router.delete("/:id", verify, comments.deleteComment);
 
