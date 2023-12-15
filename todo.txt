@@ -1,13 +1,13 @@
 Na pewno:
-1. Cały model Zespołów i związane z tym routy, api, funkcje itp itd - ok. 3 dni
-6. Trochę zmiana zasad działania ról - u ciebie one działają inaczej niż u gościa - 3 dni
+1. Cały model Zespołów i związane z tym routy, api, funkcje itp itd - ok. 3 dni - DONE CHYBA
+6. Trochę zmiana zasad działania ról - u ciebie one działają inaczej niż u gościa - 3 dni - DONE CHYBA
 5. Rzeczy z prezentacji na seminaria np: 
- - edycja profilu użytkownika (zmiana zdjęcia, hasła przez maila itp) - 3 dni
- - kalendarz (podgląd i dodawanie/zmiany/usuwanie spotkań, deadlinów itp) - ok. 5 dni
+ - edycja profilu użytkownika (zmiana zdjęcia, hasła przez maila itp) - 3 dni - BACKEND DONE CHYBA
+ - kalendarz (podgląd i dodawanie/zmiany/usuwanie spotkań, deadlinów itp) - ok. 5 dni - BACKEND DONE CHYBA
  - powiadomienia o zbliżających się terminach w kalendarzu (np tydzień przed a potem dzień przed) - 1 dzień
- - dodanie właściwości projektów - 0,5 dnia
- - dodanie właściwości zadań - 0,5 dnia
- - kilku pracowników do jednego zadania (być może to już jest w projekcie) - 1 dzien
+ - dodanie właściwości projektów - 0,5 dnia - BACKEND DONE CHYBA
+ - dodanie właściwości zadań - 0,5 dnia - BACKEND DONE CHYBA
+ - kilku pracowników do jednego zadania (być może to już jest w projekcie) - 1 dzien - BACKEND DONE CHYBA
 10. Póki co (lekcja 41) przy usunięciu kogoś z projektu przypisane do niego taski wciąż są - rozwiaż to albo tak, że osoby która ma przypisane taski nie można usunąć
 (trzeba najpierw usunąć jej taski) albo przy usunięciu osoby automatycznie usuwane są wszystkie jej taski - 0,5 dnia
 11. Update też nie do końca działa - jeżeli update robisz na tasku, który przypisał sobie np. sam pracownik, to potem gdy chcesz dodać nowy task form się psuje - 0,5 dnia

@@ -1,10 +1,16 @@
 const Team = require("../models/team");
 const User = require("../models/user");
 const Calendar = require("../models/calendar");
+const {
+	createTeamValidation,
+	editTeamValidation,
+} = require("../utils/teamValidation");
 
 // Create a team
 exports.createTeam = async (req, res) => {
 	try {
+		const { error } = createTeamValidation(req.body);
+		if (error) return res.status(400).send(error.details[0].message);
 		const { name, teamLeadId } = req.body;
 
 		// Check if the specified team leader exists and has the correct role
@@ -86,6 +92,9 @@ exports.getTeamById = async (req, res) => {
 exports.editTeam = async (req, res) => {
 	try {
 		const teamId = req.params.id;
+
+		const { error } = editTeamValidation(req.body);
+		if (error) return res.status(400).send(error.details[0].message);
 
 		const updatedTeam = await Team.findByIdAndUpdate(teamId, req.body, {
 			new: true,

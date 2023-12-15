@@ -1,9 +1,18 @@
 const Project = require("../models/project");
 const Team = require("../models/team");
 const User = require("../models/user");
+
+const {
+	createProjectValidation,
+	editProjectValidation,
+} = require("../utils/projectValidation");
+
 // Create a new project
 exports.createProject = async (req, res) => {
 	try {
+		const { error } = createProjectValidation(req.body);
+		if (error) return res.status(400).send(error.details[0].message);
+
 		const { name, description } = req.body;
 		const teamId = req.params.teamId;
 
@@ -55,6 +64,9 @@ exports.editProject = async (req, res) => {
 	try {
 		const projectId = req.params.id;
 		const { name, description, status } = req.body;
+
+		const { error } = editProjectValidation(name, description);
+		if (error) return res.status(400).send(error.details[0].message);
 
 		// Update a project by ID
 		const project = await Project.findByIdAndUpdate(

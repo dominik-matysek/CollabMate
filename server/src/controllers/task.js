@@ -1,9 +1,17 @@
 const Task = require("../models/task");
 const Project = require("../models/project");
 
+const {
+	createTaskValidation,
+	editTaskValidation,
+} = require("../utils/taskValidation");
+
 // Controller to create a new task
 exports.createTask = async (req, res) => {
 	try {
+		const { error } = createTaskValidation(req.body);
+		if (error) return res.status(400).send(error.details[0].message);
+
 		const { name, description, priority, dueDate, assignees } = req.body;
 		const projectId = req.params.projectId;
 
@@ -78,6 +86,9 @@ exports.editTask = async (req, res) => {
 	try {
 		const taskId = req.params.id;
 		const { name, description, priority, dueDate, assignees } = req.body;
+
+		const { error } = updateValidation(name, description, dueDate);
+		if (error) return res.status(400).send(error.details[0].message);
 
 		// Update a task by ID
 		const task = await Task.findByIdAndUpdate(

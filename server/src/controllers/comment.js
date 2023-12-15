@@ -1,9 +1,17 @@
 const Comment = require("../models/comment");
 const Task = require("../models/task");
 
+const {
+	createCommentValidation,
+	editCommentValidation,
+} = require("../utils/commentValidation");
+
 // Controller to create a new comment
 exports.createComment = async (req, res) => {
 	try {
+		const { error } = createCommentValidation(req.body);
+		if (error) return res.status(400).send(error.details[0].message);
+
 		const { content } = req.body;
 		const taskId = req.params.taskId; // Assuming your route parameter is taskId
 
@@ -87,6 +95,9 @@ exports.editComment = async (req, res) => {
 	try {
 		const commentId = req.params.id;
 		const { content } = req.body;
+
+		const { error } = editCommentValidation(content);
+		if (error) return res.status(400).send(error.details[0].message);
 
 		// Update a comment by ID
 		const comment = await Comment.findByIdAndUpdate(

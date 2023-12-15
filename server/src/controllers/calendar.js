@@ -1,9 +1,17 @@
 const Calendar = require("../models/calendar");
 const Team = require("../models/team");
 
+const {
+	createEventValidation,
+	editEventValidation,
+} = require("../utils/calendarEventValidation");
+
 // Controller to create a new event in the calendar
 exports.createEvent = async (req, res) => {
 	try {
+		const { error } = createEventValidation(req.body);
+		if (error) return res.status(400).send(error.details[0].message);
+
 		const { title, description, date, timeStart, timeEnd } = req.body;
 		const userId = req.user._id;
 		const teamId = req.params.teamId;
@@ -108,6 +116,9 @@ exports.editEvent = async (req, res) => {
 		const teamId = req.params.teamId; // Assuming teamId is part of the route parameters
 		const eventId = req.params.id;
 		const { title, description, date, timeStart, timeEnd } = req.body;
+
+		const { error } = editEventValidation(req.body);
+		if (error) return res.status(400).send(error.details[0].message);
 
 		// Find the team's calendar and update the specific event
 		const team = await Team.findOne({ _id: teamId }).populate("calendar");
