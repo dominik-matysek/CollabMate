@@ -39,7 +39,7 @@ exports.createProject = async (req, res) => {
 };
 
 // Get a project by ID
-exports.getprojectById = async (req, res) => {
+exports.getProjectById = async (req, res) => {
 	try {
 		const projectId = req.params.id;
 

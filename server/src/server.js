@@ -7,7 +7,7 @@ if (process.env.NODE_ENV !== "production") {
 const express = require("express");
 const app = express();
 const db = require("./config/db");
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 // Enable additional middleware for all routes
 const helmet = require("helmet");

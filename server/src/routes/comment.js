@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const comments = require("../controllers/comment");
-const verify = require("../middlewares/auth");
+const { verifyToken } = require("../middlewares/auth");
 
-router.post("/:taskId/create", verify, comments.createComment);
+router.post("/:taskId/create", verifyToken, comments.createComment);
 
-router.put("/:id/edit", verify, comments.editComment);
+router.put("/:id/edit", verifyToken, comments.editComment);
 
-router.delete("/:id", verify, comments.deleteComment);
+router.delete("/:id", verifyToken, comments.deleteComment);
 
 module.exports = router;

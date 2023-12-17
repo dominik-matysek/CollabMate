@@ -1,16 +1,16 @@
 const express = require("express");
 const router = express.Router();
 const tasks = require("../controllers/task");
-const verify = require("../middlewares/auth");
+const { verifyToken } = require("../middlewares/auth");
 
-router.post("/:projectId/create", verify, tasks.createTask);
+router.post("/:projectId/create", verifyToken, tasks.createTask);
 
-router.get("/:id", verify, tasks.getTaskById);
+router.get("/:id", verifyToken, tasks.getTaskById);
 
-router.post("/:id/edit", verify, tasks.editTask);
+router.post("/:id/edit", verifyToken, tasks.editTask);
 
-router.delete("/:id", verify, tasks.deleteTask);
+router.delete("/:id", verifyToken, tasks.deleteTask);
 
-router.get("/:id/get-comments", verify, tasks.getComments);
+router.get("/:id/get-comments", verifyToken, tasks.getComments);
 
 module.exports = router;

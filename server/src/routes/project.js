@@ -2,30 +2,35 @@ const express = require("express");
 const router = express.Router();
 const projects = require("../controllers/project");
 const verify = require("../middlewares/auth");
-const { verifyLeader } = require("../middlewares/auth");
+const { verifyToken, verifyLeader } = require("../middlewares/auth");
 
-router.post("/:teamId/create", verify, verifyLeader, projects.createProject);
+router.post(
+	"/:teamId/create",
+	verifyToken,
+	verifyLeader,
+	projects.createProject
+);
 
-router.get("/:id", verify, projects.getProjectById);
+router.get("/:id", verifyToken, projects.getProjectById);
 
-router.post("/id/edit", verify, verifyLeader, projects.editProject);
+router.post("/id/edit", verifyToken, verifyLeader, projects.editProject);
 
-router.delete("/:id", verify, verifyLeader, projects.deleteProject);
+router.delete("/:id", verifyToken, verifyLeader, projects.deleteProject);
 
 router.post(
 	"/:id/add-member/:userId",
-	verify,
+	verifyToken,
 	verifyLeader,
 	projects.addMemberToProject
 );
 
 router.post(
 	"/:id/remove-member/:userId",
-	verify,
+	verifyToken,
 	verifyLeader,
 	projects.removeMemberFromProject
 );
 
-router.get("/:id/get-tasks", verify, projects.getAllTasks);
+router.get("/:id/get-tasks", verifyToken, projects.getAllTasks);
 
 module.exports = router;

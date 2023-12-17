@@ -110,7 +110,6 @@ exports.updateProfile = async (req, res) => {
 		//Validate user input
 		const { error } = updateValidation(updatedValues);
 		if (error) return res.status(400).send(error.details[0].message);
-		s;
 
 		// Check if the new email already exists
 		if (email) {
