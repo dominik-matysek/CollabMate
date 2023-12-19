@@ -10,6 +10,8 @@ export const apiRequest = async (method, url, payload) => {
 				authorization: `Bearer ${localStorage.getItem("token")}`,
 			},
 		});
+		console.log("Request url:", response.method);
+		console.log("Request payload:", payload);
 		return response.data;
 	} catch (error) {
 		if (error.response) {

@@ -2,9 +2,15 @@ const { apiRequest } = require(".");
 
 const userAPI = "/api/users";
 
+export const RegisterUser = async (payload) => {
+	console.log("Registration data:", payload);
+	return apiRequest("post", "/api/users/register", payload);
+};
+
 const userService = {
 	register: async (userData) => {
-		return apiRequest("POST", `${userAPI}/register`, userData);
+		console.log("Registration data:", userData);
+		return apiRequest("POST", "/register", userData);
 	},
 
 	login: async (userData) => {
@@ -16,7 +22,11 @@ const userService = {
 	},
 
 	updateProfile: async (userId, updatedProfile) => {
-		return apiRequest("POST", `${userAPI}/profile/update`, updatedProfile);
+		return apiRequest(
+			"POST",
+			`${userAPI}/profile/${userId}/update`,
+			updatedProfile
+		);
 	},
 };
 

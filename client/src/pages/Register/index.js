@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
 import { Form, Input, Button, message } from "antd";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Divider from "../../components/Divider";
-import userService from "../../services/user";
-import { useDispatch, useSelector } from "react-redux";
-import { SetButtonLoading } from "../../redux/loadersSlice";
+import { RegisterUser } from "../../services/user";
+import { useSelector, useDispatch } from "react-redux";
+import { SetLoading, SetButtonLoading } from "../../redux/loadersSlice";
 import { getAntdFormInputRules } from "../../utils/helpers";
 
-function Login() {
+function Register() {
 	const navigate = useNavigate();
 	const { buttonLoading } = useSelector((state) => state.loaders);
 	const dispatch = useDispatch();
@@ -15,12 +15,11 @@ function Login() {
 	const onFinish = async (values) => {
 		try {
 			dispatch(SetButtonLoading(true));
-			const response = await userService.login(values);
+			const response = await RegisterUser(values);
 			dispatch(SetButtonLoading(false));
 			if (response.success) {
-				localStorage.setItem("token", response.data);
 				message.success(response.message);
-				// navigate("/");
+				navigate("/login"); //navigate user to the login page even if the registration is ok
 			} else {
 				throw new Error(response.message);
 			}
@@ -32,9 +31,9 @@ function Login() {
 
 	// useEffect(() => {
 	// 	if (localStorage.getItem("token")) {
-	// 		navigate("/home");
+	// 		navigate("/");
 	// 	}
-	// }, []);
+	// });
 
 	return (
 		<div className="grid grid-cols-2">
@@ -48,9 +47,23 @@ function Login() {
 			</div>
 			<div className="flex justify-center items-center">
 				<div className="w-[420px]">
-					<h1 className="text-2xl text-gray-700">Zaloguj się</h1>
+					<h1 className="text-2xl text-gray-700">Zaczynajmy!</h1>
 					<Divider />
 					<Form layout="vertical" onFinish={onFinish}>
+						<Form.Item
+							label="First Name"
+							name="firstName"
+							rules={getAntdFormInputRules}
+						>
+							<Input />
+						</Form.Item>
+						<Form.Item
+							label="Last Name"
+							name="lastName"
+							rules={getAntdFormInputRules}
+						>
+							<Input />
+						</Form.Item>
 						<Form.Item label="Email" name="email" rules={getAntdFormInputRules}>
 							<Input />
 						</Form.Item>
@@ -61,19 +74,17 @@ function Login() {
 						>
 							<Input type="password" />
 						</Form.Item>
-
 						<Button
 							type="primary"
 							htmlType="submit"
 							block
 							loading={buttonLoading}
 						>
-							{buttonLoading ? "Loading" : "Login"}
+							{buttonLoading ? "Loading" : "Register"}
 						</Button>
-
 						<div className="flex justify-center mt-5">
 							<span>
-								Don't have an account? <Link to="/register">Register</Link>
+								Posiadasz konto? <Link to="/login">Login</Link>
 							</span>
 						</div>
 					</Form>
@@ -83,4 +94,4 @@ function Login() {
 	);
 }
 
-export default Login;
+export default Register;

@@ -18,7 +18,13 @@ const mongoSanitize = require("express-mongo-sanitize");
 app.use(helmet());
 app.use(morgan("combined"));
 app.use(mongoSanitize());
-app.use(cors());
+app.use(
+	cors({
+		origin: "http://localhost:3000", // specify the origin of your frontend
+		methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+		credentials: true, // allow credentials like cookies, authorization headers, etc.
+	})
+);
 app.use(express.json());
 
 // routes
@@ -29,6 +35,8 @@ const taskRoutes = require("./routes/task");
 const commentRoutes = require("./routes/comment");
 const notificationRoutes = require("./routes/notification");
 const calendarRoutes = require("./routes/calendar");
+
+// console.log("User routes base path:", userRoutes);
 
 app.use("/api/users", userRoutes);
 app.use("/api/teams", teamRoutes);

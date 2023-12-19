@@ -10,9 +10,10 @@ const {
 // User registration
 exports.register = async (req, res) => {
 	try {
+		console.log("user registration request received");
 		//Validate a user before store the user inputs
-		const { error } = registerValidation(req.body);
-		if (error) return res.status(400).send(error.details[0].message);
+		// const { error } = registerValidation(req.body);
+		// if (error) return res.status(400).send(error.details[0].message);
 
 		const { firstName, lastName, email, password, profilePic } = req.body;
 
