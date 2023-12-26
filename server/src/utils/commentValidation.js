@@ -1,14 +1,15 @@
-const Joi = require("joi");
+const Joi = require("./joiExtensions");
 
-const createCommentValidation = Joi.object({
-	content: Joi.string().min(5).required(),
+const commentValidation = Joi.object({
+  content: Joi.string()
+    .min(5)
+    .messages({
+      "string.base": "Content should be a string.",
+      "string.empty": "Content cannot be empty.",
+      "string.min": "Content should have a minimum length of {#limit}.",
+      "any.required": "Content is required.",
+    })
+    .required(),
 });
 
-const editCommentValidation = Joi.object({
-	content: Joi.string().min(5).required(),
-});
-
-module.exports = {
-	createCommentValidation,
-	editCommentValidation,
-};
+module.exports = commentValidation;
