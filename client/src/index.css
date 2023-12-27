@@ -38,7 +38,6 @@ select:focus {
   border: 1px solid #343434 !important;
 }
 
-/* Overriding antd classes, which can be found using browser Dev Tools */
 .ant-form-item {
   margin-bottom: 10 !important;
 }
