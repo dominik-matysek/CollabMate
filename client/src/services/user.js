@@ -28,6 +28,9 @@ const userService = {
       updatedProfile
     );
   },
+  uploadImage: async (imageData) => {
+    return apiRequest("POST", `${userAPI}/upload-image`, imageData);
+  },
 };
 
 export default userService;

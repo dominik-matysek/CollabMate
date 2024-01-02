@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Input, Button, message } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import Divider from "../../components/Divider";
@@ -11,10 +11,59 @@ function Register() {
   const navigate = useNavigate();
   const { buttonLoading } = useSelector((state) => state.loaders);
   const dispatch = useDispatch();
+  const [profileImage, setProfileImage] = useState();
+
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    setProfileImage(file);
+  };
+
+  const clearProfileImage = () => {
+    setProfileImage(null);
+  };
+
+  const checkAuthentication = async () => {
+    try {
+      // Send a request to the server to check if the user is authenticated
+      const data = await userService.authenticate();
+
+      if (data.success) {
+        // User is authenticated, redirect to the main page
+        navigate("/test");
+        message.warning({
+          content:
+            "Jeżeli pragniesz zmienić konto, proszę wyloguj się najpierw.",
+          duration: 3,
+        });
+      }
+    } catch (error) {
+      console.error("Error checking authentication:", error);
+    }
+  };
 
   const onFinish = async (values) => {
     try {
       dispatch(SetButtonLoading(true));
+
+      const formData = new FormData();
+
+      // Add user details to the formData
+      for (const key in values) {
+        formData.append(key, values[key]);
+      }
+
+      // If a profile image is provided, append it to the formData
+      // if (profileImage) {
+      //   formData.append("file", profileImage);
+      // }
+
+      const uploadResponse = await userService.uploadImage(profileImage);
+
+      if (uploadResponse.imageUrl) {
+        // Add the Cloudinary URL to the user data
+        formData.append("profileImageUrl", uploadResponse.imageUrl);
+      }
+
       const response = await userService.register(values);
       dispatch(SetButtonLoading(false));
       if (response.success) {
@@ -29,10 +78,14 @@ function Register() {
     }
   };
 
+  // useEffect(() => {
+  //   if (localStorage.getItem("token")) {
+  //     navigate("/");
+  //   }
+  // }, []);
+
   useEffect(() => {
-    if (localStorage.getItem("token")) {
-      navigate("/");
-    }
+    checkAuthentication();
   }, []);
 
   return (
@@ -73,6 +126,14 @@ function Register() {
               rules={getAntdFormInputRules}
             >
               <Input type="password" />
+            </Form.Item>
+            <Form.Item label="Zdjęcie profilowe" name="file">
+              <Input
+                type="file"
+                onChange={handleImageChange}
+                accept="image/*"
+              />
+              {/* {profileImage && <button onClick={clearProfileImage}>X</button>} */}
             </Form.Item>
             <Button
               type="primary"

@@ -12,15 +12,35 @@ function Login() {
   const { buttonLoading } = useSelector((state) => state.loaders);
   const dispatch = useDispatch();
 
+  const checkAuthentication = async () => {
+    try {
+      // Send a request to the server to check if the user is authenticated
+      const data = await userService.authenticate();
+
+      if (data.success) {
+        // User is authenticated, redirect to the main page
+        navigate("/test");
+        message.warning({
+          content:
+            "Jeżeli pragniesz zmienić konto, proszę wyloguj się najpierw.",
+          duration: 3,
+        });
+      }
+    } catch (error) {
+      console.error("Error checking authentication:", error);
+    }
+  };
+
   const onFinish = async (values) => {
     try {
       dispatch(SetButtonLoading(true));
       const response = await userService.login(values);
       dispatch(SetButtonLoading(false));
       if (response.success) {
-        localStorage.setItem("token", response.data);
+        console.log(response.data);
+        // localStorage.setItem("token", response.data);
         message.success(response.message);
-        // navigate("/");
+        navigate("/test");
       } else {
         throw new Error(response.message);
       }
@@ -31,9 +51,7 @@ function Login() {
   };
 
   useEffect(() => {
-    if (localStorage.getItem("token")) {
-      navigate("/home");
-    }
+    checkAuthentication();
   }, []);
 
   return (

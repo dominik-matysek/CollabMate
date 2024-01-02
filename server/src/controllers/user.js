@@ -12,17 +12,19 @@ exports.register = async (req, res) => {
   try {
     console.log("user registration request received");
     //Validate a user before store the user inputs
-    const { error } = registerValidation.validate(req.body);
-    if (error)
-      return res.status(400).json({ message: error.details[0].message });
-
-    const { firstName, lastName, email, password, profilePic } = req.body;
+    // const { error } = registerValidation.validate(req.body);
+    // if (error)
+    //   return res.status(400).json({ message: error.details[0].message });
+    console.log(req.body);
+    const { firstName, lastName, email, password } = req.body;
 
     // Check if the email is already registered
     const existingUser = await User.findOne({ email: email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists!" });
     }
+    console.log(req.file);
+    const profileImageUrl = req.file ? req.file.path : null;
 
     // Hash the password
     const salt = await bcrypt.genSalt(10);
@@ -34,7 +36,7 @@ exports.register = async (req, res) => {
       lastName,
       email,
       password: hashedPassword,
-      profilePic: profilePic,
+      profilePic: profileImageUrl,
     });
 
     // Save the user to the database
@@ -76,7 +78,25 @@ exports.login = async (req, res) => {
       expiresIn: "30m", // Token expiration time
     });
 
-    res.status(200).json({ token });
+    // res.status(200).json({
+    //   success: true,
+    //   message: "User registered successfully",
+    //   data: { token: token, role: user.role },
+    // });
+
+    // testowanie httpsonly czy cos takiego ponizej, powyzej domyslny token jak miales wczensiej
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: true, // Enable this when deploying your application over HTTPS
+        sameSite: "strict",
+        maxAge: 30 * 60 * 1000, // Token expiration time in milliseconds
+      })
+      .json({
+        success: true,
+        message: "User logged in successfully",
+        data: { role: user.role },
+      });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -86,13 +106,16 @@ exports.login = async (req, res) => {
 // User authentication
 exports.authenticate = async (req, res) => {
   try {
-    const user = await User.findById(req.body.userId).select("-password");
+    // testowanie httpsonly ponizej
+    // const token = req.cookies.token;
+
+    const user = await User.findById(req.userId).select("-password");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json(user);
+    res.status(200).json({ success: true, data: user });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -141,5 +164,14 @@ exports.updateProfile = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.uploadImage = async (req, res) => {
+  try {
+    const imageUrl = req.file.path;
+    res.status(200).json({ imageUrl });
+  } catch (error) {
+    res.status(500).json({ message: "Image upload failed" });
   }
 };

@@ -5,8 +5,8 @@ import Footer from "../components/Footer";
 function Test() {
   return (
     <div>
-      <Navbar />
-      <Footer />
+      {/* <Navbar />
+      <Footer /> */}
       {/* <Divider /> */}
     </div>
   );

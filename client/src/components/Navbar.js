@@ -4,19 +4,97 @@ import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Button } from "antd";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import logo from "../assets/Logo.png";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const navigation = [
-  { name: "Panel główny", href: "#", current: true },
-  { name: "Panel administratora", href: "#", current: false },
-  { name: "Zespoły", href: "#", current: false },
-  // { name: "Calendar", href: "#", current: false },
+  {
+    name: "Panel główny",
+    link: "#",
+    current: true,
+    displayForGuest: true,
+    displayForUser: true,
+  },
+  {
+    name: "Panel administratora",
+    link: "#",
+    current: false,
+    displayForGuest: false,
+    displayForUser: ["ADMIN"],
+  },
+  {
+    name: "Zespoły",
+    link: "#",
+    current: false,
+    displayForGuest: false,
+    displayForUser: ["EMPLOYEE", "TEAM LEADER"],
+  },
+  {
+    name: "Kluczowe cechy",
+    link: "#",
+    current: false,
+    displayForGuest: true,
+    displayForUser: true,
+  },
+  {
+    name: "Kontakt",
+    link: "#",
+    current: false,
+    displayForGuest: true,
+    displayForUser: true,
+  },
+  {
+    name: "Utwórz konto",
+    link: "/register",
+    current: false,
+    displayForGuest: true,
+    displayForUser: false,
+  },
+  {
+    name: "Zaloguj się",
+    link: "/login",
+    current: false,
+    displayForGuest: true,
+    displayForUser: false,
+  },
 ];
+
+const filterNavigation = (navigation, isAuthenticated, userRole) => {
+  // Filter elements based on user authentication status and role
+  return navigation.filter((item) => {
+    if (isAuthenticated) {
+      // Check if displayForUser is true or an array containing the user's role
+      return (
+        item.displayForUser === true ||
+        (Array.isArray(item.displayForUser) &&
+          item.displayForUser.includes(userRole))
+      );
+    } else {
+      // Display elements with displayForGuest set to true for guest users
+      return item.displayForGuest === true;
+    }
+  });
+};
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-function Navbar() {
+function Navbar({ user, toggleSidebar }) {
+  const navigate = useNavigate();
+  // const { user } = useSelector((state) => state.users);
+
+  // const isAuthenticated = !!user;
+
+  const isAuthenticated = !!user;
+  const userRole = user?.role;
+
+  const filteredNavigation = filterNavigation(
+    navigation,
+    isAuthenticated,
+    userRole
+  );
+
   return (
     <Disclosure as="nav" className="bg-gray-800">
       {({ open }) => (
@@ -40,111 +118,121 @@ function Navbar() {
                   <img className="h-8 w-auto" src={logo} alt="CollaboMate" />
                 </div>
                 <div className="hidden sm:ml-6 sm:block">
-                  <div className="flex space-x-4">
-                    {navigation.map((item) => (
-                      <a
+                  <div
+                    className="flex space-x-4 
+                  "
+                  >
+                    {filteredNavigation.map((item) => (
+                      <span
                         key={item.name}
-                        href={item.href}
+                        // onClick={() => navigate(item.link)}
+                        onClick={
+                          item.name === "Panel administratora" ||
+                          item.name === "Zespoły"
+                            ? toggleSidebar
+                            : () => navigate(item.link)
+                        }
                         className={classNames(
                           item.current
-                            ? "bg-gray-900 text-white"
+                            ? "bg-gray-900 text-white cursor-pointer"
                             : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                          "rounded-md px-3 py-2 text-sm font-medium"
+                          "rounded-md px-3 py-2 text-sm font-medium cursor-pointer"
                         )}
                         aria-current={item.current ? "page" : undefined}
                       >
                         {item.name}
-                      </a>
+                      </span>
                     ))}
                   </div>
                 </div>
               </div>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                <button
-                  type="button"
-                  className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                >
-                  <span className="absolute -inset-1.5" />
-                  <span className="sr-only">View notifications</span>
-                  <BellIcon className="h-6 w-6" aria-hidden="true" />
-                </button>
-
-                {/* Profile dropdown */}
-                <Menu as="div" className="relative ml-3">
-                  <div>
-                    <Menu.Button className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                      <span className="absolute -inset-1.5" />
-                      <span className="sr-only">Open user menu</span>
-                      <img
-                        className="h-8 w-8 rounded-full"
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                        alt=""
-                      />
-                    </Menu.Button>
-                  </div>
-                  <Transition
-                    as={Fragment}
-                    enter="transition ease-out duration-100"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-75"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95"
+              {isAuthenticated && (
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                  <button
+                    type="button"
+                    className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                   >
-                    <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      <Menu.Item>
-                        {({ active }) => (
-                          <a
-                            href="#"
-                            className={classNames(
-                              active ? "bg-gray-100" : "",
-                              "block px-4 py-2 text-sm text-gray-700"
-                            )}
-                          >
-                            Your Profile
-                          </a>
-                        )}
-                      </Menu.Item>
-                      <Menu.Item>
-                        {({ active }) => (
-                          <a
-                            href="#"
-                            className={classNames(
-                              active ? "bg-gray-100" : "",
-                              "block px-4 py-2 text-sm text-gray-700"
-                            )}
-                          >
-                            Settings
-                          </a>
-                        )}
-                      </Menu.Item>
-                      <Menu.Item>
-                        {({ active }) => (
-                          <a
-                            href="#"
-                            className={classNames(
-                              active ? "bg-gray-100" : "",
-                              "block px-4 py-2 text-sm text-gray-700"
-                            )}
-                          >
-                            Sign out
-                          </a>
-                        )}
-                      </Menu.Item>
-                    </Menu.Items>
-                  </Transition>
-                </Menu>
-              </div>
+                    <span className="absolute -inset-1.5" />
+                    <span className="sr-only">View notifications</span>
+                    <BellIcon className="h-6 w-6" aria-hidden="true" />
+                  </button>
+                  {/* Profile dropdown */}
+                  <Menu as="div" className="relative ml-3">
+                    <div>
+                      <Menu.Button className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                        <span className="absolute -inset-1.5" />
+                        <span className="sr-only">Open user menu</span>
+                        <img
+                          className="h-8 w-8 rounded-full"
+                          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                          alt="Profile Photo"
+                        />
+                      </Menu.Button>
+                    </div>
+                    <Transition
+                      as={Fragment}
+                      enter="transition ease-out duration-100"
+                      enterFrom="transform opacity-0 scale-95"
+                      enterTo="transform opacity-100 scale-100"
+                      leave="transition ease-in duration-75"
+                      leaveFrom="transform opacity-100 scale-100"
+                      leaveTo="transform opacity-0 scale-95"
+                    >
+                      <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <Menu.Item>
+                          {({ active }) => (
+                            <span
+                              onClick={() => navigate("/")}
+                              className={classNames(
+                                active ? "bg-gray-100" : "",
+                                "block px-4 py-2 text-sm text-gray-700"
+                              )}
+                            >
+                              Twój Profil, {user?.firstName}
+                            </span>
+                          )}
+                        </Menu.Item>
+                        <Menu.Item>
+                          {({ active }) => (
+                            <span
+                              onClick={() => navigate("/")}
+                              className={classNames(
+                                active ? "bg-gray-100" : "",
+                                "block px-4 py-2 text-sm text-gray-700"
+                              )}
+                            >
+                              Settings
+                            </span>
+                          )}
+                        </Menu.Item>
+                        <Menu.Item>
+                          {({ active }) => (
+                            <span
+                              onClick={() => navigate("/")}
+                              className={classNames(
+                                active ? "bg-gray-100" : "",
+                                "block px-4 py-2 text-sm text-gray-700"
+                              )}
+                            >
+                              Sign out
+                            </span>
+                          )}
+                        </Menu.Item>
+                      </Menu.Items>
+                    </Transition>
+                  </Menu>
+                </div>
+              )}
             </div>
           </div>
 
           <Disclosure.Panel className="sm:hidden">
             <div className="space-y-1 px-2 pb-3 pt-2">
-              {navigation.map((item) => (
+              {filteredNavigation.map((item) => (
                 <Disclosure.Button
                   key={item.name}
                   as="a"
-                  href={item.href}
+                  onClick={() => navigate(item.key)}
                   className={classNames(
                     item.current
                       ? "bg-gray-900 text-white"

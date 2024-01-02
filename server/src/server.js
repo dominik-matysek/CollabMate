@@ -11,6 +11,7 @@ const MongoStore = require("connect-mongo");
 const app = express();
 const db = require("./config/db");
 const port = process.env.PORT || 5000;
+const cookieParser = require("cookie-parser");
 
 // Rate Limiting middleware
 const limiter = rateLimit({
@@ -44,6 +45,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 
 // app.use(session(sessionConfig));
 app.use(helmet());
+app.use(cookieParser());
 app.use(limiter);
 app.use(morgan("combined"));
 app.use(mongoSanitize());

@@ -2,7 +2,16 @@ const jwt = require("jsonwebtoken");
 
 const verifyToken = (req, res, next) => {
   try {
-    const token = req.headers.authorization.split(" ")[1];
+    // const token = req.headers.authorization.split(" ")[1];
+
+    // Retrieve token from HttpOnly cookie
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(401).json({
+        message: "Unauthorized - Token not found.",
+      });
+    }
     const decryptedToken = jwt.verify(token, process.env.jwt_secret);
 
     // Attach the userId to the request for later use in route handlers
