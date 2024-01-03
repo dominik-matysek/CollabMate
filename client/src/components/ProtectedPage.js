@@ -11,12 +11,14 @@ import { Avatar, Badge, Space } from "antd";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import Sidebar from "./Sidebar";
+import Profile from "../pages/Profile";
 
 function ProtectedPage({ children }) {
   // const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user, notifications } = useSelector((state) => state.users);
+  console.log(`User in Protected Page ${user}`);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -40,41 +42,15 @@ function ProtectedPage({ children }) {
     }
   };
 
-  // const getNotifications = async () => {
-  // 	try {
-  // 		dispatch(SetLoading(true));
-  // 		const response = await GetAllNotifications();
-  // 		dispatch(SetLoading(false));
-  // 		if (response.success) {
-  // 			dispatch(SetNotifications(response.data));
-  // 		} else {
-  // 			throw new Error(response.message);
-  // 		}
-  // 	} catch (error) {
-  // 		dispatch(SetLoading(false));
-  // 		message.error(error.message);
-  // 	}
-  // };
-
   useEffect(() => {
     getUser();
-  }, []);
-
-  // useEffect(() => {
-  // 	if (user) {
-  // 		getNotifications();
-  // 	}
-  // }, [user]);
+  }, [user]); // Re-fetch if user state changes
 
   return (
     <>
       <Navbar user={user} toggleSidebar={toggleSidebar} />
       <Sidebar user={user} isSidebarOpen={isSidebarOpen} />
-      <Footer />
-      <Footer />
-      <Footer />
-      <Footer />
-      <Footer />
+      <div>{children}</div>
       <Footer />
     </>
 

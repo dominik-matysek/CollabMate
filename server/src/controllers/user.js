@@ -125,6 +125,8 @@ exports.authenticate = async (req, res) => {
 // Update user profile
 exports.updateProfile = async (req, res) => {
   try {
+    console.log("user edit request received");
+    console.log(req.params);
     const userId = req.params.id;
     const { firstName, lastName, email, profilePic } = req.body;
 
@@ -136,9 +138,9 @@ exports.updateProfile = async (req, res) => {
     };
 
     //Validate user input
-    const { error } = updateValidation.validate(updatedValues);
-    if (error)
-      return res.status(400).json({ message: error.details[0].message });
+    // const { error } = updateValidation.validate(updatedValues);
+    // if (error)
+    //   return res.status(400).json({ message: error.details[0].message });
 
     // Check if the new email already exists
     if (email) {
@@ -160,7 +162,11 @@ exports.updateProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json(updatedUser);
+    res.status(200).json({
+      success: true,
+      message: "User edited succesfully",
+      data: updatedUser,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });

@@ -19,7 +19,7 @@ function Login() {
 
       if (data.success) {
         // User is authenticated, redirect to the main page
-        navigate("/test");
+        navigate("/");
         message.warning({
           content:
             "Jeżeli pragniesz zmienić konto, proszę wyloguj się najpierw.",
@@ -40,7 +40,7 @@ function Login() {
         console.log(response.data);
         // localStorage.setItem("token", response.data);
         message.success(response.message);
-        navigate("/test");
+        navigate("/");
       } else {
         throw new Error(response.message);
       }

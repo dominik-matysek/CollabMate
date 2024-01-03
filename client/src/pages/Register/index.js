@@ -29,7 +29,7 @@ function Register() {
 
       if (data.success) {
         // User is authenticated, redirect to the main page
-        navigate("/test");
+        navigate("/");
         message.warning({
           content:
             "Jeżeli pragniesz zmienić konto, proszę wyloguj się najpierw.",

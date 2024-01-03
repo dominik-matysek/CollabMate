@@ -10,7 +10,7 @@ import { useSelector } from "react-redux";
 const navigation = [
   {
     name: "Panel główny",
-    link: "#",
+    link: "/",
     current: true,
     displayForGuest: true,
     displayForUser: true,
@@ -31,17 +31,19 @@ const navigation = [
   },
   {
     name: "Kluczowe cechy",
-    link: "#",
+    link: "/",
     current: false,
     displayForGuest: true,
     displayForUser: true,
+    sectionId: "main",
   },
   {
     name: "Kontakt",
-    link: "#",
+    link: "/",
     current: false,
     displayForGuest: true,
     displayForUser: true,
+    sectionId: "contact",
   },
   {
     name: "Utwórz konto",
@@ -82,9 +84,6 @@ function classNames(...classes) {
 
 function Navbar({ user, toggleSidebar }) {
   const navigate = useNavigate();
-  // const { user } = useSelector((state) => state.users);
-
-  // const isAuthenticated = !!user;
 
   const isAuthenticated = !!user;
   const userRole = user?.role;
@@ -95,8 +94,22 @@ function Navbar({ user, toggleSidebar }) {
     userRole
   );
 
+  const handleNavigation = (link, sectionId) => {
+    if (sectionId) {
+      // Scroll to the section
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      } else {
+        console.log("Section not found:", sectionId);
+      }
+    } else {
+      navigate(link);
+    }
+  };
+
   return (
-    <Disclosure as="nav" className="bg-gray-800">
+    <Disclosure as="nav" className="bg-gray-800 w-full z-50">
       {({ open }) => (
         <>
           <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -130,12 +143,16 @@ function Navbar({ user, toggleSidebar }) {
                           item.name === "Panel administratora" ||
                           item.name === "Zespoły"
                             ? toggleSidebar
-                            : () => navigate(item.link)
+                            : () => handleNavigation(item.link, item.sectionId)
                         }
                         className={classNames(
                           item.current
                             ? "bg-gray-900 text-white cursor-pointer"
                             : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                          item.name === "Utwórz konto" ||
+                            item.name === "Zaloguj się"
+                            ? "mr-8" // This will move the item to the right
+                            : "",
                           "rounded-md px-3 py-2 text-sm font-medium cursor-pointer"
                         )}
                         aria-current={item.current ? "page" : undefined}
@@ -153,15 +170,16 @@ function Navbar({ user, toggleSidebar }) {
                     className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                   >
                     <span className="absolute -inset-1.5" />
-                    <span className="sr-only">View notifications</span>
+                    <span className="sr-only">Podgląd powiadomień</span>
                     <BellIcon className="h-6 w-6" aria-hidden="true" />
                   </button>
+
                   {/* Profile dropdown */}
                   <Menu as="div" className="relative ml-3">
                     <div>
                       <Menu.Button className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                         <span className="absolute -inset-1.5" />
-                        <span className="sr-only">Open user menu</span>
+                        <span className="sr-only">Otwórz menu użytkownika</span>
                         <img
                           className="h-8 w-8 rounded-full"
                           src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
@@ -182,7 +200,7 @@ function Navbar({ user, toggleSidebar }) {
                         <Menu.Item>
                           {({ active }) => (
                             <span
-                              onClick={() => navigate("/")}
+                              onClick={() => navigate("/profile")}
                               className={classNames(
                                 active ? "bg-gray-100" : "",
                                 "block px-4 py-2 text-sm text-gray-700"
@@ -201,20 +219,7 @@ function Navbar({ user, toggleSidebar }) {
                                 "block px-4 py-2 text-sm text-gray-700"
                               )}
                             >
-                              Settings
-                            </span>
-                          )}
-                        </Menu.Item>
-                        <Menu.Item>
-                          {({ active }) => (
-                            <span
-                              onClick={() => navigate("/")}
-                              className={classNames(
-                                active ? "bg-gray-100" : "",
-                                "block px-4 py-2 text-sm text-gray-700"
-                              )}
-                            >
-                              Sign out
+                              Wyloguj się
                             </span>
                           )}
                         </Menu.Item>
