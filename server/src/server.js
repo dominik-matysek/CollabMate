@@ -14,10 +14,10 @@ const port = process.env.PORT || 5000;
 const cookieParser = require("cookie-parser");
 
 // Rate Limiting middleware
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-});
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 100, // limit each IP to 100 requests per windowMs
+// });
 
 // Enable additional middleware for all routes
 const helmet = require("helmet");
@@ -46,7 +46,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 // app.use(session(sessionConfig));
 app.use(helmet());
 app.use(cookieParser());
-app.use(limiter);
+// app.use(limiter);
 app.use(morgan("combined"));
 app.use(mongoSanitize());
 app.use(

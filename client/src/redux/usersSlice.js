@@ -9,8 +9,8 @@ const usersSlice = createSlice({
   },
   reducers: {
     SetUser(state, action) {
-      console.log("SetUser Payload: ", action.payload);
       state.user = action.payload;
+      console.log("SetUser Payload: ", action.payload);
     },
     SetAllUsers(state, action) {
       state.allUsers = action.payload;
@@ -18,9 +18,13 @@ const usersSlice = createSlice({
     SetNotifications(state, action) {
       state.notifications = action.payload;
     },
+    LogoutUser(state) {
+      state.user = null;
+    },
   },
 });
 
-export const { SetUser, SetAllUsers, SetNotifications } = usersSlice.actions;
+export const { SetUser, SetAllUsers, SetNotifications, LogoutUser } =
+  usersSlice.actions;
 
 export default usersSlice.reducer;

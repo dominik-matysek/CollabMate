@@ -9,6 +9,7 @@ exports.createTeam = async (req, res) => {
     const { error } = teamValidation.validate(req.body);
     if (error)
       return res.status(400).json({ message: error.details[0].message });
+
     const { name, teamLeadId } = req.body;
 
     // Check if the specified team leader exists and has the correct role
@@ -38,13 +39,16 @@ exports.createTeam = async (req, res) => {
     // Update the team lead's "teams" property
     await User.findByIdAndUpdate(
       teamLeadId,
-      { $addToSet: { teams: savedTeam._id } },
+
+      { $addToSet: { teams: savedTeam._id }, $set: { role: "TEAM LEADER" } },
       { new: true }
     );
 
-    res
-      .status(201)
-      .json({ message: "Team created successfully.", team: savedTeam });
+    res.status(200).json({
+      success: true,
+      message: "Utworzono zespół",
+      data: savedTeam,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -54,12 +58,18 @@ exports.createTeam = async (req, res) => {
 // Get view of all teams
 exports.getAllTeams = async (req, res) => {
   try {
+    console.log("Jestem w kontrolerze");
     // Fetch all teams from the database
-    const teams = await Team.find()
-      .sort({ createdAt: -1 })
-      .populate("teamLead members", "firstName lastName email");
+    const teams = await Team.find();
+    console.log(teams);
+    // .sort({ createdAt: -1 })
+    // .populate("teamLead members", "firstName lastName email");
 
-    res.status(200).json(teams);
+    res.status(200).json({
+      success: true,
+      message: "Pobrano zespoły",
+      data: teams,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -79,7 +89,11 @@ exports.getTeamById = async (req, res) => {
       return res.status(404).json({ message: "Team not found" });
     }
 
-    res.status(200).json(team);
+    res.status(200).json({
+      success: true,
+      message: "Pobrano zespół",
+      data: team,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -104,7 +118,11 @@ exports.editTeam = async (req, res) => {
       return res.status(404).json({ message: "Team not found" });
     }
 
-    res.status(200).json({ team: updatedTeam });
+    res.status(200).json({
+      success: true,
+      message: "Edytowano zespół",
+      data: updatedTeam,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -139,7 +157,9 @@ exports.deleteTeam = async (req, res) => {
       return res.status(404).json({ message: "Team not found" });
     }
 
-    res.status(200).json({ message: "Team deleted successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Team deleted successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -182,8 +202,9 @@ exports.addMemberToTeam = async (req, res) => {
     );
 
     res.status(200).json({
-      message: "Member added to the team successfully",
-      team: updatedTeam,
+      success: true,
+      message: "Dodano członka zespołu",
+      data: updatedTeam,
     });
   } catch (error) {
     console.error(error);
@@ -215,8 +236,9 @@ exports.removeMemberFromTeam = async (req, res) => {
     );
 
     res.status(200).json({
-      message: "Member removed from the team successfully",
-      team: updatedTeam,
+      success: true,
+      message: "Usunięto członka zespołu ",
+      data: updatedTeam,
     });
   } catch (error) {
     console.error(error);
@@ -239,7 +261,11 @@ exports.getMembers = async (req, res) => {
       return res.status(404).json({ message: "Team not found" });
     }
 
-    res.status(200).json({ members: team.members });
+    res.status(200).json({
+      success: true,
+      message: "Pobrano członków",
+      data: team.members,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -258,7 +284,11 @@ exports.getAllProjects = async (req, res) => {
       return res.status(404).json({ message: "Team not found" });
     }
 
-    res.status(200).json({ projects: team.projects });
+    res.status(200).json({
+      success: true,
+      message: "Pobrano projekty",
+      data: team.projects,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });

@@ -16,10 +16,10 @@ router.delete("/:id", verifyToken, verifyAdmin, teams.deleteTeam);
 router.post("/:id/add-member", verifyToken, verifyAdmin, teams.addMemberToTeam);
 
 router.post(
-	"/:id/remove-member",
-	verifyToken,
-	verifyAdmin,
-	teams.removeMemberFromTeam
+  "/:id/remove-member",
+  verifyToken,
+  verifyAdmin,
+  teams.removeMemberFromTeam
 );
 
 router.get("/:id/get-members", verifyToken, teams.getMembers);

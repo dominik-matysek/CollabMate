@@ -52,3 +52,7 @@ table {
 i {
   font-size: 20px !important;
 }
+
+.ant-select-selection-search-input {
+  padding-left: 10px; /* Adjust padding as needed */
+}

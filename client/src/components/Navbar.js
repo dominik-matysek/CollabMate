@@ -4,8 +4,9 @@ import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Button } from "antd";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import logo from "../assets/Logo.png";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { LogoutUser } from "../redux/usersSlice";
 
 const navigation = [
   {
@@ -82,8 +83,9 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-function Navbar({ user, toggleSidebar }) {
+function Navbar({ user, toggleSidebar, handleLogout }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const isAuthenticated = !!user;
   const userRole = user?.role;
@@ -97,11 +99,15 @@ function Navbar({ user, toggleSidebar }) {
   const handleNavigation = (link, sectionId) => {
     if (sectionId) {
       // Scroll to the section
-      const element = document.getElementById(sectionId);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
+      if (location.pathname !== "/") {
+        navigate(link);
       } else {
-        console.log("Section not found:", sectionId);
+        const element = document.getElementById(sectionId);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        } else {
+          console.log("Section not found:", sectionId);
+        }
       }
     } else {
       navigate(link);
@@ -213,7 +219,7 @@ function Navbar({ user, toggleSidebar }) {
                         <Menu.Item>
                           {({ active }) => (
                             <span
-                              onClick={() => navigate("/")}
+                              onClick={handleLogout}
                               className={classNames(
                                 active ? "bg-gray-100" : "",
                                 "block px-4 py-2 text-sm text-gray-700"

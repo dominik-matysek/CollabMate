@@ -40,7 +40,11 @@ exports.createTask = async (req, res) => {
     project.tasks.push(task._id);
     await project.save();
 
-    res.status(201).json({ task });
+    res.status(200).json({
+      success: true,
+      message: "Stworzono zadanie",
+      data: task,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -72,7 +76,11 @@ exports.getTaskById = async (req, res) => {
         .json({ error: "User is not a member of the project" });
     }
 
-    res.status(200).json({ task });
+    res.status(200).json({
+      success: true,
+      message: "Stworzono zadanie",
+      data: task,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -120,7 +128,11 @@ exports.editTask = async (req, res) => {
         .json({ error: "User is not an assignee of the task" });
     }
 
-    res.status(200).json({ task });
+    res.status(200).json({
+      success: true,
+      message: "Edytowano zadanie",
+      data: task,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -158,7 +170,9 @@ exports.deleteTask = async (req, res) => {
         .json({ error: "User is not an assignee of the task" });
     }
 
-    res.status(200).json({ message: "Task deleted successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Task deleted successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -188,7 +202,11 @@ exports.getComments = async (req, res) => {
         .json({ error: "User is not a member of the project" });
     }
 
-    res.status(200).json({ comments: task.comments });
+    res.status(200).json({
+      success: true,
+      message: "Pobrano komentarze",
+      data: task.comments,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });

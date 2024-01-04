@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const apiRequest = async (method, url, payload) => {
   try {
-    console.log("siema 2");
+    console.log("początek apirequest");
     const response = await axios({
       method,
       url,

@@ -37,7 +37,11 @@ exports.createComment = async (req, res) => {
     task.comments.push(comment._id);
     await task.save();
 
-    res.status(201).json({ comment });
+    res.status(200).json({
+      success: true,
+      message: "Dodano komentarz",
+      data: comment,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -81,7 +85,10 @@ exports.deleteComment = async (req, res) => {
       return res.status(404).json({ error: "Task not found" });
     }
 
-    res.status(200).json({ message: "Comment deleted successfully" });
+    res.status(200).json({
+      success: true,
+      message: "Usunięto komentarz",
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -116,7 +123,11 @@ exports.editComment = async (req, res) => {
         .json({ error: "User is not the creator of the comment" });
     }
 
-    res.status(200).json({ comment });
+    res.status(200).json({
+      success: true,
+      message: "Edytowano komentarz",
+      data: comment,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });

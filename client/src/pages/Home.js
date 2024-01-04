@@ -28,6 +28,9 @@ import onpoint from "../assets/on-point.jpg";
 import { Carousel } from "antd";
 
 function Home() {
+  // const { user } = useSelector((state) => state.users);
+  // console.log(`User in Profile Page ${user}`);
+
   const trustedBusinesses = [
     onpoint,
     onpoint,
@@ -40,7 +43,6 @@ function Home() {
 
   return (
     <>
-      <Navbar />
       <div className="pt-10 min-h-screen bg-gray-900 text-grey">
         {/* About Us Panel */}
         <section className="py-16 bg-gradient-to-b from-gray-200 via-gray-550 to-gray-600 text-grey">
@@ -158,7 +160,6 @@ function Home() {
           </div>
         </section>
       </div>
-      <Footer />
     </>
   );
 }

@@ -45,7 +45,11 @@ exports.createEvent = async (req, res) => {
     await teamCalendar.save();
     await team.save();
 
-    res.status(201).json({ event });
+    res.status(200).json({
+      success: true,
+      message: "Dodano wydarzenie",
+      data: event,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -69,7 +73,11 @@ exports.getAllEvents = async (req, res) => {
       return res.status(404).json({ error: "Team calendar not found" });
     }
 
-    res.status(200).json({ events: teamCalendar.events });
+    res.status(200).json({
+      success: true,
+      message: "Wydarzenia",
+      data: teamCalendar.events,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -101,7 +109,11 @@ exports.getEventById = async (req, res) => {
       return res.status(404).json({ error: "Event not found" });
     }
 
-    res.status(200).json({ event });
+    res.status(200).json({
+      success: true,
+      message: "Wyswietlono wydarzenie",
+      data: event,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -147,7 +159,11 @@ exports.editEvent = async (req, res) => {
 
     await teamCalendar.save();
 
-    res.status(200).json({ event });
+    res.status(200).json({
+      success: true,
+      message: "Edytowano wydarzenie",
+      data: event,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -176,7 +192,7 @@ exports.deleteEvent = async (req, res) => {
     teamCalendar.events.id(eventId).remove();
     await teamCalendar.save();
 
-    res.status(200).json({ message: "Event deleted successfully" });
+    res.status(200).json({ success: true, message: "Usunięto wydarzenie" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });

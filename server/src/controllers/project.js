@@ -29,7 +29,11 @@ exports.createProject = async (req, res) => {
       return res.status(404).json({ error: "Team not found" });
     }
 
-    res.status(201).json({ project });
+    res.status(200).json({
+      success: true,
+      message: "Stworzono projekt",
+      data: project,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -50,7 +54,11 @@ exports.getProjectById = async (req, res) => {
       return res.status(404).json({ error: "Project not found" });
     }
 
-    res.status(200).json({ project });
+    res.status(200).json({
+      success: true,
+      message: "Pobrano projekt",
+      data: project,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -78,7 +86,11 @@ exports.editProject = async (req, res) => {
       return res.status(404).json({ error: "Project not found" });
     }
 
-    res.status(200).json({ project });
+    res.status(200).json({
+      success: true,
+      message: "Edytowano projekt",
+      data: project,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -116,7 +128,9 @@ exports.deleteProject = async (req, res) => {
       return res.status(404).json({ error: "Team not found" });
     }
 
-    res.status(200).json({ message: "Project deleted successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Project deleted successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -148,7 +162,11 @@ exports.addMemberToProject = async (req, res) => {
       return res.status(404).json({ error: "Project not found" });
     }
 
-    res.status(200).json({ project });
+    res.status(200).json({
+      success: true,
+      message: "Dodano członka do projektu",
+      data: project,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -172,7 +190,11 @@ exports.removeMemberFromProject = async (req, res) => {
       return res.status(404).json({ error: "Project not found" });
     }
 
-    res.status(200).json({ project });
+    res.status(200).json({
+      success: true,
+      message: "Usunięto członka z projektu",
+      data: project,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -191,7 +213,11 @@ exports.getAllTasks = async (req, res) => {
       return res.status(404).json({ error: "Project not found" });
     }
 
-    res.status(200).json({ tasks: project.tasks });
+    res.status(200).json({
+      success: true,
+      message: "Pobrano wszystkie zadania",
+      data: project.tasks,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });

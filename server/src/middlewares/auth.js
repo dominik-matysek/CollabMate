@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 
 const verifyToken = (req, res, next) => {
   try {
@@ -29,10 +30,21 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-const verifyAdmin = (req, res, next) => {
+const verifyAdmin = async (req, res, next) => {
   try {
-    if (req.user && req.user.role === "ADMIN") {
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized access." });
+    }
+
+    // Fetch the user from the database
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (user.role === "ADMIN") {
       // User is an admin, allow the request to proceed
+      console.log("User to admin");
       next();
     } else {
       // User is not an admin, send a 403
@@ -44,13 +56,24 @@ const verifyAdmin = (req, res, next) => {
   }
 };
 
-const verifyLeader = (req, res, next) => {
+const verifyLeader = async (req, res, next) => {
   try {
-    if (req.user && req.user.role === "TEAM LEADER") {
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized access." });
+    }
+
+    // Fetch the user from the database
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (user.role === "TEAM LEADER") {
       // User is a team leader, allow the request to proceed
+      console.log("User to team leader");
       next();
     } else {
-      // User is not a team leader, send a 403
+      // User is not an team leader, send a 403
       res.status(403).json({ message: "Permission denied." });
     }
   } catch (error) {

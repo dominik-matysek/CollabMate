@@ -89,7 +89,7 @@ exports.login = async (req, res) => {
       .cookie("token", token, {
         httpOnly: true,
         secure: true, // Enable this when deploying your application over HTTPS
-        sameSite: "strict",
+        SameSite: "none",
         maxAge: 30 * 60 * 1000, // Token expiration time in milliseconds
       })
       .json({
@@ -97,6 +97,16 @@ exports.login = async (req, res) => {
         message: "User logged in successfully",
         data: { role: user.role },
       });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.logout = async (req, res) => {
+  try {
+    res.clearCookie("token");
+    res.json({ success: true, message: "Logged out successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -176,8 +186,22 @@ exports.updateProfile = async (req, res) => {
 exports.uploadImage = async (req, res) => {
   try {
     const imageUrl = req.file.path;
-    res.status(200).json({ imageUrl });
+    res.status(200).json({
+      success: true,
+      message: "Dodano zdjęcie",
+      data: imageUrl,
+    });
   } catch (error) {
     res.status(500).json({ message: "Image upload failed" });
+  }
+};
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password");
+    res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };

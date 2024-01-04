@@ -6,32 +6,32 @@ import { Divider } from "antd";
 const navigation = [
   {
     name: "Zespoły",
-    link: "#",
+    link: "/teams",
     current: false,
     displayForUser: ["ADMIN"],
   },
   {
     name: "Użytkownicy",
-    link: "#",
-    current: true,
+    link: "/users",
+    current: false,
     displayForUser: ["ADMIN"],
   },
   {
     name: "Projekty",
-    link: "#",
+    link: "/projects",
     current: false,
     displayForUser: ["EMPLOYEE", "TEAM LEADER"],
   },
 
   {
     name: "Członkowie",
-    link: "#",
+    link: "/members",
     current: false,
     displayForUser: ["EMPLOYEE", "TEAM LEADER"],
   },
   {
     name: "Kalendarz",
-    link: "#",
+    link: "/calendar",
     current: false,
     displayForUser: ["EMPLOYEE", "TEAM LEADER"],
   },
