@@ -1,0 +1,1 @@
+nazwa w joi.object({np name}) mus byc taka sama jak w req.body w controllerze

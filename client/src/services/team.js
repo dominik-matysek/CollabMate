@@ -12,7 +12,7 @@ const teamService = {
   },
 
   getTeamById: async (teamId) => {
-    return apiRequest("GET", `${teamAPI}/${teamId}`);
+    return apiRequest("GET", `${teamAPI}/team/${teamId}`);
   },
 
   editTeam: async (teamId, updatedData) => {

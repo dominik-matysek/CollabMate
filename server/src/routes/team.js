@@ -7,7 +7,7 @@ router.post("/", verifyToken, verifyAdmin, teams.createTeam);
 
 router.get("/", verifyToken, verifyAdmin, teams.getAllTeams);
 
-router.get("/:id", verifyToken, teams.getTeamById);
+router.get("/team/:id", verifyToken, teams.getTeamById);
 
 router.post("/:id/edit", verifyToken, verifyAdmin, teams.editTeam);
 

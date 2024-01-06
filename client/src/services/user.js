@@ -23,11 +23,17 @@ const userService = {
   updateProfile: async (userId, updatedProfile) => {
     return apiRequest("POST", `${userAPI}/profile/${userId}`, updatedProfile);
   },
+
   uploadImage: async (imageData) => {
     return apiRequest("POST", `${userAPI}/upload-image`, imageData);
   },
+
   getAllUsers: async () => {
     return apiRequest("GET", `${userAPI}/`);
+  },
+
+  getUserInfo: async (userId) => {
+    return apiRequest("GET", `${userAPI}/profile/${userId}`);
   },
 };
 

@@ -12,9 +12,9 @@ exports.register = async (req, res) => {
   try {
     console.log("user registration request received");
     //Validate a user before store the user inputs
-    // const { error } = registerValidation.validate(req.body);
-    // if (error)
-    //   return res.status(400).json({ message: error.details[0].message });
+    const { error } = registerValidation.validate(req.body);
+    if (error)
+      return res.status(400).json({ message: error.details[0].message });
     console.log(req.body);
     const { firstName, lastName, email, password } = req.body;
 
@@ -119,7 +119,9 @@ exports.authenticate = async (req, res) => {
     // testowanie httpsonly ponizej
     // const token = req.cookies.token;
 
-    const user = await User.findById(req.userId).select("-password");
+    const user = await User.findById(req.userId)
+      .select("-password")
+      .populate("teams", "name");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -198,8 +200,28 @@ exports.uploadImage = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password");
+    const users = await User.find()
+      .select("-password")
+      .populate("teams", "name");
     res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.getUserInfo = async (req, res) => {
+  try {
+    console.log("Kontroler getUserInfo");
+    const userId = req.params.id;
+    console.log(userId);
+    const user = await User.findById(userId)
+      .select("-password")
+      .populate("teams", "name");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ success: true, data: user });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });

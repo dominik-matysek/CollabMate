@@ -21,4 +21,6 @@ router.post("/upload-image", upload.single("file"), users.uploadImage);
 
 router.get("/", verifyToken, verifyAdmin, users.getAllUsers);
 
+router.get("/profile/:id", verifyToken, users.getUserInfo);
+
 module.exports = router;

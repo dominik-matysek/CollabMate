@@ -206,7 +206,7 @@ function Navbar({ user, toggleSidebar, handleLogout }) {
                         <Menu.Item>
                           {({ active }) => (
                             <span
-                              onClick={() => navigate("/profile")}
+                              onClick={() => navigate(`/profile/${user._id}`)}
                               className={classNames(
                                 active ? "bg-gray-100" : "",
                                 "block px-4 py-2 text-sm text-gray-700"

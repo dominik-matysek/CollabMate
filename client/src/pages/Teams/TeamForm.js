@@ -1,16 +1,20 @@
 import { Form, Input, message, Modal, Select } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SetLoading } from "../../redux/loadersSlice";
 import teamService from "../../services/team";
+import { getAntdFormInputRules } from "../../utils/helpers";
 
 const { Option } = Select;
 
+// Nie wiem czy edycje zespołu nie lepiej zrobić tak, że po naciśnięciu na dany zespół przenosi cie do profilu zespołu (analogicznie jak masz profil uzytkownika) i tam jako admin możesz zmienić nazwę i np usunąć lub dodać userów do zespołu. Profil zespołu i tak by ci się przydał myślę, więc może warto
+// to tak zrobić. A tworzenie zespolu zostaw jak jest jest git raczej.
+
 function TeamForm({ show, setShow, reloadData, team, users }) {
   const formRef = useRef(null);
-  const { user } = useSelector((state) => state.users);
   const dispatch = useDispatch();
+  const [teamLeader, setTeamLeader] = useState(team?.teamLead?._id);
 
   const onFinish = async (values) => {
     try {
@@ -21,15 +25,17 @@ function TeamForm({ show, setShow, reloadData, team, users }) {
         // values._id = team._id;
         response = await teamService.editTeam(team._id, values);
       } else {
-        // create project
-        // values.owner = user._id;
-        // values.members = [
-        //   {
-        //     user: user._id,
-        //     role: "owner",
-        //   },
-        // ];
-        response = await teamService.createTeam(values);
+        console.log(`Wartości w teamie: ${values}`);
+        // create team
+        const payload = {
+          name: values.name,
+          teamLeadId: values.teamLead,
+          memberIds: values.users,
+        };
+        console.log(
+          `Wartości w teamie: ${payload.name}, ${payload.teamLeadId},${payload.memberIds}`
+        );
+        response = await teamService.createTeam(payload);
       }
 
       if (response.success) {
@@ -42,8 +48,20 @@ function TeamForm({ show, setShow, reloadData, team, users }) {
       dispatch(SetLoading(false));
     } catch (error) {
       dispatch(SetLoading(false));
+      message.error(error.message);
     }
   };
+
+  const editInitialValues = team
+    ? {
+        name: team.name,
+        teamLead: team.teamLead?._id,
+        users: team.members.filter((member) => member !== team.teamLead?._id),
+      }
+    : {};
+
+  console.log(`Oto lider: ${teamLeader}`);
+
   return (
     <Modal
       title={team ? "EDYTUJ ZESPÓŁ" : "UTWÓRZ ZESPÓŁ"}
@@ -60,10 +78,40 @@ function TeamForm({ show, setShow, reloadData, team, users }) {
         layout="vertical"
         ref={formRef}
         onFinish={onFinish}
-        initialValues={team}
+        // initialValues={team ? { ...team, teamLead: team?.teamLead?._id } : null}
+        // initialValues={team}
+        initialValues={editInitialValues}
       >
-        <Form.Item label="Nazwa zespołu" name="name">
+        <Form.Item
+          label="Nazwa zespołu"
+          name="name"
+          rules={getAntdFormInputRules}
+        >
           <Input placeholder="Nazwa Zespołu" />
+        </Form.Item>
+
+        <Form.Item
+          label="Team Leader"
+          name="teamLead"
+          rules={getAntdFormInputRules}
+        >
+          <Select
+            placeholder="Wybierz lidera zespołu"
+            disabled={team ? true : false}
+            onChange={setTeamLeader}
+            optionFilterProp="children"
+            filterOption={(input, option) =>
+              option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+            }
+          >
+            {users
+              .filter((user) => user.role !== "ADMIN") // Exclude users with the 'ADMIN' role
+              .map((user) => (
+                <Option key={user._id} value={user._id}>
+                  {user.firstName} {user.lastName}
+                </Option>
+              ))}
+          </Select>
         </Form.Item>
 
         {/* Niżej masz do zrobienia listę wszystkich użytkowników i ewentualnie jeszcze jakieś formy jakbyś coś potrzebował/wymyślił dodatkowo */}
@@ -79,11 +127,15 @@ function TeamForm({ show, setShow, reloadData, team, users }) {
               option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
             }
           >
-            {users.map((user) => (
-              <Option key={user._id} value={user._id}>
-                {user.firstName}
-              </Option> // Assuming each user has _id and name
-            ))}
+            {users
+              .filter(
+                (user) => user.role !== "ADMIN" && user._id !== teamLeader
+              ) // Exclude users with the 'ADMIN' role
+              .map((user) => (
+                <Option key={user._id} value={user._id}>
+                  {user.firstName} {user.lastName}
+                </Option>
+              ))}
           </Select>
         </Form.Item>
       </Form>

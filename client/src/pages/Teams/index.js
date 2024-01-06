@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, message, Table } from "antd";
+import { Form, Input, Button, message } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import Divider from "../../components/Divider";
 import teamService from "../../services/team";
@@ -12,15 +12,19 @@ import { SetNotifications, SetUser } from "../../redux/usersSlice";
 import { IoTrashBin } from "react-icons/io5";
 import TeamForm from "./TeamForm";
 import { FaPencilAlt } from "react-icons/fa";
+import { Navigate } from "react-router-dom";
+import CustomTable from "../../components/CustomTable";
 
 // PAMIĘTAJ DEBILU - JEŻELI REQUEST CI NIE DZIAŁA, TO PROBLEM NA 99% JEST W BACKENDZIE - SPRAWDZAJ LOGI W KONSOLI VSCODE A NIE WEBOWEJ JEŚLI CHODZI O BACKEND, SPRAWDZAJ CZY W REQUESCIE SIĘ ZNAJDUJĄ RZECZY KTÓRE SĄ OCZEKIWANE W KONTROLERZE ITP
 
 function Teams() {
+  const { user } = useSelector((state) => state.users);
   const [teams, setTeams] = useState([]);
   const [users, setUsers] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [show, setShow] = useState(false);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const fetchUsers = async () => {
     try {
@@ -75,6 +79,14 @@ function Teams() {
     }
   };
 
+  const onRowClick = (record) => {
+    return {
+      onClick: () => {
+        navigate(`/team/${record._id}`);
+      },
+    };
+  };
+
   useEffect(() => {
     fetchTeams();
     fetchUsers();
@@ -88,6 +100,7 @@ function Teams() {
     {
       title: "Lider zespołu",
       dataIndex: "teamLead",
+      render: (teamLead) => `${teamLead.firstName} ${teamLead.lastName}`,
     },
     {
       title: "Liczba członków",
@@ -118,7 +131,7 @@ function Teams() {
     },
   ];
 
-  return (
+  return user.role === "ADMIN" ? (
     <div>
       <div className="flex justify-end">
         <Button
@@ -131,7 +144,7 @@ function Teams() {
           Utwórz zespół
         </Button>
       </div>
-      <Table columns={columns} dataSource={teams} className="mt-4" />
+      <CustomTable columns={columns} data={teams} onRowClick={onRowClick} />
       {show && (
         <TeamForm
           show={show}
@@ -142,6 +155,8 @@ function Teams() {
         />
       )}
     </div>
+  ) : (
+    <Navigate to="/" />
   );
 }
 

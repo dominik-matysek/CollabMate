@@ -4,9 +4,11 @@ import Login from "./pages/Login/index";
 import Register from "./pages/Register/index";
 import Profile from "./pages/Profile/index";
 import Teams from "./pages/Teams";
+import Users from "./pages/Users";
 import ProtectedPage from "./components/ProtectedPage";
 import Home from "./pages/Home";
 import Spinner from "./components/Spinner";
+import Team from "./pages/Teams/Team";
 function App() {
   const { loading } = useSelector((state) => state.loaders);
   return (
@@ -32,7 +34,23 @@ function App() {
             }
           />
           <Route
-            path="/profile"
+            path="/team/:teamId"
+            element={
+              <ProtectedPage>
+                <Team />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <ProtectedPage>
+                <Users />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/profile/:userId"
             element={
               <ProtectedPage>
                 <Profile />

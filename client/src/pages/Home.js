@@ -11,6 +11,13 @@
 // hurra! zrobiłeś po ponad 5 godzinach strone główną i profil użytkownika (obie rzeczy brzydkie że ja dupie)
 // ale na szczescie jeszcze nie do konca działają tak jak powinny - np profil bo zrefreszowaniu strony wywala ci błąd że user jest null - ?
 
+// Abstrachując od tego co masz tutaj - może zrezygnować z navbara/sidebara i zostać przy jednej rzeczy. I umozliwić użytkownikowi podgląd wszystkich projektów do jakich należy - niezależnie od teamu. W ogole przydałoby się jednak żeby można było należeć do kilku teamów i w różnych mieć różne role,
+// ale to wymagałoby ze sobą dużo zmian w backendzie - do przemyślenia
+// Chociaż w sumie to niekoniecznie - można zostać przy tym że jeden team, no nie wiem
+
+// A może uderzyć w coś podobnego jak: https://dribbble.com/shots/2773385/attachments/2773385-Team-Ui?mode=media
+// Czyli navbar to tylko logo, przycisk do otwierania/zamykania sidebara (ale niekoniecznie) i ikonka powiadomienia i profilu (może searchbar jak starczy czasu). Na sidebarze dashboard - czyli przenosi cie do strony głównej/home, niżej notyfikacje tak samo jak na navbarze, potem zespoły - zbiór wszystkich zespołów jakie istnieją, podsumowanie u góry liczby zespołów, pracowników , z boku gdzieś wszyscy leaderzy itp. Jakieś ograniczenia, np. może być kilku leadów w jednym zespole, ale dany lead może byc leadem i w ogóle członkiem tylko jednego zespołu. Zwykli userzy tak samo - mogą być członkami tylko jednego zespołu. ALE podgląd mają wszystkich zespołów jakie istnieją w systemie. Po naciśnięciu na jakiś pojawia im się panel tego zespołu - to co już masz mniej więcej czyli info ogólne, kto jest leadem, ilu i jacy członkowie. ALE jeśli nie jest cżłonkiem tego zespołu, to nic więcej typu projekty, zadania, kalendarz nie zobaczy. A jeżeli jest - no to widzi to i ma dostęp. Poniżej zespołów profil znowu (jak na tej stronce dribble) i tyle. ADMIN de facto widziałby to samo czyli zespoły wszystkie i info ALE on dodatkowo może zespół utworzyć, a jak wejdzie w konkretny zespół to może edytować nazwę, zmieniać członków itp. Do projektów i kalendarza nie ma dostępu, tak jakby nie był członkiem zespołu - co jest zgodne z prawdą. ADMIN dodatkowo miałby dodatkową rzecz na tym sidebarze tj. uzytkownicy - WSZYSCY użytkownicy systemu, podzieleni np. na leadów i zwykłych, może se wejść w ich profil (ale nie może go ofc edytować) albo np. usunąć kogoś całkowicie z serwisu.
+
 import { message } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";

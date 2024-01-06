@@ -6,26 +6,51 @@ const teamValidation = require("../utils/teamValidation");
 // Create a team
 exports.createTeam = async (req, res) => {
   try {
-    const { error } = teamValidation.validate(req.body);
-    if (error)
-      return res.status(400).json({ message: error.details[0].message });
+    console.log("Tworzenie teamu");
 
-    const { name, teamLeadId } = req.body;
+    const { name, teamLeadId, memberIds } = req.body;
+
+    const { error } = teamValidation.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        message: "Validation error",
+        details: error.details.map((detail) => detail.message),
+      });
+    }
+
+    console.log(`Wartości teamu: ${name}, ${teamLeadId}, ${memberIds}`);
 
     // Check if the specified team leader exists and has the correct role
-    const teamLead = await User.findOne({
-      _id: teamLeadId,
-      role: { $ne: "ADMIN" },
-    });
-    if (!teamLead) {
-      return res.status(400).json({ message: "Invalid team leader ID." });
+    const teamLead = await User.findById(teamLeadId);
+    if (!teamLead || teamLead.role === "ADMIN") {
+      return res
+        .status(400)
+        .json({ message: "User does not exist OR is an admin" });
+    }
+
+    let members = [];
+
+    if (memberIds && memberIds.length) {
+      members = await User.find({
+        _id: { $in: memberIds },
+        role: { $ne: "ADMIN" },
+      });
+      if (members.length !== memberIds.length) {
+        return res
+          .status(400)
+          .json({ message: "One or more members are invalid." });
+      }
+    }
+
+    if (!members.find((member) => member._id.equals(teamLead._id))) {
+      members.push(teamLead);
     }
 
     // Create a new team
     const newTeam = new Team({
       name,
       teamLead: teamLead._id,
-      members: [teamLead._id],
+      members: members.map((member) => member._id),
     });
 
     // Automatically create a calendar for the team
@@ -34,15 +59,31 @@ exports.createTeam = async (req, res) => {
 
     // Save the team and the calendar
     const savedTeam = await newTeam.save();
-    const savedCalendar = await newCalendar.save();
+    await newCalendar.save();
 
     // Update the team lead's "teams" property
-    await User.findByIdAndUpdate(
-      teamLeadId,
+    const updates = members.map((member) => {
+      console.log(`User: ${member}`);
+      console.log(`Team: ${savedTeam}`);
+      console.log(`Team ID: ${savedTeam._id}`);
+      return User.findByIdAndUpdate(
+        member._id,
+        { $addToSet: { teams: savedTeam._id } },
+        { new: true }
+      );
+    });
 
-      { $addToSet: { teams: savedTeam._id }, $set: { role: "TEAM LEADER" } },
-      { new: true }
-    );
+    if (teamLead.role !== "TEAM LEADER") {
+      updates.push(
+        User.findByIdAndUpdate(
+          teamLead._id,
+          { $set: { role: "TEAM LEADER" } },
+          { new: true }
+        )
+      );
+    }
+
+    await Promise.all(updates);
 
     res.status(200).json({
       success: true,
@@ -60,10 +101,9 @@ exports.getAllTeams = async (req, res) => {
   try {
     console.log("Jestem w kontrolerze");
     // Fetch all teams from the database
-    const teams = await Team.find();
-    console.log(teams);
-    // .sort({ createdAt: -1 })
-    // .populate("teamLead members", "firstName lastName email");
+    const teams = await Team.find()
+      .sort({ createdAt: -1 })
+      .populate("teamLead", "firstName lastName");
 
     res.status(200).json({
       success: true,
@@ -82,7 +122,7 @@ exports.getTeamById = async (req, res) => {
     const teamId = req.params.id;
     const team = await Team.findById(teamId).populate(
       "teamLead members",
-      "firstName lastName email"
+      "firstName lastName email role"
     );
 
     if (!team) {
@@ -105,9 +145,9 @@ exports.editTeam = async (req, res) => {
   try {
     const teamId = req.params.id;
 
-    const { error } = teamValidation.validate(req.body);
-    if (error)
-      return res.status(400).json({ message: error.details[0].message });
+    // const { error } = teamEditValidation.validate(req.body);
+    // if (error)
+    //   return res.status(400).json({ message: error.details[0].message });
 
     const updatedTeam = await Team.findByIdAndUpdate(teamId, req.body, {
       new: true,
@@ -228,6 +268,8 @@ exports.removeMemberFromTeam = async (req, res) => {
     if (!updatedTeam) {
       return res.status(404).json({ message: "Team not found" });
     }
+
+    //Tu by trzeba było dodać jakieś sprawdzanie czy np uzytkownik nie jest przypadkiem przypisany do jakichs projektow zadan itp
 
     await User.findByIdAndUpdate(
       userId,

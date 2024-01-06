@@ -22,12 +22,12 @@ const teamSchema = new Schema(
     teamLead: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      // required: true,
+      required: true,
     },
     calendar: {
       type: Schema.Types.ObjectId,
       ref: "Calendar",
-      // required: true,
+      required: true,
     },
   },
   { timestamps: true }
