@@ -19,7 +19,7 @@ router.post("/profile/:id", verifyToken, users.updateProfile);
 
 router.post("/upload-image", upload.single("file"), users.uploadImage);
 
-router.get("/", verifyToken, verifyAdmin, users.getAllUsers);
+router.get("/", verifyToken, users.getAllUsers);
 
 router.get("/profile/:id", verifyToken, users.getUserInfo);
 
