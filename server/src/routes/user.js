@@ -15,7 +15,7 @@ router.post("/logout", users.logout);
 
 router.get("/authenticate", verifyToken, users.authenticate);
 
-router.post("/profile/:id", verifyToken, users.updateProfile);
+router.patch("/profile/:id", verifyToken, users.updateProfile);
 
 router.post("/upload-image", upload.single("file"), users.uploadImage);
 

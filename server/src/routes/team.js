@@ -3,27 +3,30 @@ const router = express.Router();
 const teams = require("../controllers/team");
 const { verifyToken, verifyAdmin } = require("../middlewares/auth");
 
-router.post("/", verifyToken, verifyAdmin, teams.createTeam);
+router.post("/teams", verifyToken, verifyAdmin, teams.createTeam);
 
-router.get("/", verifyToken, teams.getAllTeams);
+router.get("/teams", verifyToken, teams.getAllTeams);
 
-router.get("/team/:id", verifyToken, teams.getTeamById);
+router.get("/teams/:id", verifyToken, teams.getTeamById);
 
-router.post("/:id/edit", verifyToken, verifyAdmin, teams.editTeam);
+router.patch("/teams/:id", verifyToken, verifyAdmin, teams.editTeam);
 
-router.delete("/:id", verifyToken, verifyAdmin, teams.deleteTeam);
+router.delete("/teams/:id", verifyToken, verifyAdmin, teams.deleteTeam);
 
-router.post("/:id/add-member", verifyToken, verifyAdmin, teams.addMemberToTeam);
+router.patch(
+	"/teams/:id/add-member",
+	verifyToken,
+	verifyAdmin,
+	teams.addMemberToTeam
+);
 
-router.post(
-	"/:id/remove-member",
+router.patch(
+	"/teams/:id/remove-member",
 	verifyToken,
 	verifyAdmin,
 	teams.removeMemberFromTeam
 );
 
-router.get("/:id/get-members", verifyToken, teams.getMembers);
-
-router.get("/:id/get-projects", verifyToken, teams.getAllProjects);
+router.get("/teams/:id/get-members", verifyToken, teams.getMembers);
 
 module.exports = router;

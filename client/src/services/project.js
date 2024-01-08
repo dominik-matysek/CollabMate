@@ -3,39 +3,47 @@ const { apiRequest } = require(".");
 const projectAPI = "/api/projects";
 
 const projectService = {
-  createProject: async (teamId, projectData) => {
-    return apiRequest("POST", `${projectAPI}/${teamId}/create`, projectData);
-  },
+	createProject: async (teamId, projectData) => {
+		return apiRequest(
+			"POST",
+			`${projectAPI}/teams/${teamId}/projects/create`,
+			projectData
+		);
+	},
 
-  getProjectById: async (projectId) => {
-    return apiRequest("GET", `${projectAPI}/${projectId}`);
-  },
+	getAllProjects: async (teamId, projectId) => {
+		return apiRequest("GET", `${projectAPI}/teams/${teamId}/projects`);
+	},
 
-  editProject: async (projectId, projectData) => {
-    return apiRequest("POST", `${projectAPI}/${projectId}/edit`, projectData);
-  },
+	getProjectById: async (projectId) => {
+		return apiRequest("GET", `${projectAPI}/projects/${projectId}`);
+	},
 
-  deleteProject: async (projectId) => {
-    return apiRequest("DELETE", `${projectAPI}/${projectId}`);
-  },
+	editProject: async (projectId, projectData) => {
+		return apiRequest(
+			"PATCH",
+			`${projectAPI}/projects/${projectId}`,
+			projectData
+		);
+	},
 
-  addMemberToProject: async (projectId, userId) => {
-    return apiRequest(
-      "POST",
-      `${projectAPI}/${projectId}/add-member/${userId}`
-    );
-  },
+	deleteProject: async (projectId) => {
+		return apiRequest("DELETE", `${projectAPI}/projects/${projectId}`);
+	},
 
-  removeMemberFromProject: async (projectId, userId) => {
-    return apiRequest(
-      "POST",
-      `${projectAPI}/${projectId}/remove-member/${userId}`
-    );
-  },
+	addMemberToProject: async (projectId, userId) => {
+		return apiRequest(
+			"PATCH",
+			`${projectAPI}/projects/${projectId}/add-member/${userId}`
+		);
+	},
 
-  getAllTasksForProject: async (projectId) => {
-    return apiRequest("GET", `${projectAPI}/${projectId}/get-tasks`);
-  },
+	removeMemberFromProject: async (projectId, userId) => {
+		return apiRequest(
+			"PATCH",
+			`${projectAPI}/projects/${projectId}/remove-member/${userId}`
+		);
+	},
 };
 
 export default projectService;

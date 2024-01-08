@@ -3,14 +3,16 @@ const router = express.Router();
 const tasks = require("../controllers/task");
 const { verifyToken } = require("../middlewares/auth");
 
-router.post("/:projectId/create", verifyToken, tasks.createTask);
+router.post("/projects/:projectId/tasks/create", verifyToken, tasks.createTask);
 
-router.get("/:id", verifyToken, tasks.getTaskById);
+router.get("/projects/:projectId/tasks", verifyToken, tasks.getAllTasks);
 
-router.post("/:id/edit", verifyToken, tasks.editTask);
+router.get("/tasks/:id", verifyToken, tasks.getTaskById);
 
-router.delete("/:id", verifyToken, tasks.deleteTask);
+router.patch("/tasks/:id", verifyToken, tasks.editTask);
 
-router.get("/:id/get-comments", verifyToken, tasks.getComments);
+router.delete("/tasks/:id", verifyToken, tasks.deleteTask);
+
+router.get("/tasks/:id/comments", verifyToken, tasks.getComments); //probably niepotrzebne
 
 module.exports = router;

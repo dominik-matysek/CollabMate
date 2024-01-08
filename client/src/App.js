@@ -10,6 +10,8 @@ import Home from "./pages/Home";
 import Spinner from "./components/Spinner";
 import Team from "./pages/Teams/Team";
 import Test from "./pages/Test";
+import Projects from "./pages/Projects";
+import Tasks from "./pages/Tasks";
 function App() {
 	const { loading } = useSelector((state) => state.loaders);
 	return (
@@ -39,6 +41,22 @@ function App() {
 						element={
 							<ProtectedPage>
 								<Team />
+							</ProtectedPage>
+						}
+					/>
+					<Route
+						path="/projects"
+						element={
+							<ProtectedPage>
+								<Projects />
+							</ProtectedPage>
+						}
+					/>
+					<Route
+						path="/tasks"
+						element={
+							<ProtectedPage>
+								<Tasks />
 							</ProtectedPage>
 						}
 					/>

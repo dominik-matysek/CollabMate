@@ -35,12 +35,10 @@ const userSchema = new Schema(
 			enum: ["ADMIN", "TEAM LEADER", "EMPLOYEE"],
 			default: "EMPLOYEE",
 		},
-		teams: [
-			{
-				type: Schema.Types.ObjectId,
-				ref: "Team",
-			},
-		],
+		team: {
+			type: Schema.Types.ObjectId,
+			ref: "Team",
+		},
 	},
 	{ timestamps: true }
 );

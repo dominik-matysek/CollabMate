@@ -12,6 +12,7 @@ import SidebarSubItem from "./SidebarSubItem";
 
 function SidebarItem({ name, link, icon, notifications, underItems }) {
 	const [collapsed, setCollapsed] = useState(true);
+	const navigate = useNavigate();
 
 	const toggleCollapse = () => {
 		if (underItems) {
@@ -22,8 +23,9 @@ function SidebarItem({ name, link, icon, notifications, underItems }) {
 	return (
 		<div>
 			<div
-				className="flex items-center justify-between p-2 text-gray-600 hover:bg-gray-200 cursor-pointer"
+				className="flex items-center justify-between p-2 text-lg text-gray-600 hover:bg-gray-200 cursor-pointer"
 				onClick={toggleCollapse}
+				style={{ marginBottom: "10px" }}
 			>
 				<div className="flex items-center">
 					<div className="flex items-center justify-center w-10">
@@ -33,9 +35,11 @@ function SidebarItem({ name, link, icon, notifications, underItems }) {
 							icon
 						)}
 					</div>
-					<span className="ml-2">{name}</span>
+					<span className="ml-2" onClick={() => navigate(link)}>
+						{name}
+					</span>
 				</div>
-				{underItems && (collapsed ? <DownOutlined /> : <UpOutlined />)}
+				{/* {underItems && (collapsed ? <DownOutlined /> : <UpOutlined />)} */}
 			</div>
 			{/* {!collapsed && (
 				<div className="pl-4">
@@ -49,11 +53,11 @@ function SidebarItem({ name, link, icon, notifications, underItems }) {
 					))}
 				</div>
 			)} */}
-			{!collapsed &&
+			{/* {!collapsed &&
 				underItems &&
 				underItems.map((subItem, index) => (
 					<SidebarSubItem key={index} {...subItem} level={1} />
-				))}
+				))} */}
 		</div>
 	);
 }

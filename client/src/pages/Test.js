@@ -8,6 +8,11 @@ import Footer from "../components/Footer";
 import Team from "../pages/Teams/Team/index";
 const { Search } = Input;
 
+// PLAN NA NASTĘPNE POSIEDZENIE:
+// LEĆ DALEJ ZE ZMIANA designu - ogarnij żeby w zależności od roli oraz tego na jakies stronie się znajdujesz to wyświetlały się na np sidebarze albo subheaderze inne rzeczy,
+// ogarnij ich funkcjonalności czyli zeby przenosily gdzie mają przenosić itp, uporządkuj to trochę. Jak zrobisz design do miejsca w którym się zatrzymałeś pod względem funckjonalności - czyli praktycznie skończony ADMIN (no a wiadomo że niektóre rzeczy typu wyswietlanie teamów takie same powinny być u admina i reszty), to dopiero lecisz dalej.
+// Pamiętaj że niektóre funkcjonalności typu dodawanie zdjęcia, dodawanie uzytkownikow przez admina itp są do dokonczenia/naprawy
+
 const Test = () => {
 	const [sidebarVisible, setSidebarVisible] = useState(false);
 
@@ -23,8 +28,8 @@ const Test = () => {
 			<Row>
 				<Sidebar sidebarVisible={sidebarVisible} />
 				<Col span={sidebarVisible ? 12 : 18}>
-					<div className="container mx-auto my-5 p-5">
-						{/* Team Name and Creation Date */}
+					{/* <div className="container mx-auto my-5 p-5">
+						
 						<div className="mb-6">
 							<h1 className="text-3xl font-bold text-gray-900 mb-2">
 								Nazwa teamu
@@ -92,7 +97,7 @@ const Test = () => {
 								</div>
 							</div>
 						</div>
-					</div>
+					</div> */}
 				</Col>
 			</Row>
 			<Footer />

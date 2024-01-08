@@ -70,13 +70,13 @@ const items = [
 		link: "/",
 		current: true,
 	},
-	{
-		name: "Powiadomienia",
-		icon: <BellTwoTone />,
-		link: "#",
-		notifications: 5,
-		current: false,
-	},
+	// {
+	// 	name: "Powiadomienia",
+	// 	icon: <BellTwoTone />,
+	// 	link: "#",
+	// 	notifications: 5,
+	// 	current: false,
+	// },
 	{
 		name: "Zespoły",
 		link: "/teams",
@@ -122,18 +122,48 @@ const items = [
 	// },
 ];
 
-function Sidebar({ sidebarVisible }) {
+function Sidebar({ user, isSidebarOpen }) {
+	const items = [
+		{
+			name: "Panel główny",
+			icon: <HomeOutlined />,
+			link: "/",
+			current: true,
+		},
+		// {
+		// 	name: "Powiadomienia",
+		// 	icon: <BellTwoTone />,
+		// 	link: "#",
+		// 	notifications: 5,
+		// 	current: false,
+		// },
+		{
+			name: "Zespoły",
+			link: "/teams",
+			icon: <TeamOutlined />,
+			current: false,
+			underItems: itemsInTeam,
+		},
+		{
+			name: "Profil",
+			link: `/profile/${user._id}`,
+			icon: <UserOutlined />,
+			current: false,
+		},
+	];
 	return (
-		sidebarVisible && (
-			<Col span={6}>
-				<div>
-					<div className="h-full bg-white shadow-md">
-						{items.map((item, index) => (
-							<SidebarItem key={index} {...item} />
-						))}
-					</div>
-				</div>
-			</Col>
+		isSidebarOpen && (
+			<div
+				className="bg-white shadow-lg h-full rounded-r-lg"
+				style={{
+					transition: "opacity 0.5s ease-out",
+					opacity: 1,
+				}}
+			>
+				{items.map((item, index) => (
+					<SidebarItem key={index} {...item} />
+				))}
+			</div>
 		)
 	);
 }

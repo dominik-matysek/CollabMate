@@ -1,10 +1,29 @@
 import React, { useState } from "react";
-import { Input, Button, Avatar, Badge, Divider } from "antd";
+import { Input, Button, Avatar, Badge, Divider, Menu, Dropdown } from "antd";
 import { MenuOutlined, BellOutlined, UserOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 const { Search } = Input;
 
-const Navbar = ({ toggleSidebar }) => {
+const Navbar = ({ user, toggleSidebar, handleLogout }) => {
+	const navigate = useNavigate();
+
+	const onMenuClick = (event) => {
+		const { key } = event;
+		if (key === "logout") {
+			handleLogout();
+		} else if (key === "profile") {
+			navigate(`/profile/${user._id}`);
+		}
+	};
+
+	const menu = (
+		<Menu onClick={onMenuClick}>
+			<Menu.Item key="profile">Twój profil, {user.firstName}</Menu.Item>
+			<Menu.Item key="logout">Wyloguj się</Menu.Item>
+		</Menu>
+	);
+
 	return (
 		<div className="flex items-center justify-between px-6 py-4 bg-white shadow-md">
 			<div className="flex items-center">
@@ -16,7 +35,12 @@ const Navbar = ({ toggleSidebar }) => {
 					style={{ width: "4em" }}
 				/>
 				{/* Brand logo or name */}
-				<div className="text-xl font-bold mx-4">CollaboMate</div>
+				<div
+					className="text-xl font-bold mx-4 cursor-pointer"
+					onClick={() => navigate("/")}
+				>
+					CollaboMate
+				</div>
 
 				{/* Vertical divider */}
 
@@ -43,7 +67,11 @@ const Navbar = ({ toggleSidebar }) => {
 				</Badge>
 
 				{/* Profile picture */}
-				<Avatar icon={<UserOutlined />} className="cursor-pointer" />
+				<Dropdown overlay={menu} trigger={["click"]}>
+					<a onClick={(e) => e.preventDefault()}>
+						<Avatar icon={<UserOutlined />} className="cursor-pointer" />
+					</a>
+				</Dropdown>
 			</div>
 		</div>
 	);

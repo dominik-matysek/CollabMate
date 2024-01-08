@@ -5,32 +5,37 @@ const verify = require("../middlewares/auth");
 const { verifyToken, verifyLeader } = require("../middlewares/auth");
 
 router.post(
-	"/:teamId/create",
+	"/teams/:teamId/projects/create",
 	verifyToken,
 	verifyLeader,
 	projects.createProject
 );
 
-router.get("/:id", verifyToken, projects.getProjectById);
+router.get("/teams/:teamId/projects", verifyToken, projects.getAllProjects);
 
-router.post("/id/edit", verifyToken, verifyLeader, projects.editProject);
+router.get("/projects/:id", verifyToken, projects.getProjectById);
 
-router.delete("/:id", verifyToken, verifyLeader, projects.deleteProject);
+router.patch("/projects/:id", verifyToken, verifyLeader, projects.editProject);
 
-router.post(
-	"/:id/add-member/:userId",
+router.delete(
+	"/projects/:id",
+	verifyToken,
+	verifyLeader,
+	projects.deleteProject
+);
+
+router.patch(
+	"/projects/:id/add-member/:userId",
 	verifyToken,
 	verifyLeader,
 	projects.addMemberToProject
 );
 
-router.post(
-	"/:id/remove-member/:userId",
+router.patch(
+	"/projects/:id/remove-member/:userId",
 	verifyToken,
 	verifyLeader,
 	projects.removeMemberFromProject
 );
-
-router.get("/:id/get-tasks", verifyToken, projects.getAllTasks);
 
 module.exports = router;

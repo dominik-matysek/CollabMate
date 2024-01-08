@@ -3,17 +3,28 @@ const { apiRequest } = require(".");
 const commentAPI = "/api/comments";
 
 const commentService = {
-  createComment: async (taskId, commentData) => {
-    return apiRequest("POST", `${commentAPI}/${taskId}/create`, commentData);
-  },
+	createComment: async (taskId, commentData) => {
+		return apiRequest(
+			"POST",
+			`${commentAPI}/${taskId}/comments/create`,
+			commentData
+		);
+	},
 
-  editComment: async (commentId, updatedData) => {
-    return apiRequest("PUT", `${commentAPI}/${commentId}/edit`, updatedData);
-  },
+	editComment: async (taskId, commentId, updatedData) => {
+		return apiRequest(
+			"PATCH",
+			`${commentAPI}/${taskId}/comments/${commentId}`,
+			updatedData
+		);
+	},
 
-  deleteComment: async (commentId) => {
-    return apiRequest("DELETE", `${commentAPI}/${commentId}`);
-  },
+	deleteComment: async (taskId, commentId) => {
+		return apiRequest(
+			"DELETE",
+			`${commentAPI}/${taskId}/comments/${commentId}`
+		);
+	},
 };
 
 export default commentService;

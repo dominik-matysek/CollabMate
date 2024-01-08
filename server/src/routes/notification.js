@@ -7,10 +7,10 @@ router.post("/create", verifyToken, notifications.createNotification);
 
 router.get("/", verifyToken, notifications.getNotifications);
 
-router.post("/:id/mark-as-read", verifyToken, notifications.readNotifications);
+router.patch("/:id/mark-as-read", verifyToken, notifications.readNotifications);
 
 router.delete("/:id", verifyToken, notifications.deleteNotification);
 
-router.delete("/delete-all", verifyToken, notifications.deleteAllNotifications);
+router.delete("/", verifyToken, notifications.deleteAllNotifications);
 
 module.exports = router;
