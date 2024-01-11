@@ -57,7 +57,10 @@ exports.getAllTasks = async (req, res) => {
 		const { projectId } = req.params;
 
 		// Retrieve all tasks of a project
-		const project = await Project.findById(projectId).populate("tasks");
+		const project = await Project.findById(projectId).populate(
+			"tasks",
+			"createdAt"
+		);
 
 		if (!project) {
 			return res.status(404).json({ error: "Project not found" });
@@ -81,7 +84,7 @@ exports.getTaskById = async (req, res) => {
 
 		// Retrieve a task by ID and populate the 'members' and 'comments' fields
 		const task = await Task.findById(taskId)
-			.populate("members", "firstName lastName email")
+			.populate("members", "firstName lastName email createdAt")
 			.populate("comments");
 
 		if (!task) {

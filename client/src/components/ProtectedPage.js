@@ -21,7 +21,7 @@ function ProtectedPage({ children }) {
 	const dispatch = useDispatch();
 	const { user, notifications } = useSelector((state) => state.users);
 	console.log(`User in Protected Page ${user}`);
-	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
 	const handleLogout = () => {
 		try {

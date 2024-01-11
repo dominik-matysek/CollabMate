@@ -1,6 +1,6 @@
 import { Form, Input, message, Modal, Select, Button, Card } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SetLoading } from "../../redux/loadersSlice";
 import teamService from "../../services/team";
@@ -11,46 +11,33 @@ const { Option } = Select;
 // Nie wiem czy edycje zespołu nie lepiej zrobić tak, że po naciśnięciu na dany zespół przenosi cie do profilu zespołu (analogicznie jak masz profil uzytkownika) i tam jako admin możesz zmienić nazwę i np usunąć lub dodać userów do zespołu. Profil zespołu i tak by ci się przydał myślę, więc może warto
 // to tak zrobić. A tworzenie zespolu zostaw jak jest jest git raczej.
 
-function TeamForm({
-	formType,
-	onSubmit,
-	show,
-	setShow,
-	reloadData,
-	team,
-	users,
-}) {
-	const formRef = useRef(null);
+function TeamForm({ reloadData, users }) {
 	const [form] = Form.useForm();
 	const dispatch = useDispatch();
-	const [teamLeader, setTeamLeader] = useState(team?.teamLead?._id);
+	const [availableUsers, setAvailableUsers] = useState(users); // for reseting users in select after creation of team
 
 	const onFinish = async (values) => {
 		try {
 			dispatch(SetLoading(true));
-			let response = null;
-			if (team) {
-				// edit team
-				// values._id = team._id;
-				response = await teamService.editTeam(team._id, values);
-			} else {
-				console.log(`Wartości w teamie: ${values}`);
-				// create team
-				const payload = {
-					name: values.name,
-					teamLeadId: values.teamLead,
-					memberIds: values.users,
-				};
-				console.log(
-					`Wartości w teamie: ${payload.name}, ${payload.teamLeadId},${payload.memberIds}`
-				);
-				response = await teamService.createTeam(payload);
-			}
+			// create team
+			const payload = {
+				name: values.name,
+				teamLeadIds: values.teamLeaders,
+			};
+			const response = await teamService.createTeam(payload);
 
 			if (response.success) {
 				message.success(response.message);
+
+				// form.resetFields();
+
+				//exclude the selected team leaders
+				setAvailableUsers((prevUsers) =>
+					prevUsers.filter((user) => !values.teamLeaders.includes(user._id))
+				);
+
+				form.resetFields();
 				reloadData();
-				setShow(false);
 			} else {
 				throw new Error(response.error);
 			}
@@ -60,49 +47,40 @@ function TeamForm({
 			message.error(error.message);
 		}
 	};
-	const handleFormSubmit = (values) => {
-		// Call the passed onSubmit function with form values and type
-		onSubmit(values, formType);
-	};
 
-	const getPlaceholderText = () => {
-		switch (formType) {
-			case "team":
-				return "Nazwa zespołu";
-			case "project":
-				return "Nazwa projektu";
-			case "task":
-				return "Nazwa zadania";
-			default:
-				return "";
-		}
-	};
-
-	const editInitialValues = team
-		? {
-				name: team.name,
-				teamLead: team.teamLead?._id,
-				users: team.members.filter((member) => member !== team.teamLead?._id),
-		  }
-		: {};
-
-	console.log(`Oto lider: ${teamLeader}`);
+	useEffect(() => {
+		setAvailableUsers(users);
+	}, [users]);
 
 	return (
 		<Card title="Nowy zespół" bordered={false} className="w-full shadow-lg">
-			<Form form={form} onFinish={handleFormSubmit} layout="vertical">
+			<Form form={form} onFinish={onFinish} layout="vertical">
 				<Form.Item name="name" rules={getAntdFormInputRules}>
-					<Input placeholder={getPlaceholderText()} />
+					<Input placeholder="Nazwa zespołu" />
 				</Form.Item>
-				<Form.Item name="teamLeaders">
-					<Select mode="multiple" placeholder="Wybierz lidera">
-						{users
+				<Form.Item name="teamLeaders" rules={getAntdFormInputRules}>
+					<Select
+						mode="multiple"
+						placeholder="Wybierz lidera/liderów"
+						filterOption={(input, option) =>
+							option.children.toLowerCase().includes(input.toLowerCase())
+						}
+						showSearch // Enables the search functionality
+					>
+						{availableUsers
 							.filter((user) => user.role === "EMPLOYEE" && !user.team)
 							.map((user) => (
-								<Option key={user._id} value={user._id}>
+								<Select.Option key={user._id} value={user._id}>
 									{user.firstName} {user.lastName}
-								</Option>
+								</Select.Option>
 							))}
+						{/* {users
+							.filter((user) => user.role === "EMPLOYEE" && !user.team)
+							.map((user) => (
+								<Select.Option key={user._id} value={user._id}>
+									{user.firstName} {user.lastName}
+								</Select.Option>
+							))} */}
 					</Select>
 				</Form.Item>
 				{/* Similar conditional rendering can be applied for other specific fields */}

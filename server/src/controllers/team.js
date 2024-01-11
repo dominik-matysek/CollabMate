@@ -1,31 +1,33 @@
 const Team = require("../models/team");
 const User = require("../models/user");
 const Calendar = require("../models/calendar");
-const teamValidation = require("../utils/teamValidation");
+const teamCreateValidation = require("../utils/teamValidation");
 
 // Create a team
 exports.createTeam = async (req, res) => {
 	try {
 		console.log("Tworzenie teamu");
 
-		const { name, teamLeadIds, memberIds } = req.body;
+		const { name, teamLeadIds } = req.body;
 
-		const { error } = teamValidation.validate(req.body);
-		if (error) {
-			return res.status(400).json({
-				message: "Validation error",
-				details: error.details.map((detail) => detail.message),
-			});
-		}
+		// const { error } = teamCreateValidation.validate(req.body);
+		// if (error) {
+		// 	return res.status(400).json({
+		// 		message: "Validation error",
+		// 		details: error.details.map((detail) => detail.message),
+		// 	});
+		// }
 
-		console.log(`Wartości teamu: ${name}, ${teamLeadIds}, ${memberIds}`);
+		console.log("Ile leadów: ", teamLeadIds.length);
 
-		// Check if the specified team leader exists and has the correct role
+		// Check if the specified team leader exists and are not admins or already in team
 		const teamLeads = await User.find({
 			_id: { $in: teamLeadIds },
 			role: { $ne: "ADMIN" },
 			team: { $exists: false },
 		});
+
+		console.log("Ile leadów teraz: ", teamLeads.length);
 
 		if (teamLeads.length !== teamLeadIds.length) {
 			return res.status(400).json({
@@ -34,26 +36,25 @@ exports.createTeam = async (req, res) => {
 			});
 		}
 
-		let members = [];
+		// let members = [];
 
-		if (memberIds && memberIds.length) {
-			members = await User.find({
-				_id: { $in: memberIds },
-				role: { $ne: "ADMIN" },
-				team: { $exists: false },
-			});
-			if (members.length !== memberIds.length) {
-				return res
-					.status(400)
-					.json({ message: "One or more members are invalid." });
-			}
-		}
+		// if (memberIds && memberIds.length) {
+		// 	members = await User.find({
+		// 		_id: { $in: memberIds },
+		// 		role: { $ne: "ADMIN" },
+		// 		team: { $exists: false },
+		// 	});
+		// 	if (members.length !== memberIds.length) {
+		// 		return res
+		// 			.status(400)
+		// 			.json({ message: "One or more members are invalid." });
+		// 	}
+		// }
 
 		// Create a new team
 		const newTeam = new Team({
 			name,
-			teamLeads: teamLeads.map((lead) => lead._id),
-			members: members.map((member) => member._id),
+			teamLeaders: teamLeads.map((lead) => lead._id),
 		});
 
 		// Automatically create a calendar for the team
@@ -70,13 +71,7 @@ exports.createTeam = async (req, res) => {
 			});
 		});
 
-		const memberUpdates = members.map((member) => {
-			return User.findByIdAndUpdate(member._id, {
-				$set: { team: savedTeam._id },
-			});
-		});
-
-		await Promise.all([...teamLeadUpdates, ...memberUpdates]);
+		await Promise.all(teamLeadUpdates);
 
 		res.status(200).json({
 			success: true,
@@ -96,7 +91,10 @@ exports.getAllTeams = async (req, res) => {
 		// Fetch all teams from the database
 		const teams = await Team.find()
 			.sort({ createdAt: -1 })
-			.populate("teamLeaders members", "firstName lastName profilePic");
+			.populate(
+				"teamLeaders members",
+				"firstName lastName profilePic createdAt"
+			);
 
 		res.status(200).json({
 			success: true,
@@ -115,7 +113,7 @@ exports.getTeamById = async (req, res) => {
 		const teamId = req.params.id;
 		const team = await Team.findById(teamId).populate(
 			"teamLeaders members",
-			"firstName lastName email role"
+			"firstName lastName email role profilePic createdAt"
 		);
 
 		if (!team) {
@@ -199,44 +197,70 @@ exports.deleteTeam = async (req, res) => {
 	}
 };
 
-// Add a user to the team
-exports.addMemberToTeam = async (req, res) => {
+exports.addUsersToTeam = async (req, res) => {
 	try {
+		const { userIds, roleType } = req.body; // roleType can be 'member' or 'leader'
 		const teamId = req.params.id; // Extract team ID from params
-		const { searchKey } = req.body; // Extract search key from request body
 
-		// Search for the user by name or email
-		const user = await User.findOne({
-			$or: [
-				{ firstName: searchKey },
-				{ lastName: searchKey },
-				{ email: searchKey },
-			],
-		});
-		if (!user) {
-			return res.status(404).json({ message: "User not found" });
-		}
-
-		// Add the user to the team's members
-		const updatedTeam = await Team.findByIdAndUpdate(
-			teamId,
-			{ $addToSet: { members: user._id } }, // $addToSet ensures uniqueness
-			{ new: true }
-		);
-
-		if (!updatedTeam) {
+		// Check if the team exists
+		const team = await Team.findById(teamId);
+		if (!team) {
 			return res.status(404).json({ message: "Team not found" });
 		}
 
-		await User.findByIdAndUpdate(
-			user._id,
-			{ $addToSet: { teams: updatedTeam._id } },
-			{ new: true }
+		// Fetch users based on the provided IDs
+		const users = await User.find({ _id: { $in: userIds } });
+
+		// Check if all user IDs exist
+		if (users.length !== userIds.length) {
+			return res.status(400).json({ message: "Some user IDs do not exist" });
+		}
+
+		// Filter out invalid users (admins or already in a team)
+		const invalidUsers = users.filter(
+			(user) => user.role === "ADMIN" || user.team
 		);
+		if (invalidUsers.length > 0) {
+			const invalidUserDetails = invalidUsers.map((user) => {
+				return { id: user._id, role: user.role, alreadyInTeam: !!user.team };
+			});
+			return res.status(400).json({
+				message:
+					"Niektórzy użytkownicy nie spełniają wymagań: 1. Użytkownik nie może być adminem 2. Użytkownik nie może należeć do innego zespołu 3. Użytownik musi istnieć w systemie",
+				invalidUsers: invalidUserDetails,
+			});
+		}
+
+		// Update team based on role type
+		let teamUpdate = {};
+		if (roleType === "TEAM LEADER") {
+			teamUpdate = { $addToSet: { teamLeaders: { $each: userIds } } };
+		} else {
+			teamUpdate = { $addToSet: { members: { $each: userIds } } };
+		}
+
+		// Update team in the database
+		const updatedTeam = await Team.findByIdAndUpdate(teamId, teamUpdate, {
+			new: true,
+		});
+
+		// Update users' team and role
+		for (let userId of userIds) {
+			if (roleType === "TEAM LEADER") {
+				await User.findByIdAndUpdate(userId, {
+					team: teamId,
+					role: "TEAM LEADER",
+				});
+			} else {
+				await User.findByIdAndUpdate(userId, {
+					team: teamId,
+				});
+			}
+		}
 
 		res.status(200).json({
 			success: true,
-			message: "Dodano członka zespołu",
+			message: "Users added successfully to the team",
 			data: updatedTeam,
 		});
 	} catch (error) {
@@ -245,35 +269,140 @@ exports.addMemberToTeam = async (req, res) => {
 	}
 };
 
+// Add a user to the team
+// exports.addUsersToTeam = async (req, res) => {
+// 	try {
+// 		const { userIds, roleType } = req.body; // roleType can be 'member' or 'leader'
+// 		const teamId = req.params.id; // Extract team ID from params
+// 		console.log("Id userów do dodania", userIds);
+
+// 		const team = await Team.findById(teamId);
+// 		if (!team) {
+// 			return res.status(404).json({ message: "Team not found" });
+// 		}
+
+// 		console.log(team);
+
+// 		// const users = await User.find({ _id: { $in: userIds } });
+
+// 		// if (users.length !== userIds.length) {
+// 		// 	return res.status(400).json({ message: "Some user IDs do not exist" });
+// 		// }
+
+// 		// const invalidUsers = users.filter(
+// 		// 	(user) => user.role === "ADMIN" || user.team
+// 		// );
+// 		// if (invalidUsers.length > 0) {
+// 		// 	const invalidUserDetails = invalidUsers.map((user) => {
+// 		// 		return { id: user._id, role: user.role, alreadyInTeam: !!user.team };
+// 		// 	});
+// 		// 	return res.status(400).json({
+// 		// 		message: "Some users are invalid, already in a team, or are admins",
+// 		// 		invalidUsers: invalidUserDetails,
+// 		// 	});
+// 		// }
+
+// 		// Filter out invalid user IDs or users already in a team
+// 		const validUsers = await User.find({
+// 			_id: { $in: userIds },
+// 			role: { $ne: "ADMIN" },
+// 			team: { $exists: false },
+// 		});
+
+// 		console.log("Valid users", validUsers);
+
+// 		if (validUsers.length !== userIds.length) {
+// 			return res.status(400).json({
+// 				message: "Some users are invalid, already in a team, or are admins",
+// 			});
+// 		}
+
+// 		// Perform updates based on roleType
+// 		if (roleType === "TEAM LEADER") {
+// 			team.teamLeaders.push(...validUsers.map((user) => user._id));
+// 			await User.updateMany(
+// 				{ _id: { $in: validUsers.map((user) => user._id) } },
+// 				{ team: teamId, role: "TEAM LEADER" }
+// 			);
+// 		} else {
+// 			team.members.push(...validUsers.map((user) => user._id));
+// 			await User.updateMany(
+// 				{ _id: { $in: validUsers.map((user) => user._id) } },
+// 				{ team: teamId }
+// 			);
+// 		}
+
+// 		await team.save();
+
+// 		res.status(200).json({
+// 			success: true,
+// 			message: "Dodano członka zespołu",
+// 			// data: team,
+// 		});
+// 	} catch (error) {
+// 		console.error(error);
+// 		res.status(500).json({ message: "Internal Server Error" });
+// 	}
+// };
+
 // Remove user from a team
-exports.removeMemberFromTeam = async (req, res) => {
+exports.removeUserFromTeam = async (req, res) => {
 	try {
 		const teamId = req.params.id;
-		const userId = req.body.userId; // Extract user ID from request body
+		console.log(teamId);
+		const userId = req.body.memberId; // Extract user ID from request body
+		console.log(userId);
 
-		// Remove the user from the team's members
-		const updatedTeam = await Team.findByIdAndUpdate(
-			teamId,
-			{ $pull: { members: userId } },
-			{ new: true }
-		);
+		const team = await Team.findById(teamId)
+			.populate({
+				path: "projects",
+				populate: { path: "members" },
+			})
+			.populate("teamLeaders", "role");
 
-		if (!updatedTeam) {
-			return res.status(404).json({ message: "Team not found" });
+		if (!team) {
+			return res.status(404).json({ message: "Nie znaleziono zespołu" });
 		}
 
-		//Tu by trzeba było dodać jakieś sprawdzanie czy np uzytkownik nie jest przypadkiem przypisany do jakichs projektow zadan itp
-
-		await User.findByIdAndUpdate(
-			userId,
-			{ $pull: { teams: teamId } }, // Remove the team ID from the user's teams array
-			{ new: true }
+		// Check if user is part of any project within the team
+		const isUserInProject = team.projects.some((project) =>
+			project.members.some((member) => member._id.toString() === userId)
 		);
+
+		if (isUserInProject) {
+			return res.status(400).json({
+				message:
+					"Użytkownik jest przypisany do projektu. Zadbaj o to, żeby został z niego usunięty.",
+			});
+		}
+
+		// Ensure at least one team leader remains
+		if (
+			team.teamLeaders.some((leader) => leader._id.toString() === userId) &&
+			team.teamLeaders.length <= 1
+		) {
+			return res
+				.status(400)
+				.json({ message: "Zespół musi posiadać przynajmniej jednego lidera." });
+		}
+
+		// Remove the user from the team
+		await Team.findByIdAndUpdate(teamId, {
+			$pull: { members: userId, teamLeaders: userId },
+		});
+
+		// Change role back to EMPLOYEE if removed user is a team leader
+		if (team.teamLeaders.some((leader) => leader._id.toString() === userId)) {
+			await User.findByIdAndUpdate(userId, {
+				$set: { role: "EMPLOYEE", team: null },
+			});
+		} else {
+			await User.findByIdAndUpdate(userId, { $set: { team: null } });
+		}
 
 		res.status(200).json({
 			success: true,
 			message: "Usunięto członka zespołu ",
-			data: updatedTeam,
 		});
 	} catch (error) {
 		console.error(error);
@@ -289,7 +418,7 @@ exports.getMembers = async (req, res) => {
 		// Fetch the team and populate the members
 		const team = await Team.findById(teamId).populate(
 			"members",
-			"firstName lastName email"
+			"firstName lastName email createdAt"
 		);
 
 		if (!team) {

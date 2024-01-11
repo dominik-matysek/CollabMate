@@ -20,6 +20,10 @@ const userService = {
 		return apiRequest("GET", `${userAPI}/authenticate`);
 	},
 
+	setInitialProfilePic: async (userId, profilePicData) => {
+		return apiRequest("PATCH", `${userAPI}/${userId}`, profilePicData);
+	},
+
 	updateProfile: async (userId, updatedProfile) => {
 		return apiRequest("PATCH", `${userAPI}/profile/${userId}`, updatedProfile);
 	},
@@ -34,6 +38,10 @@ const userService = {
 
 	getUserInfo: async (userId) => {
 		return apiRequest("GET", `${userAPI}/profile/${userId}`);
+	},
+
+	removeUserFromSystem: async (userId) => {
+		return apiRequest("DELETE", `${userAPI}/${userId}`);
 	},
 };
 

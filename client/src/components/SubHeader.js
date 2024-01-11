@@ -8,8 +8,8 @@ const itemsWhenInTeams = [
 		current: true,
 	},
 	{
-		name: "Moje zespoły",
-		link: "/teams",
+		name: "Mój zespoły",
+		link: "/teams/:teamId", // to by mogło wyglądać tak, że w zakładce wszystkie zespoły pojawiają się wszystkie zespoły jakie istnieją w systemie, a w zakładce mój zespół pojawia się tylko zespół jeden do którego dany user zalogowany należy - jest card w postaci takiej jak pojedynczy zespół ma w zakładce wszystkie zespoły
 		current: false,
 		forRole: ["TEAM LEADER", "EMPLOYEE"],
 	},
@@ -24,22 +24,22 @@ const itemsWhenInTeams = [
 const itemsWhenInTeam = [
 	{
 		name: "Zespół",
-		link: "/team/:teamId",
+		link: "/teams/:teamId",
 		current: true,
 	},
 	{
 		name: "Projekty",
-		link: "/team/:teamId/projects",
+		link: "/teams/:teamId/projects",
 		current: false,
 	},
 	{
 		name: "Członkowie",
-		link: "/team/:teamId/members",
+		link: "/teams/:teamId/get-members",
 		current: false,
 	},
 	{
 		name: "Kalendarz",
-		link: "/team/:teamId/calendar",
+		link: "/teams/:teamId/calendar",
 		current: false,
 	},
 ];
@@ -47,7 +47,7 @@ const itemsWhenInTeam = [
 const itemsWhenInProject = [
 	{
 		name: "Projekt",
-		link: "/team/:teamId/project/:projectId",
+		link: "/teams/:teamId/projects/:projectId",
 		current: true,
 	},
 	{
@@ -64,7 +64,6 @@ const itemsWhenInProject = [
 
 function SubHeader({ user }) {
 	const navigate = useNavigate();
-	console.log("Użytkownik: ", user);
 
 	const shouldShowItem = (item) => {
 		if (!item.forRole) {

@@ -15,6 +15,7 @@ import SingleCard from "../../components/SingleCard";
 import { FaPencilAlt } from "react-icons/fa";
 import { Navigate } from "react-router-dom";
 import StatsCard from "../../components/StatsCard";
+import UserList from "../../components/UserList";
 
 // PAMIĘTAJ DEBILU - JEŻELI REQUEST CI NIE DZIAŁA, TO PROBLEM NA 99% JEST W BACKENDZIE - SPRAWDZAJ LOGI W KONSOLI VSCODE A NIE WEBOWEJ JEŚLI CHODZI O BACKEND, SPRAWDZAJ CZY W REQUESCIE SIĘ ZNAJDUJĄ RZECZY KTÓRE SĄ OCZEKIWANE W KONTROLERZE ITP
 
@@ -22,10 +23,9 @@ function Teams() {
 	const { user } = useSelector((state) => state.users);
 	const [teams, setTeams] = useState([]);
 	const [users, setUsers] = useState([]);
-	const [selectedTeam, setSelectedTeam] = useState(null);
-	const [show, setShow] = useState(false);
 	const dispatch = useDispatch();
-	const navigate = useNavigate();
+	const [statsData, setStatsData] = useState([]);
+	const [leaders, setLeaders] = useState([]);
 
 	const fetchUsers = async () => {
 		try {
@@ -34,6 +34,10 @@ function Teams() {
 			const response = await userService.getAllUsers(); // Adjust with your actual API call
 			if (response.success) {
 				setUsers(response.data);
+				const leadersData = response.data.filter(
+					(user) => user.role === "TEAM LEADER"
+				);
+				setLeaders(leadersData);
 			} else {
 				throw new Error(response.error);
 			}
@@ -47,11 +51,8 @@ function Teams() {
 	const fetchTeams = async () => {
 		try {
 			dispatch(SetLoading(true));
-			console.log(`Jestem w fetchu`);
 			const response = await teamService.getAllTeams(); // Replace with your actual API endpoint
-			console.log("PO");
 			if (response.success) {
-				console.log(`Oto zespoły ${response.data}`);
 				setTeams(response.data);
 			} else {
 				throw new Error(response.error);
@@ -63,73 +64,54 @@ function Teams() {
 		}
 	};
 
-	const onDelete = async (id) => {
-		try {
-			dispatch(SetLoading(true));
-			const response = await teamService.deleteTeam(id);
-			if (response.success) {
-				message.success(response.message);
-				fetchTeams();
-			} else {
-				throw new Error(response.error);
-			}
-			dispatch(SetLoading(false));
-		} catch (error) {
-			dispatch(SetLoading(false));
-			message.error(error.message);
-		}
+	// const onDelete = async (id) => {
+	// 	try {
+	// 		dispatch(SetLoading(true));
+	// 		const response = await teamService.deleteTeam(id);
+	// 		if (response.success) {
+	// 			message.success(response.message);
+	// 			fetchTeams();
+	// 		} else {
+	// 			throw new Error(response.error);
+	// 		}
+	// 		dispatch(SetLoading(false));
+	// 	} catch (error) {
+	// 		dispatch(SetLoading(false));
+	// 		message.error(error.message);
+	// 	}
+	// };
+
+	const countStats = () => {
+		const teamCount = teams.length;
+
+		const leaderCount = users.filter(
+			(user) => user.role === "TEAM LEADER"
+		).length;
+		const employeeCount = users.filter(
+			(user) => user.role === "EMPLOYEE"
+		).length;
+		const adminCount = users.filter((user) => user.role === "ADMIN").length;
+
+		setStatsData([
+			{ title: "Zespoły", value: teamCount },
+			{ title: "Liderzy", value: leaderCount },
+			{ title: "Pracownicy", value: employeeCount },
+			{ title: "Administratorzy", value: adminCount },
+		]);
 	};
 
-	const statsData = [
-		{ title: "Teams", value: 9 },
-		{ title: "Leads", value: 12 },
-		{ title: "Employees", value: 87 },
-		{ title: "Admins", value: 25 },
-	];
+	const reloadAllData = async () => {
+		await fetchTeams();
+		await fetchUsers();
+	};
 
 	useEffect(() => {
-		fetchTeams();
-		fetchUsers();
+		reloadAllData();
 	}, []);
 
-	// const columns = [
-	// 	{
-	// 		title: "Nazwa",
-	// 		dataIndex: "name",
-	// 	},
-	// 	{
-	// 		title: "Lider zespołu",
-	// 		dataIndex: "teamLead",
-	// 		render: (teamLead) => `${teamLead.firstName} ${teamLead.lastName}`,
-	// 	},
-	// 	{
-	// 		title: "Liczba członków",
-	// 		dataIndex: "members",
-	// 		render: (members) => members.length,
-	// 	},
-	// 	{
-	// 		title: "Data utworzenia",
-	// 		dataIndex: "createdAt",
-	// 		render: (text) => getSimpleDateFormat(text),
-	// 	},
-	// 	{
-	// 		title: "Akcja",
-	// 		dataIndex: "action",
-	// 		render: (text, record) => {
-	// 			return (
-	// 				<div className="flex gap-4">
-	// 					<IoTrashBin onClick={() => onDelete(record._id)} />
-	// 					<FaPencilAlt
-	// 						onClick={() => {
-	// 							setSelectedTeam(record);
-	// 							setShow(true);
-	// 						}}
-	// 					/>
-	// 				</div>
-	// 			);
-	// 		},
-	// 	},
-	// ];
+	useEffect(() => {
+		countStats();
+	}, [teams, users]); // Depend on teams and users
 
 	return (
 		<>
@@ -146,7 +128,8 @@ function Teams() {
 				</Col>
 				{user.role === "ADMIN" && (
 					<Col span={8}>
-						<TeamForm users={users} />
+						<TeamForm users={users} reloadData={reloadAllData} />
+						<UserList users={leaders} title="Liderzy" />
 					</Col>
 				)}
 			</Row>

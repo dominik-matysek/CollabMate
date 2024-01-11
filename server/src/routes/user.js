@@ -5,7 +5,10 @@ const { verifyToken, verifyAdmin } = require("../middlewares/auth");
 const { cloudinary, storage } = require("../config/cloudinary");
 const multer = require("multer");
 
-const upload = multer({ storage: storage });
+const upload = multer({
+	storage: storage,
+	limits: { fileSize: 1024 * 1024 * 5 },
+});
 
 router.post("/register", users.register);
 
@@ -15,6 +18,8 @@ router.post("/logout", users.logout);
 
 router.get("/authenticate", verifyToken, users.authenticate);
 
+router.patch("/:userId", users.setInitialProfilePic);
+
 router.patch("/profile/:id", verifyToken, users.updateProfile);
 
 router.post("/upload-image", upload.single("file"), users.uploadImage);
@@ -22,5 +27,7 @@ router.post("/upload-image", upload.single("file"), users.uploadImage);
 router.get("/", verifyToken, users.getAllUsers);
 
 router.get("/profile/:id", verifyToken, users.getUserInfo);
+
+router.delete("/:id", verifyToken, verifyAdmin, users.removeUserFromSystem);
 
 module.exports = router;

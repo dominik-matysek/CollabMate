@@ -69,7 +69,11 @@ const Navbar = ({ user, toggleSidebar, handleLogout }) => {
 				{/* Profile picture */}
 				<Dropdown overlay={menu} trigger={["click"]}>
 					<a onClick={(e) => e.preventDefault()}>
-						<Avatar icon={<UserOutlined />} className="cursor-pointer" />
+						{user.profilePic ? (
+							<Avatar src={user.profilePic} className="cursor-pointer" />
+						) : (
+							<Avatar icon={<UserOutlined />} className="cursor-pointer" />
+						)}
 					</a>
 				</Dropdown>
 			</div>

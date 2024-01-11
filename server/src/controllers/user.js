@@ -11,11 +11,12 @@ const {
 exports.register = async (req, res) => {
 	try {
 		console.log("user registration request received");
+
 		//Validate a user before store the user inputs
-		const { error } = registerValidation.validate(req.body);
-		if (error)
-			return res.status(400).json({ message: error.details[0].message });
-		console.log(req.body);
+		// const { error } = registerValidation.validate(req.body);
+		// if (error)
+		// 	return res.status(400).json({ message: error.details[0].message });
+
 		const { firstName, lastName, email, password } = req.body;
 
 		// Check if the email is already registered
@@ -23,8 +24,6 @@ exports.register = async (req, res) => {
 		if (existingUser) {
 			return res.status(400).json({ message: "User already exists!" });
 		}
-		console.log(req.file);
-		const profileImageUrl = req.file ? req.file.path : null;
 
 		// Hash the password
 		const salt = await bcrypt.genSalt(10);
@@ -36,15 +35,18 @@ exports.register = async (req, res) => {
 			lastName,
 			email,
 			password: hashedPassword,
-			profilePic: profileImageUrl,
 		});
+
+		console.log(newUser);
 
 		// Save the user to the database
 		await newUser.save();
 
-		res
-			.status(201)
-			.json({ success: true, message: "User registered successfully" });
+		res.status(201).json({
+			success: true,
+			message: "User registered successfully",
+			userId: newUser._id,
+		});
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ success: false, message: "Internal Server Error" });
@@ -121,7 +123,14 @@ exports.authenticate = async (req, res) => {
 
 		const user = await User.findById(req.userId)
 			.select("-password")
-			.populate("team", "name");
+			.populate({
+				path: "team",
+				select: "name teamLeaders members createdAt",
+				populate: {
+					path: "members",
+					select: "profilePic",
+				},
+			});
 
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
@@ -134,20 +143,47 @@ exports.authenticate = async (req, res) => {
 	}
 };
 
+exports.setInitialProfilePic = async (req, res) => {
+	try {
+		const userId = req.params.userId;
+		const { profilePic } = req.body;
+
+		// Optional: Add additional checks to ensure the userId is from a recently created user
+
+		// Update only the profilePic field
+		const updatedUser = await User.findByIdAndUpdate(
+			userId,
+			{ profilePic: profilePic },
+			{ new: true }
+		).select("-password");
+
+		if (!updatedUser) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		res.status(200).json({
+			success: true,
+			message: "Profile picture updated successfully",
+			data: updatedUser,
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
 // Update user profile
 exports.updateProfile = async (req, res) => {
 	try {
-		console.log("user edit request received");
-		console.log(req.params);
 		const userId = req.params.id;
 		const { firstName, lastName, email, profilePic } = req.body;
 
-		const updatedValues = {
-			firstName: firstName,
-			lastName: lastName,
-			email: email,
-			profilePic: profilePic,
-		};
+		const updatedValues = {};
+
+		if (firstName) updatedValues.firstName = firstName;
+		if (lastName) updatedValues.lastName = lastName;
+		if (email) updatedValues.email = email;
+		if (profilePic) updatedValues.profilePic = profilePic;
 
 		//Validate user input
 		// const { error } = updateValidation.validate(updatedValues);
@@ -165,8 +201,8 @@ exports.updateProfile = async (req, res) => {
 		}
 
 		const updatedUser = await User.findByIdAndUpdate(
-			{ _id: userId },
-			updatedValues,
+			userId,
+			{ $set: updatedValues },
 			{ new: true }
 		).select("-password");
 
@@ -202,7 +238,7 @@ exports.getAllUsers = async (req, res) => {
 	try {
 		const users = await User.find()
 			.select("-password")
-			.populate("team", "name");
+			.populate("team", "name createdAt");
 		res.status(200).json({ success: true, data: users });
 	} catch (error) {
 		console.error(error);
@@ -217,11 +253,53 @@ exports.getUserInfo = async (req, res) => {
 		console.log(userId);
 		const user = await User.findById(userId)
 			.select("-password")
-			.populate("team", "name");
+			.populate({
+				path: "team",
+				select: "name teamLeaders members createdAt",
+				populate: {
+					path: "members",
+					select: "profilePic",
+				},
+			});
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
 		}
 		res.status(200).json({ success: true, data: user });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+exports.removeUserFromSystem = async (req, res) => {
+	try {
+		const userId = req.params.id;
+
+		console.log("User do usunięcia: ", userId);
+
+		if (req.userId === userId) {
+			return res
+				.status(403)
+				.json({ message: "Nie możesz usunąć własnego konta!" });
+		}
+
+		const user = await User.findById(userId);
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+		if (user.team) {
+			return res.status(404).json({
+				message:
+					"Członek zespołu nie może zostać usunięty z serwisu! Najpierw usuń użytkownika z zespołu!",
+			});
+		}
+
+		// Remove the user from the database
+		await User.findByIdAndRemove(userId);
+
+		res.json({
+			message: "User has been successfully removed from the system.",
+		});
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: "Internal Server Error" });

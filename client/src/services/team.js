@@ -23,15 +23,15 @@ const teamService = {
 		return apiRequest("DELETE", `${teamAPI}/teams/${teamId}`);
 	},
 
-	addMemberToTeam: async (teamId, memberData) => {
+	addUsersToTeam: async (teamId, memberData) => {
 		return apiRequest(
 			"PATCH",
-			`${teamAPI}/teams/${teamId}/add-member`,
+			`${teamAPI}/teams/${teamId}/add-members`,
 			memberData
 		);
 	},
 
-	removeMemberFromTeam: async (teamId, memberId) => {
+	removeUserFromTeam: async (teamId, memberId) => {
 		return apiRequest("PATCH", `${teamAPI}/teams/${teamId}/remove-member`, {
 			memberId,
 		});

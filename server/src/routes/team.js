@@ -14,17 +14,17 @@ router.patch("/teams/:id", verifyToken, verifyAdmin, teams.editTeam);
 router.delete("/teams/:id", verifyToken, verifyAdmin, teams.deleteTeam);
 
 router.patch(
-	"/teams/:id/add-member",
+	"/teams/:id/add-members",
 	verifyToken,
 	verifyAdmin,
-	teams.addMemberToTeam
+	teams.addUsersToTeam
 );
 
 router.patch(
 	"/teams/:id/remove-member",
 	verifyToken,
 	verifyAdmin,
-	teams.removeMemberFromTeam
+	teams.removeUserFromTeam
 );
 
 router.get("/teams/:id/get-members", verifyToken, teams.getMembers);

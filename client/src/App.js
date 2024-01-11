@@ -37,7 +37,7 @@ function App() {
 						}
 					/>
 					<Route
-						path="/team/:teamId"
+						path="/teams/:teamId"
 						element={
 							<ProtectedPage>
 								<Team />
@@ -52,14 +52,14 @@ function App() {
 							</ProtectedPage>
 						}
 					/>
-					<Route
+					{/* <Route
 						path="/tasks"
 						element={
 							<ProtectedPage>
 								<Tasks />
 							</ProtectedPage>
 						}
-					/>
+					/> */}
 					<Route
 						path="/users"
 						element={
