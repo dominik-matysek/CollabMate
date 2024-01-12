@@ -40,6 +40,10 @@ const teamService = {
 	getMembers: async (teamId) => {
 		return apiRequest("GET", `${teamAPI}/teams/${teamId}/get-members`);
 	},
+
+	getLeaders: async (teamId) => {
+		return apiRequest("GET", `${teamAPI}/teams/${teamId}/get-leaders`);
+	},
 };
 
 export default teamService;

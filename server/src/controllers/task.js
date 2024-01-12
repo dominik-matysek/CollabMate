@@ -13,15 +13,10 @@ exports.createTask = async (req, res) => {
 		const { name, description, priority, dueDate, members } = req.body;
 		const projectId = req.params.projectId;
 
-		// Check if the user creating the task is a member of the project
-		const project = await Project.findOne({
-			_id: projectId,
-			members: req.user._id,
-		});
+		// Retrieve the specified project
+		const project = await Project.findById(projectId);
 		if (!project) {
-			return res
-				.status(403)
-				.json({ error: "User is not a member of the project" });
+			return res.status(404).json({ message: "Project not found" });
 		}
 
 		// Create a new task
@@ -30,8 +25,9 @@ exports.createTask = async (req, res) => {
 			description,
 			priority,
 			dueDate,
-			members: [req.user._id],
+			members: members || [],
 			createdBy: req.user._id,
+			project: projectId,
 		});
 
 		await task.save();
@@ -59,7 +55,7 @@ exports.getAllTasks = async (req, res) => {
 		// Retrieve all tasks of a project
 		const project = await Project.findById(projectId).populate(
 			"tasks",
-			"createdAt"
+			"name status members createdAt"
 		);
 
 		if (!project) {
@@ -80,7 +76,7 @@ exports.getAllTasks = async (req, res) => {
 // Controller to get a task by ID
 exports.getTaskById = async (req, res) => {
 	try {
-		const taskId = req.params.id;
+		const taskId = req.params.taskId;
 
 		// Retrieve a task by ID and populate the 'members' and 'comments' fields
 		const task = await Task.findById(taskId)
@@ -91,20 +87,9 @@ exports.getTaskById = async (req, res) => {
 			return res.status(404).json({ error: "Task not found" });
 		}
 
-		// Check if the user accessing the task is a member of the project
-		const project = await Project.findOne({
-			tasks: taskId,
-			members: req.user._id,
-		});
-		if (!project) {
-			return res
-				.status(403)
-				.json({ error: "User is not a member of the project" });
-		}
-
 		res.status(200).json({
 			success: true,
-			message: "Stworzono zadanie",
+			message: "Pobrano zadanie",
 			data: task,
 		});
 	} catch (error) {
@@ -116,7 +101,7 @@ exports.getTaskById = async (req, res) => {
 // Controller to edit a task
 exports.editTask = async (req, res) => {
 	try {
-		const taskId = req.params.id;
+		const taskId = req.params.taskId;
 		const { name, description, priority, dueDate, members } = req.body;
 
 		const { error } = taskValidation.validate(name, description, dueDate);
@@ -134,26 +119,6 @@ exports.editTask = async (req, res) => {
 			return res.status(404).json({ error: "Task not found" });
 		}
 
-		// Check if the user editing the task is a member of the project
-		const project = await Project.findOne({
-			tasks: taskId,
-			members: req.user._id,
-		});
-
-		if (!project) {
-			return res
-				.status(403)
-				.json({ error: "User is not a member of the project" });
-		}
-
-		// Check if the user is one of the members of the task
-		const taskMembers = task.members.map((assignee) => assignee.toString());
-		if (!taskMembers.includes(req.user._id.toString())) {
-			return res
-				.status(403)
-				.json({ error: "User is not an assignee of the task" });
-		}
-
 		res.status(200).json({
 			success: true,
 			message: "Edytowano zadanie",
@@ -168,33 +133,23 @@ exports.editTask = async (req, res) => {
 // Controller to delete a task
 exports.deleteTask = async (req, res) => {
 	try {
-		const taskId = req.params.id;
+		const taskId = req.params.taskId;
 
-		// Delete a task by ID
-		const deletedTask = await Task.findByIdAndDelete(taskId);
-
-		if (!deletedTask) {
+		// Retrieve the task with its project ID
+		const task = await Task.findById(taskId).select("project");
+		if (!task) {
 			return res.status(404).json({ error: "Task not found" });
 		}
 
+		// Delete the task
+		await Task.findByIdAndDelete(taskId);
+
 		// Remove the task from the project's tasks array
-		const project = await Project.findByIdAndUpdate(
-			req.project._id,
+		await Project.findByIdAndUpdate(
+			task.project,
 			{ $pull: { tasks: taskId } },
 			{ new: true }
 		);
-
-		if (!project) {
-			return res.status(404).json({ error: "Project not found" });
-		}
-
-		// Check if the user is one of the members of the task
-		const taskMembers = task.members.map((assignee) => assignee.toString());
-		if (!taskMembers.includes(req.user._id.toString())) {
-			return res
-				.status(403)
-				.json({ error: "User is not an assignee of the task" });
-		}
 
 		res
 			.status(200)
@@ -208,24 +163,13 @@ exports.deleteTask = async (req, res) => {
 // Controller to get comments of a task
 exports.getComments = async (req, res) => {
 	try {
-		const taskId = req.params.id;
+		const taskId = req.params.taskId;
 
 		// Retrieve comments of a task
 		const task = await Task.findById(taskId).populate("comments");
 
 		if (!task) {
 			return res.status(404).json({ error: "Task not found" });
-		}
-
-		// Check if the user accessing the comments is a member of the project
-		const project = await Project.findOne({
-			tasks: taskId,
-			members: req.user._id,
-		});
-		if (!project) {
-			return res
-				.status(403)
-				.json({ error: "User is not a member of the project" });
 		}
 
 		res.status(200).json({

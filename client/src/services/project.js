@@ -11,7 +11,7 @@ const projectService = {
 		);
 	},
 
-	getAllProjects: async (teamId, projectId) => {
+	getAllProjects: async (teamId) => {
 		return apiRequest("GET", `${projectAPI}/teams/${teamId}/projects`);
 	},
 
@@ -31,17 +31,19 @@ const projectService = {
 		return apiRequest("DELETE", `${projectAPI}/projects/${projectId}`);
 	},
 
-	addMemberToProject: async (projectId, userId) => {
+	addMemberToProject: async (projectId, memberData) => {
 		return apiRequest(
 			"PATCH",
-			`${projectAPI}/projects/${projectId}/add-member/${userId}`
+			`${projectAPI}/projects/${projectId}/add-member`,
+			memberData
 		);
 	},
 
-	removeMemberFromProject: async (projectId, userId) => {
+	removeMemberFromProject: async (projectId, memberId) => {
 		return apiRequest(
 			"PATCH",
-			`${projectAPI}/projects/${projectId}/remove-member/${userId}`
+			`${projectAPI}/projects/${projectId}/remove-member`,
+			{ memberId }
 		);
 	},
 };

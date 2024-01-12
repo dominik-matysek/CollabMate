@@ -1,32 +1,41 @@
 const express = require("express");
 const router = express.Router();
 const calendars = require("../controllers/calendar");
-const { verifyToken } = require("../middlewares/auth");
+const { verifyToken, checkTeamAccess } = require("../middlewares/auth");
 
 router.post(
-	"/:teamId/calendar/create-event",
+	"teams/:teamId/calendar/create-event",
 	verifyToken,
+	checkTeamAccess,
 	calendars.createEvent
-); //CZŁONEK ZESPOŁU
-
-router.get("/:teamId/calendar/events", verifyToken, calendars.getAllEvents); //CZŁONEK ZESPOŁU
+);
 
 router.get(
-	"/:teamId/calendar/events/:eventId",
+	"teams/:teamId/calendar/events",
 	verifyToken,
+	checkTeamAccess,
+	calendars.getAllEvents
+);
+
+router.get(
+	"teams/:teamId/calendar/events/:eventId",
+	verifyToken,
+	checkTeamAccess,
 	calendars.getEventById
-); //CZŁONEK ZESPOŁU
+);
 
 router.patch(
-	"/:teamId/calendar/events/:eventId",
+	"teams/:teamId/calendar/events/:eventId",
 	verifyToken,
+	checkTeamAccess,
 	calendars.editEvent
-); //CZŁONEK ZESPOŁU
+);
 
 router.delete(
-	"/:teamId/calendar/events/:eventId",
+	"teams/:teamId/calendar/events/:eventId",
 	verifyToken,
+	checkTeamAccess,
 	calendars.deleteEvent
-); //CZŁONEK ZESPOŁU
+);
 
 module.exports = router;

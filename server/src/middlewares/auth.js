@@ -85,40 +85,172 @@ const verifyLeader = async (req, res, next) => {
 	}
 };
 
-const checkAccessToTeam = async (req, res, next) => {
-	const userId = req.userId;
-	const teamId = req.params.teamId;
+const checkTeamAccess = async (req, res, next) => {
+	try {
+		const userId = req.userId;
+		if (!userId) {
+			return res.status(401).json({ message: "Unauthorized access." });
+		}
+		let teamId = req.params.teamId || req.body.teamId;
 
-	const team = await Team.findById(teamId);
-	if (!team) {
-		return res.status(404).send("Team not found");
+		console.log(teamId);
+
+		if (!teamId) {
+			const projectId = req.params.projectId || req.body.projectId;
+			const taskId = req.params.taskId || req.body.taskId;
+
+			if (projectId) {
+				const project = await Project.findById(projectId);
+				if (!project) {
+					return res.status(404).json({ message: "Project not found." });
+				}
+				teamId = project.team;
+			} else if (taskId) {
+				const task = await Task.findById(taskId);
+				if (!task) {
+					return res.status(404).json({ message: "Task not found." });
+				}
+				// Assuming task model has a 'project' field referencing the project it belongs to
+				const project = await Project.findById(task.project);
+				if (!project) {
+					return res
+						.status(404)
+						.json({ message: "Project not found for the task." });
+				}
+				teamId = project.team;
+			} else {
+				return res
+					.status(400)
+					.json({ message: "Insufficient data to determine team membership." });
+			}
+		}
+
+		const team = await Team.findById(teamId);
+		if (!team) {
+			return res.status(404).json({ message: "Team not found." });
+		}
+
+		if (team.members.includes(userId) || team.teamLeaders.includes(userId)) {
+			return next();
+		}
+
+		return res
+			.status(403)
+			.json({ message: "Access denied. Not a team member." });
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: "Internal Server Error." });
 	}
-
-	if (team.members.includes(userId) || team.teamLeaders.includes(userId)) {
-		return next();
-	}
-
-	return res.status(403).send("Access denied");
 };
 
-const checkAccessToTeamByProject = async (req, res, next) => {
-	const userId = req.userId;
-	const projectId = req.params.projectId;
+const checkProjectAccess = async (req, res, next) => {
+	try {
+		const userId = req.userId;
+		if (!userId) {
+			return res.status(401).json({ message: "Unauthorized access." });
+		}
+		const projectId = req.params.projectId || req.body.projectId;
 
-	const team = await Team.findOne({ projects: projectId });
-	if (!team) {
-		return res.status(404).send("Associated team not found");
+		if (!projectId) {
+			return res.status(400).json({ message: "Project ID is required." });
+		}
+
+		const project = await Project.findById(projectId);
+		if (!project) {
+			return res.status(404).json({ message: "Project not found." });
+		}
+
+		// Check if the user is a member of the project or a team leader of the team owning the project
+		const team = await Team.findById(project.team);
+		if (
+			team &&
+			(project.members.includes(userId) || team.teamLeaders.includes(userId))
+		) {
+			return next();
+		}
+
+		return res
+			.status(403)
+			.json({ message: "Access denied. Not a project member." });
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: "Internal Server Error." });
+	}
+};
+
+const checkTaskAccess = async (req, res, next) => {
+	try {
+		const userId = req.userId;
+		if (!userId) {
+			return res.status(401).json({ message: "Unauthorized access." });
+		}
+		const taskId = req.params.taskId || req.body.taskId;
+
+		if (!taskId) {
+			return res.status(400).json({ message: "Task ID is required." });
+		}
+
+		const task = await Task.findById(taskId);
+		if (!task) {
+			return res.status(404).json({ message: "Task not found." });
+		}
+
+		// Check if the user is a member of the task or a team leader of the team associated with the project of the task
+		const project = await Project.findById(task.project);
+		if (!project) {
+			return res
+				.status(404)
+				.json({ message: "Project not found for the task." });
+		}
+
+		const team = await Team.findById(project.team);
+		if (
+			team &&
+			(task.members.includes(userId) || team.teamLeaders.includes(userId))
+		) {
+			return next();
+		}
+
+		return res
+			.status(403)
+			.json({ message: "Access denied. Not a task member." });
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: "Internal Server Error." });
+	}
+};
+
+const verifyAdminOrTeamMember = async (req, res, next) => {
+	if (!req.userId) {
+		return res.status(401).json({ message: "Unauthorized access." });
 	}
 
-	if (team.members.includes(userId) || team.teamLeaders.includes(userId)) {
-		return next();
-	}
+	try {
+		const user = await User.findById(req.userId);
+		if (!user) {
+			return res.status(404).json({ message: "User not found." });
+		}
 
-	return res.status(403).send("Access denied");
+		if (user.role === "ADMIN") {
+			// User is an admin, proceed to the next middleware
+			return next();
+		}
+
+		// If not admin, check team access
+		await checkTeamAccess(req, res, next);
+	} catch (error) {
+		// Handle any errors that occur during the process
+		console.error("Error in verifyAdminOrTeamMember:", error);
+		res.status(500).json({ message: "Internal Server Error." });
+	}
 };
 
 module.exports = {
 	verifyToken,
 	verifyAdmin,
 	verifyLeader,
+	checkTeamAccess,
+	checkProjectAccess,
+	checkTaskAccess,
+	verifyAdminOrTeamMember,
 };

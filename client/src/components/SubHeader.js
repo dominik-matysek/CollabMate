@@ -5,18 +5,15 @@ const itemsWhenInTeams = [
 	{
 		name: "Wszystkie zespoły",
 		link: "/teams",
-		current: true,
 	},
 	{
 		name: "Mój zespoły",
 		link: "/teams/:teamId", // to by mogło wyglądać tak, że w zakładce wszystkie zespoły pojawiają się wszystkie zespoły jakie istnieją w systemie, a w zakładce mój zespół pojawia się tylko zespół jeden do którego dany user zalogowany należy - jest card w postaci takiej jak pojedynczy zespół ma w zakładce wszystkie zespoły
-		current: false,
 		forRole: ["TEAM LEADER", "EMPLOYEE"],
 	},
 	{
 		name: "Wszyscy użytkownicy",
 		link: "/users",
-		current: false,
 		forRole: "ADMIN",
 	},
 ];
@@ -25,22 +22,14 @@ const itemsWhenInTeam = [
 	{
 		name: "Zespół",
 		link: "/teams/:teamId",
-		current: true,
 	},
 	{
 		name: "Projekty",
 		link: "/teams/:teamId/projects",
-		current: false,
-	},
-	{
-		name: "Członkowie", // nie wiem jeszcze czy członków to sie opyla robić w ogóle
-		link: "/teams/:teamId/get-members",
-		current: false,
 	},
 	{
 		name: "Kalendarz",
 		link: "/teams/:teamId/calendar",
-		current: false,
 	},
 ];
 
@@ -48,83 +37,97 @@ const itemsWhenInProject = [
 	{
 		name: "Projekt",
 		link: "/projects/:projectId",
-		current: true,
 	},
 	{
 		name: "Zadania",
 		link: "/projects/:projectId/tasks",
-		current: false,
-	},
-	{
-		name: "Członkowie", // nie wiem jeszcze czy członków to sie opyla robić w ogóle
-		link: "/team/:teamId/project/:projectId/members",
-		current: false,
 	},
 ];
 
 const itemWhenInTask = [
 	{
 		name: "Zadanie",
-		link: "/tasks/:id",
-		current: true,
+		link: "/tasks/:taskId",
 	},
 ];
 
 function SubHeader({ user }) {
 	const location = useLocation();
 	const navigate = useNavigate();
+	const [currentItem, setCurrentItem] = useState("Wszystkie zespoły"); // Default current item
 
 	const pathSegments = location.pathname.split("/").filter((seg) => seg);
 
+	// Function to replace params in the link with actual IDs
+	const getResolvedLink = (link) => {
+		return link
+			.replace(":teamId", user.team?._id)
+			.replace(":projectId", pathSegments[1])
+			.replace(":taskId", pathSegments[1]);
+	};
+
+	const shouldShowItem = (item) => {
+		// If forRole is not defined, everyone can see it
+		if (!item.forRole) {
+			return true;
+		}
+
+		// If forRole is an array, check if the user's role is included in the array
+		if (Array.isArray(item.forRole)) {
+			return item.forRole.includes(user.role);
+		}
+
+		// If forRole is a string, check if it matches the user's role
+		return item.forRole === user.role;
+	};
+
 	// Function to determine navigation items based on the current URL
 	const getNavigationItems = () => {
-		const isAdmin = user.role === "ADMIN";
+		let items = [];
 
-		const items = [];
+		if (user.role !== "ADMIN" && pathSegments.length > 1) {
+			const isTeamPage = pathSegments[0] === "teams";
+			const isProjectPage = pathSegments[0] === "projects";
+			const isTaskPage = pathSegments[0] === "tasks";
 
-		if (isAdmin) {
-			items = itemsWhenInTeams;
-		} else {
-			if (pathSegments[0] === "teams" && pathSegments.length > 1) {
-				const teamId = pathSegments[1];
-				if (user.team && user.team._id === teamId) {
-					items = itemsWhenInTeam;
-				}
-			} else if (pathSegments[0] === "projects" && pathSegments.length > 1) {
-				const projectId = pathSegments[1];
+			if (isTeamPage && user.team?._id === pathSegments[1]) {
+				items = itemsWhenInTeam;
+			} else if (isProjectPage) {
 				items = itemsWhenInProject;
-			} else if (pathSegments[0] === "tasks" && pathSegments.length > 1) {
-				const taskId = pathSegments[1];
+			} else if (isTaskPage) {
 				items = itemWhenInTask;
 			} else {
 				items = itemsWhenInTeams;
 			}
+		} else {
+			items = itemsWhenInTeams;
 		}
 
-		return items;
+		const visibleItems = items.filter(shouldShowItem);
+
+		return visibleItems;
 	};
 
-	const shouldShowItem = (item) => {
-		if (!item.forRole) {
-			return true;
-		}
-		if (Array.isArray(item.forRole)) {
-			return item.forRole.includes(user.role);
-		}
-		return item.forRole === user.role;
+	const handleItemClick = (itemName, link) => {
+		setCurrentItem(itemName);
+		navigate(getResolvedLink(link));
 	};
 
-	// Filter items based on the user's role
-	// const visibleItems = itemsWhenInTeams.filter(shouldShowItem);
+	// Function to check if the item is the current item
+	const isCurrentItem = (itemName) => {
+		return currentItem === itemName;
+	};
 
 	return (
 		<div className="py-6 shadow-md" style={{ backgroundColor: "#138585" }}>
 			<div className="flex justify-center space-x-10">
-				{itemsWhenInTeams.map((item, index) => (
+				{getNavigationItems().map((item, index) => (
 					<span
-						className="cursor-pointer text-white"
 						key={index}
-						onClick={() => navigate(item.link)}
+						className={`cursor-pointer text-white ${
+							isCurrentItem(item.name) ? "bg-blue-500" : ""
+						}`}
+						onClick={() => handleItemClick(item.name, item.link)}
 					>
 						{item.name}
 					</span>

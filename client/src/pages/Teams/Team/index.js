@@ -7,7 +7,6 @@ import { SetLoading } from "../../../redux/loadersSlice";
 import { getSimpleDateFormat } from "../../../utils/helpers";
 import { SetNotifications, SetUser } from "../../../redux/usersSlice";
 import { IoTrashBin } from "react-icons/io5";
-import Sidebar from "../../../components/Sidebar";
 import { UserOutlined } from "@ant-design/icons";
 import AddUserForm from "./AddUserForm";
 

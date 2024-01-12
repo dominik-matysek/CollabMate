@@ -1,16 +1,27 @@
 const express = require("express");
 const router = express.Router();
 const comments = require("../controllers/comment");
-const { verifyToken } = require("../middlewares/auth");
+const { verifyToken, checkTaskAccess } = require("../middlewares/auth");
 
-router.post("/:taskId/comments/create", verifyToken, comments.createComment); // CZŁONKE ZESPOŁU + CZŁONEK PROJEKTU + CZŁONEK ZADANIA / NO CHYBA ŻE TEAM LEADER
+router.post(
+	"/:taskId/comments/create",
+	verifyToken,
+	checkTaskAccess,
+	comments.createComment
+);
 
-router.patch("/:taskId/comments/:commentId", verifyToken, comments.editComment); // CZŁONKE ZESPOŁU + CZŁONEK PROJEKTU + CZŁONEK ZADANIA / NO CHYBA ŻE TEAM LEADER
+router.patch(
+	"/:taskId/comments/:commentId",
+	verifyToken,
+	checkTaskAccess,
+	comments.editComment
+);
 
 router.delete(
-	"/:taskId/comments/commentId",
+	"/:taskId/comments/:commentId",
 	verifyToken,
+	checkTaskAccess,
 	comments.deleteComment
-); // CZŁONKE ZESPOŁU + CZŁONEK PROJEKTU + CZŁONEK ZADANIA / NO CHYBA ŻE TEAM LEADER
+);
 
 module.exports = router;

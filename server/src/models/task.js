@@ -47,6 +47,13 @@ const taskSchema = new Schema(
 				ref: "Comment",
 			},
 		],
+		project: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: "Project",
+				required: true,
+			},
+		],
 	},
 	{ timestamps: true }
 );

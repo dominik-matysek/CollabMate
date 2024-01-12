@@ -20,14 +20,14 @@ router.get("/authenticate", verifyToken, users.authenticate);
 
 router.patch("/:userId", users.setInitialProfilePic);
 
-router.patch("/profile/:id", verifyToken, users.updateProfile);
+router.patch("/profile/:userId", verifyToken, users.updateProfile);
 
 router.post("/upload-image", upload.single("file"), users.uploadImage);
 
 router.get("/", verifyToken, users.getAllUsers);
 
-router.get("/profile/:id", verifyToken, users.getUserInfo);
+router.get("/profile/:userId", verifyToken, users.getUserInfo);
 
-router.delete("/:id", verifyToken, verifyAdmin, users.removeUserFromSystem);
+router.delete("/:userId", verifyToken, verifyAdmin, users.removeUserFromSystem);
 
 module.exports = router;

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Button, message, Table, Col, Row } from "antd";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Divider from "../../components/Divider";
 import teamService from "../../services/team";
-import userService from "../../services/user";
+import projectService from "../../services/project";
 import { useSelector, useDispatch } from "react-redux";
 import { SetLoading, SetButtonLoading } from "../../redux/loadersSlice";
 import { getAntdFormInputRules } from "../../utils/helpers";
@@ -11,29 +11,28 @@ import { getSimpleDateFormat } from "../../utils/helpers";
 import { SetNotifications, SetUser } from "../../redux/usersSlice";
 import { IoTrashBin } from "react-icons/io5";
 import ProjectForm from "./ProjectForm";
-import SingleCard from "../../components/SingleCard";
+import SingleProjectCard from "../../components/SingleProjectCard";
 import { FaPencilAlt } from "react-icons/fa";
 import { Navigate } from "react-router-dom";
 import StatsCard from "../../components/StatsCard";
-
-// PAMIĘTAJ DEBILU - JEŻELI REQUEST CI NIE DZIAŁA, TO PROBLEM NA 99% JEST W BACKENDZIE - SPRAWDZAJ LOGI W KONSOLI VSCODE A NIE WEBOWEJ JEŚLI CHODZI O BACKEND, SPRAWDZAJ CZY W REQUESCIE SIĘ ZNAJDUJĄ RZECZY KTÓRE SĄ OCZEKIWANE W KONTROLERZE ITP
+import UserList from "../../components/UserList";
 
 function Projects() {
 	const { user } = useSelector((state) => state.users);
+	const { teamId } = useParams();
 	const [projects, setProjects] = useState([]);
-	const [users, setUsers] = useState([]);
-	const [selectedProject, setSelectedProject] = useState(null);
-	const [show, setShow] = useState(false);
+	const [members, setMembers] = useState([]);
 	const dispatch = useDispatch();
-	const navigate = useNavigate();
+	const [statsData, setStatsData] = useState([]);
+	const [leaders, setLeaders] = useState([]);
 
-	const fetchUsers = async () => {
+	const fetchTeamMembers = async () => {
 		try {
 			// Add loading state handling if needed
 			dispatch(SetLoading(true));
-			const response = await userService.getAllUsers(); // Adjust with your actual API call
+			const response = await teamService.getMembers(teamId); // Adjust with your actual API call
 			if (response.success) {
-				setUsers(response.data);
+				setMembers(response.data);
 			} else {
 				throw new Error(response.error);
 			}
@@ -44,24 +43,38 @@ function Projects() {
 		}
 	};
 
-	// const fetchTeams = async () => {
-	// 	try {
-	// 		dispatch(SetLoading(true));
-	// 		console.log(`Jestem w fetchu`);
-	// 		const response = await teamService.getAllTeams(); // Replace with your actual API endpoint
-	// 		console.log("PO");
-	// 		if (response.success) {
-	// 			console.log(`Oto zespoły ${response.data}`);
-	// 			setTeams(response.data);
-	// 		} else {
-	// 			throw new Error(response.error);
-	// 		}
-	// 		dispatch(SetLoading(false));
-	// 	} catch (error) {
-	// 		dispatch(SetLoading(false));
-	// 		message.error(error.message);
-	// 	}
-	// };
+	const fetchTeamLeaders = async () => {
+		try {
+			// Add loading state handling if needed
+			dispatch(SetLoading(true));
+			const response = await teamService.getLeaders(teamId); // Adjust with your actual API call
+			if (response.success) {
+				setLeaders(response.data);
+			} else {
+				throw new Error(response.error);
+			}
+			dispatch(SetLoading(false));
+		} catch (error) {
+			dispatch(SetLoading(false));
+			message.error(error.message);
+		}
+	};
+
+	const fetchProjects = async () => {
+		try {
+			dispatch(SetLoading(true));
+			const response = await projectService.getAllProjects(teamId); // Replace with your actual API endpoint
+			if (response.success) {
+				setProjects(response.data);
+			} else {
+				throw new Error(response.error);
+			}
+			dispatch(SetLoading(false));
+		} catch (error) {
+			dispatch(SetLoading(false));
+			message.error(error.message);
+		}
+	};
 
 	// const onDelete = async (id) => {
 	// 	try {
@@ -80,16 +93,31 @@ function Projects() {
 	// 	}
 	// };
 
-	const statsData = [
-		{ title: "Projekty", value: 25 },
-		{ title: "Leaderzy", value: 12 },
-		{ title: "Pracownicy", value: 87 },
-	];
+	const countStats = () => {
+		const projectCount = projects.length;
+		const leaderCount = leaders.length;
+		const employeeCount = members.length;
+
+		setStatsData([
+			{ title: "Projekty", value: projectCount },
+			{ title: "Liderzy", value: leaderCount },
+			{ title: "Pracownicy", value: employeeCount },
+		]);
+	};
+
+	const reloadAllData = async () => {
+		await fetchTeamMembers();
+		await fetchTeamLeaders();
+		await fetchProjects();
+	};
 
 	useEffect(() => {
-		// fetchTeams();
-		// fetchUsers();
+		reloadAllData();
 	}, []);
+
+	useEffect(() => {
+		countStats();
+	}, [projects, members, leaders]); // Depend on teams and users
 
 	return (
 		<>
@@ -98,17 +126,23 @@ function Projects() {
 					<div className="pr-3 pb-9">
 						<StatsCard stats={statsData} />
 					</div>
-					{projects.map(([project], index) => (
+					{projects.map((project, index) => (
 						<div className="pr-3 pb-3">
-							<SingleCard key={index} item={project} />
+							<SingleProjectCard key={index} item={project} />
 						</div>
 					))}
 				</Col>
-				{user.role === "ADMIN" && (
-					<Col span={8}>
-						<ProjectForm users={users} />
-					</Col>
-				)}
+
+				<Col span={8}>
+					{user.role === "TEAM LEADER" && (
+						<ProjectForm
+							teamId={teamId}
+							users={members}
+							reloadData={reloadAllData}
+						/>
+					)}
+					<UserList users={[...leaders, ...members]} title="Członkowie" />
+				</Col>
 			</Row>
 		</>
 		// <div>

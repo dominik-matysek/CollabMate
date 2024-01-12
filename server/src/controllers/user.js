@@ -175,7 +175,7 @@ exports.setInitialProfilePic = async (req, res) => {
 // Update user profile
 exports.updateProfile = async (req, res) => {
 	try {
-		const userId = req.params.id;
+		const userId = req.params.userId;
 		const { firstName, lastName, email, profilePic } = req.body;
 
 		const updatedValues = {};
@@ -249,7 +249,7 @@ exports.getAllUsers = async (req, res) => {
 exports.getUserInfo = async (req, res) => {
 	try {
 		console.log("Kontroler getUserInfo");
-		const userId = req.params.id;
+		const userId = req.params.userId;
 		console.log(userId);
 		const user = await User.findById(userId)
 			.select("-password")
@@ -273,7 +273,7 @@ exports.getUserInfo = async (req, res) => {
 
 exports.removeUserFromSystem = async (req, res) => {
 	try {
-		const userId = req.params.id;
+		const userId = req.params.userId;
 
 		console.log("User do usunięcia: ", userId);
 

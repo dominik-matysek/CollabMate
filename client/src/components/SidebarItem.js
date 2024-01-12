@@ -11,33 +11,24 @@ import { DownOutlined, UpOutlined } from "@ant-design/icons";
 import SidebarSubItem from "./SidebarSubItem";
 
 function SidebarItem({ name, link, icon, notifications, underItems }) {
-	const [collapsed, setCollapsed] = useState(true);
 	const navigate = useNavigate();
-
-	const toggleCollapse = () => {
-		if (underItems) {
-			setCollapsed(!collapsed);
-		}
-	};
 
 	return (
 		<div>
 			<div
 				className="flex items-center justify-between p-2 text-lg text-gray-600 hover:bg-gray-200 cursor-pointer"
-				onClick={toggleCollapse}
 				style={{ marginBottom: "10px" }}
+				onClick={() => navigate(link)}
 			>
 				<div className="flex items-center">
-					<div className="flex items-center justify-center w-10">
+					<div className="flex items-center justify-center w-10 m-4">
 						{name === "Powiadomienia" && notifications > 0 ? (
 							<Badge count={notifications}>{icon}</Badge>
 						) : (
 							icon
 						)}
 					</div>
-					<span className="ml-2" onClick={() => navigate(link)}>
-						{name}
-					</span>
+					<span className="ml-2">{name}</span>
 				</div>
 				{/* {underItems && (collapsed ? <DownOutlined /> : <UpOutlined />)} */}
 			</div>

@@ -126,12 +126,13 @@ function Teams() {
 						</div>
 					))}
 				</Col>
-				{user.role === "ADMIN" && (
-					<Col span={8}>
+
+				<Col span={8}>
+					{user.role === "ADMIN" && (
 						<TeamForm users={users} reloadData={reloadAllData} />
-						<UserList users={leaders} title="Liderzy" />
-					</Col>
-				)}
+					)}
+					<UserList users={leaders} title="Liderzy" />
+				</Col>
 			</Row>
 		</>
 		// <div>

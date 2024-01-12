@@ -22,7 +22,11 @@ const UserListItem = ({ user }) => {
 				</span>
 				<div className="flex items-center text-green-500 text-sm">
 					<TeamOutlined className="mr-1" />
-					<span>{user.team?.name}</span>
+					{user.team ? (
+						<span>{user.team?.name}</span>
+					) : (
+						<span>{user.role}</span>
+					)}
 				</div>
 			</div>
 		</div>

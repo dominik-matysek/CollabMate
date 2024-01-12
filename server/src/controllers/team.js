@@ -110,7 +110,7 @@ exports.getAllTeams = async (req, res) => {
 // Get a team by ID
 exports.getTeamById = async (req, res) => {
 	try {
-		const teamId = req.params.id;
+		const teamId = req.params.teamId;
 		const team = await Team.findById(teamId).populate(
 			"teamLeaders members",
 			"firstName lastName email role profilePic createdAt"
@@ -134,7 +134,7 @@ exports.getTeamById = async (req, res) => {
 // Edit a team by ID
 exports.editTeam = async (req, res) => {
 	try {
-		const teamId = req.params.id;
+		const teamId = req.params.teamId;
 
 		// const { error } = teamEditValidation.validate(req.body);
 		// if (error)
@@ -163,7 +163,7 @@ exports.editTeam = async (req, res) => {
 // Delete a team by Id
 exports.deleteTeam = async (req, res) => {
 	try {
-		const teamId = req.params.id;
+		const teamId = req.params.teamId;
 
 		const team = await Team.findById(teamId);
 
@@ -200,7 +200,7 @@ exports.deleteTeam = async (req, res) => {
 exports.addUsersToTeam = async (req, res) => {
 	try {
 		const { userIds, roleType } = req.body; // roleType can be 'member' or 'leader'
-		const teamId = req.params.id; // Extract team ID from params
+		const teamId = req.params.teamId; // Extract team ID from params
 
 		// Check if the team exists
 		const team = await Team.findById(teamId);
@@ -348,7 +348,7 @@ exports.addUsersToTeam = async (req, res) => {
 // Remove user from a team
 exports.removeUserFromTeam = async (req, res) => {
 	try {
-		const teamId = req.params.id;
+		const teamId = req.params.teamId;
 		console.log(teamId);
 		const userId = req.body.memberId; // Extract user ID from request body
 		console.log(userId);
@@ -413,12 +413,12 @@ exports.removeUserFromTeam = async (req, res) => {
 // Get members of a team
 exports.getMembers = async (req, res) => {
 	try {
-		const teamId = req.params.id;
+		const teamId = req.params.teamId;
 
 		// Fetch the team and populate the members
 		const team = await Team.findById(teamId).populate(
 			"members",
-			"firstName lastName email createdAt"
+			"firstName lastName email createdAt role profilePic"
 		);
 
 		if (!team) {
@@ -429,6 +429,32 @@ exports.getMembers = async (req, res) => {
 			success: true,
 			message: "Pobrano członków",
 			data: team.members,
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+// Get leaders of a team
+exports.getLeaders = async (req, res) => {
+	try {
+		const teamId = req.params.teamId;
+
+		// Fetch the team and populate the members
+		const team = await Team.findById(teamId).populate(
+			"teamLeaders",
+			"firstName lastName email createdAt profilePic role"
+		);
+
+		if (!team) {
+			return res.status(404).json({ message: "Team not found" });
+		}
+
+		res.status(200).json({
+			success: true,
+			message: "Pobrano liderów",
+			data: team.teamLeaders,
 		});
 	} catch (error) {
 		console.error(error);

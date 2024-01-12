@@ -11,6 +11,7 @@ import Spinner from "./components/Spinner";
 import Team from "./pages/Teams/Team";
 import Test from "./pages/Test";
 import Projects from "./pages/Projects";
+import Project from "./pages/Projects/Project";
 import Tasks from "./pages/Tasks";
 function App() {
 	const { loading } = useSelector((state) => state.loaders);
@@ -19,7 +20,6 @@ function App() {
 			{loading && <Spinner />}
 			<BrowserRouter>
 				<Routes>
-					{/* <Route path="/" element={<Home />} /> */}
 					<Route
 						path="/"
 						element={
@@ -44,14 +44,38 @@ function App() {
 							</ProtectedPage>
 						}
 					/>
-					<Route
-						path="/projects"
+					<Route // W takim roucie jak ten, powineineś sprawdzać czy user należy do teamId - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
+						path="/teams/:teamId/projects"
 						element={
 							<ProtectedPage>
 								<Projects />
 							</ProtectedPage>
 						}
 					/>
+					{/* <Route // W takim roucie jak ten, powineineś sprawdzać czy user należy do teamId - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
+						path="/teams/:teamId/calendar"
+						element={
+							<ProtectedPage>
+								<Calendar />
+							</ProtectedPage>
+						}
+					/> */}
+					<Route // W takim roucie jak ten, powineineś sprawdzać czy user należy do teamId - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
+						path="/projects/:projectId"
+						element={
+							<ProtectedPage>
+								<Project />
+							</ProtectedPage>
+						}
+					/>
+					{/* <Route
+						path="/projects"
+						element={
+							<ProtectedPage>
+								<Projects />
+							</ProtectedPage>
+						}
+					/> */}
 					{/* <Route
 						path="/tasks"
 						element={
@@ -60,7 +84,7 @@ function App() {
 							</ProtectedPage>
 						}
 					/> */}
-					<Route
+					<Route // W takim roucie jak ten, powineineś sprawdzać czy user jest adminem - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
 						path="/users"
 						element={
 							<ProtectedPage>
@@ -78,8 +102,8 @@ function App() {
 					/>
 					<Route path="/login" element={<Login />} />
 					<Route path="/register" element={<Register />} />
-
 					<Route path="/test" element={<Test />} />
+					{/* <Route path="*" element={<NotFound />} /> */}
 				</Routes>
 			</BrowserRouter>
 		</div>

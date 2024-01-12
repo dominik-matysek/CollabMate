@@ -6,26 +6,26 @@ const calendarService = {
 	createEvent: async (teamId, eventData) => {
 		return apiRequest(
 			"POST",
-			`${calendarAPI}/${teamId}/calendar/create-event`,
+			`${calendarAPI}/teams/${teamId}/calendar/create-event`,
 			eventData
 		);
 	},
 
 	getAllEvents: async (teamId) => {
-		return apiRequest("GET", `${calendarAPI}/${teamId}/calendar/events`);
+		return apiRequest("GET", `${calendarAPI}/teams/${teamId}/calendar/events`);
 	},
 
 	getEventById: async (teamId, eventId) => {
 		return apiRequest(
 			"GET",
-			`${calendarAPI}/${teamId}/calendar/events/${eventId}`
+			`${calendarAPI}/teams/${teamId}/calendar/events/${eventId}`
 		);
 	},
 
 	editEvent: async (teamId, eventId, updatedData) => {
 		return apiRequest(
 			"PATCH",
-			`${calendarAPI}/${teamId}/calendar/events/${eventId}`,
+			`${calendarAPI}/teams/${teamId}/calendar/events/${eventId}`,
 			updatedData
 		);
 	},
@@ -33,7 +33,7 @@ const calendarService = {
 	deleteEvent: async (teamId, eventId) => {
 		return apiRequest(
 			"DELETE",
-			`${calendarAPI}/${teamId}/calendar/events/${eventId}`
+			`${calendarAPI}/teams/${teamId}/calendar/events/${eventId}`
 		);
 	},
 };

@@ -7,9 +7,17 @@ router.post("/create", verifyToken, notifications.createNotification);
 
 router.get("/", verifyToken, notifications.getNotifications);
 
-router.patch("/:id/mark-as-read", verifyToken, notifications.readNotifications);
+router.patch(
+	"/:notificationId/mark-as-read",
+	verifyToken,
+	notifications.readNotifications
+);
 
-router.delete("/:id", verifyToken, notifications.deleteNotification);
+router.delete(
+	"/:notificationId",
+	verifyToken,
+	notifications.deleteNotification
+);
 
 router.delete("/", verifyToken, notifications.deleteAllNotifications);
 

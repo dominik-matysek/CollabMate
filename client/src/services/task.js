@@ -11,7 +11,7 @@ const taskService = {
 		);
 	},
 
-	getAllTasks: async (projectId, taskId) => {
+	getAllTasks: async (projectId) => {
 		return apiRequest("GET", `${taskAPI}/projects/${projectId}/tasks`);
 	},
 

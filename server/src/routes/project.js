@@ -2,40 +2,64 @@ const express = require("express");
 const router = express.Router();
 const projects = require("../controllers/project");
 const verify = require("../middlewares/auth");
-const { verifyToken, verifyLeader } = require("../middlewares/auth");
+const {
+	verifyToken,
+	verifyLeader,
+	checkTeamAccess,
+} = require("../middlewares/auth");
 
 router.post(
 	"/teams/:teamId/projects/create",
 	verifyToken,
 	verifyLeader,
+	checkTeamAccess,
 	projects.createProject
-); //CZŁONEK ZESPOŁU
+);
 
-router.get("/teams/:teamId/projects", verifyToken, projects.getAllProjects); //CZŁONEK ZESPOŁU
+router.get(
+	"/teams/:teamId/projects",
+	verifyToken,
+	checkTeamAccess,
+	projects.getAllProjects
+);
 
-router.get("/projects/:id", verifyToken, projects.getProjectById); //CZŁONEK ZESPOŁU
+router.get(
+	"/projects/:projectId",
+	verifyToken,
+	checkTeamAccess,
+	projects.getProjectById
+);
 
-router.patch("/projects/:id", verifyToken, verifyLeader, projects.editProject); //CZŁONEK ZESPOŁU
+router.patch(
+	"/projects/:projectId",
+	verifyToken,
+	verifyLeader,
+	checkTeamAccess,
+	projects.editProject
+);
 
 router.delete(
-	"/projects/:id",
+	"/projects/:projectId",
 	verifyToken,
 	verifyLeader,
+	checkTeamAccess,
 	projects.deleteProject
-); //CZŁONEK ZESPOŁU
+);
 
 router.patch(
-	"/projects/:id/add-member",
+	"/projects/:projectId/add-member",
 	verifyToken,
 	verifyLeader,
+	checkTeamAccess,
 	projects.addMemberToProject
-); //CZŁONEK ZESPOŁU
+);
 
 router.patch(
-	"/projects/:id/remove-member",
+	"/projects/:projectId/remove-member",
 	verifyToken,
 	verifyLeader,
+	checkTeamAccess,
 	projects.removeMemberFromProject
-); //CZŁONEK ZESPOŁU
+);
 
 module.exports = router;

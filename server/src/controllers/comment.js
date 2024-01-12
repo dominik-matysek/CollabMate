@@ -51,7 +51,7 @@ exports.createComment = async (req, res) => {
 // Controller to delete a comment
 exports.deleteComment = async (req, res) => {
 	try {
-		const commentId = req.params.id;
+		const commentId = req.params.commentId;
 
 		// Find the comment by ID
 		const comment = await Comment.findById(commentId);
@@ -98,7 +98,7 @@ exports.deleteComment = async (req, res) => {
 // Controller to edit a comment
 exports.editComment = async (req, res) => {
 	try {
-		const commentId = req.params.id;
+		const commentId = req.params.commentId;
 		const { content } = req.body;
 
 		const { error } = commentValidation.validate(content);
