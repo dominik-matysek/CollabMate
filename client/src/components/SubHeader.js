@@ -33,7 +33,7 @@ const itemsWhenInTeam = [
 		current: false,
 	},
 	{
-		name: "Członkowie",
+		name: "Członkowie", // nie wiem jeszcze czy członków to sie opyla robić w ogóle
 		link: "/teams/:teamId/get-members",
 		current: false,
 	},
@@ -47,23 +47,62 @@ const itemsWhenInTeam = [
 const itemsWhenInProject = [
 	{
 		name: "Projekt",
-		link: "/teams/:teamId/projects/:projectId",
+		link: "/projects/:projectId",
 		current: true,
 	},
 	{
 		name: "Zadania",
-		link: "/team/:teamId/project/:projectId/tasks",
+		link: "/projects/:projectId/tasks",
 		current: false,
 	},
 	{
-		name: "Członkowie",
+		name: "Członkowie", // nie wiem jeszcze czy członków to sie opyla robić w ogóle
 		link: "/team/:teamId/project/:projectId/members",
 		current: false,
 	},
 ];
 
+const itemWhenInTask = [
+	{
+		name: "Zadanie",
+		link: "/tasks/:id",
+		current: true,
+	},
+];
+
 function SubHeader({ user }) {
+	const location = useLocation();
 	const navigate = useNavigate();
+
+	const pathSegments = location.pathname.split("/").filter((seg) => seg);
+
+	// Function to determine navigation items based on the current URL
+	const getNavigationItems = () => {
+		const isAdmin = user.role === "ADMIN";
+
+		const items = [];
+
+		if (isAdmin) {
+			items = itemsWhenInTeams;
+		} else {
+			if (pathSegments[0] === "teams" && pathSegments.length > 1) {
+				const teamId = pathSegments[1];
+				if (user.team && user.team._id === teamId) {
+					items = itemsWhenInTeam;
+				}
+			} else if (pathSegments[0] === "projects" && pathSegments.length > 1) {
+				const projectId = pathSegments[1];
+				items = itemsWhenInProject;
+			} else if (pathSegments[0] === "tasks" && pathSegments.length > 1) {
+				const taskId = pathSegments[1];
+				items = itemWhenInTask;
+			} else {
+				items = itemsWhenInTeams;
+			}
+		}
+
+		return items;
+	};
 
 	const shouldShowItem = (item) => {
 		if (!item.forRole) {
@@ -76,12 +115,12 @@ function SubHeader({ user }) {
 	};
 
 	// Filter items based on the user's role
-	const visibleItems = itemsWhenInTeams.filter(shouldShowItem);
+	// const visibleItems = itemsWhenInTeams.filter(shouldShowItem);
 
 	return (
 		<div className="py-6 shadow-md" style={{ backgroundColor: "#138585" }}>
 			<div className="flex justify-center space-x-10">
-				{visibleItems.map((item, index) => (
+				{itemsWhenInTeams.map((item, index) => (
 					<span
 						className="cursor-pointer text-white"
 						key={index}

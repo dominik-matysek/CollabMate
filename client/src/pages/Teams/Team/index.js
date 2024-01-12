@@ -57,7 +57,6 @@ function Team() {
 
 	const closeAddUserModal = () => {
 		setIsModalVisible(false);
-		reloadData();
 	};
 
 	useEffect(() => {

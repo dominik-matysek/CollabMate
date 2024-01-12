@@ -125,7 +125,7 @@ exports.authenticate = async (req, res) => {
 			.select("-password")
 			.populate({
 				path: "team",
-				select: "name teamLeaders members createdAt",
+				select: "name teamLeaders members projects createdAt",
 				populate: {
 					path: "members",
 					select: "profilePic",
@@ -295,9 +295,10 @@ exports.removeUserFromSystem = async (req, res) => {
 		}
 
 		// Remove the user from the database
-		await User.findByIdAndRemove(userId);
+		await User.findByIdAndDelete(userId);
 
-		res.json({
+		res.status(200).json({
+			success: true,
 			message: "User has been successfully removed from the system.",
 		});
 	} catch (error) {

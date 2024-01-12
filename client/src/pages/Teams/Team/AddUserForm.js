@@ -48,6 +48,7 @@ const AddUserForm = ({ teamId, isVisible, onClose, reloadData }) => {
 			if (response.success) {
 				message.success("User(s) added successfully");
 				onClose();
+				reloadData();
 			} else {
 				throw new Error(response.error);
 			}
