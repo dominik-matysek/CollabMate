@@ -30,14 +30,6 @@ router.get(
 	projects.getProjectById
 );
 
-router.patch(
-	"/projects/:projectId",
-	verifyToken,
-	verifyLeader,
-	checkTeamAccess,
-	projects.editProject
-);
-
 router.delete(
 	"/projects/:projectId",
 	verifyToken,
@@ -51,7 +43,7 @@ router.patch(
 	verifyToken,
 	verifyLeader,
 	checkTeamAccess,
-	projects.addMemberToProject
+	projects.addMembersToProject
 );
 
 router.patch(
@@ -60,6 +52,22 @@ router.patch(
 	verifyLeader,
 	checkTeamAccess,
 	projects.removeMemberFromProject
+);
+
+router.patch(
+	"/projects/:projectId/change-status",
+	verifyToken,
+	verifyLeader,
+	checkTeamAccess,
+	projects.changeProjectStatus
+);
+
+router.patch(
+	"/projects/:projectId/change-description",
+	verifyToken,
+	verifyLeader,
+	checkTeamAccess,
+	projects.changeProjectDescription
 );
 
 module.exports = router;

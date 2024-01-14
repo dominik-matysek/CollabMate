@@ -11,7 +11,7 @@ const projectSchema = new Schema(
 			type: String,
 			required: true,
 			minlength: 5,
-			maxlength: 50,
+			maxlength: 250,
 		},
 		status: {
 			type: String,
@@ -32,13 +32,11 @@ const projectSchema = new Schema(
 				required: true,
 			},
 		],
-		team: [
-			{
-				type: Schema.Types.ObjectId,
-				ref: "Team",
-				required: true,
-			},
-		],
+		team: {
+			type: Schema.Types.ObjectId,
+			ref: "Team",
+			required: true,
+		},
 	},
 	{
 		timestamps: true,

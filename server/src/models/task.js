@@ -34,10 +34,12 @@ const taskSchema = new Schema(
 			required: true,
 		},
 		// niżej może nie tylko zdjęcia, ale też jakieś pliki typu pdf czy coś przydatne do tasków
-		attachments: {
-			type: Array,
-			default: [],
-		},
+		attachments: [
+			{
+				type: Array,
+				default: [],
+			},
+		],
 		dueDate: {
 			type: Date,
 		},
@@ -47,13 +49,11 @@ const taskSchema = new Schema(
 				ref: "Comment",
 			},
 		],
-		project: [
-			{
-				type: Schema.Types.ObjectId,
-				ref: "Project",
-				required: true,
-			},
-		],
+		project: {
+			type: Schema.Types.ObjectId,
+			ref: "Project",
+			required: true,
+		},
 	},
 	{ timestamps: true }
 );

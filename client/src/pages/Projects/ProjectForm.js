@@ -69,8 +69,8 @@ function ProjectForm({ teamId, reloadData, users }) {
 						...getAntdFormInputRules,
 						{
 							min: 5,
-							max: 50,
-							message: "Opis musi być dłuższy niż 5 i krótszy niż 50 znaków",
+							max: 250,
+							message: "Opis musi być dłuższy niż 5 i krótszy niż 250 znaków",
 						},
 					]}
 				>

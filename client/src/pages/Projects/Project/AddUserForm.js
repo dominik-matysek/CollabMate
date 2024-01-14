@@ -7,7 +7,7 @@ import { getAntdFormInputRules } from "../../../utils/helpers";
 import { useDispatch } from "react-redux";
 import projectService from "../../../services/project";
 
-const AddUserForm = ({ projectId, isVisible, onClose, reloadData }) => {
+const AddUserForm = ({ project, isVisible, onClose, reloadData }) => {
 	const [form] = Form.useForm();
 	const [members, setMembers] = useState([]);
 	const dispatch = useDispatch();
@@ -15,9 +15,15 @@ const AddUserForm = ({ projectId, isVisible, onClose, reloadData }) => {
 
 	const fetchTeamMembers = async () => {
 		try {
-			const response = await teamService.getMembers();
+			const response = await teamService.getMembers(project.team);
 			if (response.success) {
-				setMembers(response.data);
+				const currentProjectMemberIds = project.members.map(
+					(member) => member._id
+				);
+				const filteredMembers = response.data.filter(
+					(member) => !currentProjectMemberIds.includes(member._id)
+				);
+				setMembers(filteredMembers);
 				form.resetFields();
 			} else {
 				throw new Error(response.message);
@@ -38,11 +44,11 @@ const AddUserForm = ({ projectId, isVisible, onClose, reloadData }) => {
 			dispatch(SetButtonLoading(true));
 			const values = await form.validateFields();
 			const payload = {
-				memberIds: values.member,
+				userIds: values.member,
 				// roleType: roleType, // "member" or "leader"
 			};
-			const response = await projectService.addMemberToProject(
-				projectId,
+			const response = await projectService.addMembersToProject(
+				project._id,
 				payload
 			);
 			dispatch(SetButtonLoading(false));

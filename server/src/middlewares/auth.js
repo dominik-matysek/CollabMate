@@ -99,6 +99,8 @@ const checkTeamAccess = async (req, res, next) => {
 			const projectId = req.params.projectId || req.body.projectId;
 			const taskId = req.params.taskId || req.body.taskId;
 
+			console.log("Project ID in checkTeamAccess: ", projectId);
+
 			if (projectId) {
 				const project = await Project.findById(projectId);
 				if (!project) {

@@ -64,10 +64,15 @@ exports.getProjectById = async (req, res) => {
 	try {
 		const projectId = req.params.projectId;
 
+		console.log("project id: ", projectId);
+
 		// Retrieve a project by ID
 		const project = await Project.findById(projectId)
 			.populate("tasks", "name status priority createdAt")
-			.populate("members", "firstName lastName email createdAt profilePic");
+			.populate(
+				"members",
+				"firstName lastName email createdAt profilePic role"
+			);
 
 		if (!project) {
 			return res.status(404).json({ error: "Project not found" });
@@ -76,38 +81,6 @@ exports.getProjectById = async (req, res) => {
 		res.status(200).json({
 			success: true,
 			message: "Pobrano projekt",
-			data: project,
-		});
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: "Internal Server Error" });
-	}
-};
-
-// Edit a project
-exports.editProject = async (req, res) => {
-	try {
-		const projectId = req.params.projectId;
-		const { name, description, status } = req.body;
-
-		// const { error } = projectValidation.validate(name, description);
-		// if (error)
-		// 	return res.status(400).json({ message: error.details[0].message });
-
-		// Update a project by ID
-		const project = await Project.findByIdAndUpdate(
-			projectId,
-			{ name, description, status },
-			{ new: true }
-		);
-
-		if (!project) {
-			return res.status(404).json({ error: "Project not found" });
-		}
-
-		res.status(200).json({
-			success: true,
-			message: "Edytowano projekt",
 			data: project,
 		});
 	} catch (error) {
@@ -157,10 +130,12 @@ exports.deleteProject = async (req, res) => {
 };
 
 // Controller to add a member to a project
-exports.addMemberToProject = async (req, res) => {
+exports.addMembersToProject = async (req, res) => {
 	try {
 		const projectId = req.params.projectId;
-		const { userId } = req.body; // Extract userId from request body
+		const { userIds } = req.body; // Extract userId from request body
+
+		console.log("userzy: ", userIds);
 
 		// Find the project and populate the team reference
 		const project = await Project.findById(projectId).populate(
@@ -168,27 +143,43 @@ exports.addMemberToProject = async (req, res) => {
 			"members"
 		);
 
+		console.log("Projekt info: ", project.team.members);
+
 		if (!project) {
 			return res.status(404).json({ error: "Project not found" });
 		}
 
-		// Check if the user is a member of the team associated with the project
-		if (!project.team.members.includes(userId)) {
+		// Check if any users are already members of the project
+		const alreadyMembers = userIds.filter((userId) =>
+			project.members.includes(userId)
+		);
+		if (alreadyMembers.length > 0) {
+			return res.status(400).json({
+				error: "One or more users are already members of the project",
+			});
+		}
+
+		// Check if all users are members of the team associated with the project
+		const areAllUsersTeamMembers = userIds.every((userId) =>
+			project.team.members.includes(userId)
+		);
+
+		if (!areAllUsersTeamMembers) {
 			return res
 				.status(403)
-				.json({ message: "User is not a member of the team" });
+				.json({ message: "One or more users are not members of the team" });
 		}
 
 		// Add a member to the project
 		const updatedProject = await Project.findByIdAndUpdate(
 			projectId,
-			{ $addToSet: { members: userId } }, // $addToSet ensures no duplicates
+			{ $addToSet: { members: { $each: userIds } } }, // $addToSet ensures no duplicates
 			{ new: true }
 		).populate("team", "members");
 
 		res.status(200).json({
 			success: true,
-			message: "Dodano członka do projektu",
+			message: "Dodano członków do projektu",
 			data: updatedProject,
 		});
 	} catch (error) {
@@ -201,7 +192,7 @@ exports.addMemberToProject = async (req, res) => {
 exports.removeMemberFromProject = async (req, res) => {
 	try {
 		const projectId = req.params.projectId;
-		const userId = req.params.userId;
+		const userId = req.body.memberId;
 
 		// Remove a member from a project
 		const project = await Project.findByIdAndUpdate(
@@ -247,6 +238,68 @@ exports.getAllProjects = async (req, res) => {
 			success: true,
 			message: "Pobrano projekty",
 			data: team.projects,
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+exports.changeProjectStatus = async (req, res) => {
+	try {
+		const { projectId } = req.params;
+		const project = await Project.findById(projectId);
+
+		if (!project) {
+			return res.status(404).json({ message: "Nie znaleziono projektu" });
+		}
+
+		// Cycle through the statuses
+		const nextStatus = {
+			active: "completed",
+			completed: "archived",
+			archived: "active",
+		};
+
+		const newStatus = nextStatus[project.status] || "active";
+
+		// Update the project status
+		project.status = newStatus;
+		await project.save();
+
+		res.status(200).json({
+			success: true,
+			message: "Status projektu zaktualizowany pomyślnie",
+			data: { status: newStatus },
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+exports.changeProjectDescription = async (req, res) => {
+	try {
+		const { projectId } = req.params;
+		const { description } = req.body;
+
+		console.log("Tym razem zmiana opisu - ID: ", projectId);
+		console.log("Tym razem zmiana opisu: ", description);
+
+		const result = await Project.updateOne(
+			{ _id: projectId },
+			{ $set: { description: description } }
+		);
+
+		if (result.nModified === 0) {
+			return res
+				.status(404)
+				.json({ message: "Project not found or description unchanged" });
+		}
+
+		res.status(200).json({
+			success: true,
+			message: "Opis projektu zaktualizowany pomyślnie",
 		});
 	} catch (error) {
 		console.error(error);

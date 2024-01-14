@@ -13,7 +13,7 @@ const projectCreateValidation = Joi.object({
 
 	description: Joi.string()
 		.min(5)
-		.max(50)
+		.max(250)
 		.messages({
 			"string.base": "Description should be a string.",
 			"string.empty": "Description cannot be empty.",

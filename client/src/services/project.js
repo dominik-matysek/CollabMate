@@ -31,7 +31,7 @@ const projectService = {
 		return apiRequest("DELETE", `${projectAPI}/projects/${projectId}`);
 	},
 
-	addMemberToProject: async (projectId, memberData) => {
+	addMembersToProject: async (projectId, memberData) => {
 		return apiRequest(
 			"PATCH",
 			`${projectAPI}/projects/${projectId}/add-member`,
@@ -44,6 +44,21 @@ const projectService = {
 			"PATCH",
 			`${projectAPI}/projects/${projectId}/remove-member`,
 			{ memberId }
+		);
+	},
+
+	changeProjectStatus: async (projectId) => {
+		return apiRequest(
+			"PATCH",
+			`${projectAPI}/projects/${projectId}/change-status`
+		);
+	},
+
+	changeProjectDescription: async (projectId, description) => {
+		return apiRequest(
+			"PATCH",
+			`${projectAPI}/projects/${projectId}/change-description`,
+			{ description }
 		);
 	},
 };

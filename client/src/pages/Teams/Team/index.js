@@ -209,7 +209,7 @@ function Team() {
 							</ul>
 						</div>
 					</div>
-					<div className="w-full md:w-9/12 mx-2 h-64">
+					<div className="w-full md:w-9/12 mx-2 ">
 						<div className="bg-white p-3 shadow-sm rounded-sm">
 							<div className="flex items-center justify-between font-semibold text-gray-900 leading-8">
 								<div className="flex items-center space-x-2">
