@@ -68,10 +68,10 @@ exports.getProjectById = async (req, res) => {
 
 		// Retrieve a project by ID
 		const project = await Project.findById(projectId)
-			.populate("tasks", "name status priority createdAt")
+			.populate("tasks", "name status priority createdAt") // ten populate chyba do wywalenia
 			.populate(
 				"members",
-				"firstName lastName email createdAt profilePic role"
+				"firstName lastName createdAt profilePic role" // w tym chyba tylko imie nazwisko profilePic starczy
 			);
 
 		if (!project) {

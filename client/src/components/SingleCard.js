@@ -25,9 +25,8 @@ function SingleCard({ item }) {
 							? `${item.members.length} Pracownik`
 							: `${item.members.length} Pracowników`}
 					</p>
-					<p className="text-gray-600 text-sm">
-						Utworzono: {getSimpleDateFormat(item.createdAt)}
-					</p>
+					<p className="text-gray-600 text-sm">Utworzono:</p>
+					<p>{getSimpleDateFormat(item.createdAt)}</p>
 				</div>
 				<div className="flex items-center ">
 					{item.members.slice(0, 5).map((member, index) => (

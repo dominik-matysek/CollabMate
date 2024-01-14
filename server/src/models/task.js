@@ -10,6 +10,8 @@ const taskSchema = new Schema(
 		description: {
 			type: String,
 			required: true,
+			minlength: 5,
+			maxlength: 250,
 		},
 		members: [
 			{
@@ -19,14 +21,23 @@ const taskSchema = new Schema(
 		],
 		status: {
 			type: String,
-			required: true,
-			enum: ["pending", "inProgress", "completed"],
+			required: true, // to moze działać tak że członkowie projektu sobie tworzą zadania, ustalają ich status itp, ale mogą maks ustawic completed - status approved musi ustawić jeden z team leaderów, np. po tym jak pracownicy ustawią status completed team leaderzy dostają powiadomienie i jeden z nich moze ustawic approved
+			// overdue wystepuje np automatycznie tylko wtedy gdy aktualna data jest po dueDate
+			enum: [
+				"pending",
+				"inProgress",
+				"completed",
+				"approved",
+				"cancelled",
+				"overdue",
+			],
 			default: "pending",
 		},
 		priority: {
 			type: String,
 			required: true,
 			enum: ["low", "medium", "high"],
+			default: "medium",
 		},
 		createdBy: {
 			type: Schema.Types.ObjectId,

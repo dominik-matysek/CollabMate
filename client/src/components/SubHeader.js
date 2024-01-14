@@ -35,6 +35,10 @@ const itemsWhenInTeam = [
 
 const itemsWhenInProject = [
 	{
+		name: "Zespół",
+		link: "/teams/:teamId",
+	},
+	{
 		name: "Projekt",
 		link: "/projects/:projectId",
 	},
@@ -45,6 +49,10 @@ const itemsWhenInProject = [
 ];
 
 const itemWhenInTask = [
+	{
+		name: "Zespół",
+		link: "/teams/:teamId",
+	},
 	{
 		name: "Zadanie",
 		link: "/tasks/:taskId",

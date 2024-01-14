@@ -21,9 +21,8 @@ function SingleProjectCard({ item }) {
 							? `${item.members.length} Pracownik`
 							: `${item.members.length} Pracowników`}
 					</p>
-					<p className="text-gray-600 text-sm">
-						Utworzono: {getSimpleDateFormat(item.createdAt)}
-					</p>
+					<p className="text-gray-600 text-sm">Utworzono:</p>
+					<p>{getSimpleDateFormat(item.createdAt)}</p>
 				</div>
 				<div className="flex items-center ">
 					{item.members.slice(0, 5).map((member, index) => (
@@ -34,31 +33,6 @@ function SingleProjectCard({ item }) {
 							size={52}
 						/>
 					))}
-					{/* <Avatar className="mr-4" src={item.teamLeaders[0].profilePic} /> */}
-					{/* <Avatar.Group>
-						{item.teamLeaders.map((member, index) => {
-							// <Badge key={index} className="mr-4">
-							// 	<a href="#" className="example-link">
-							// 		<Avatar
-							// 			style={{ backgroundColor: "#f56a00" }}
-							// 			src={member.profilePic}
-							// 		/>
-							// 	</a>
-							// </Badge>;
-
-							// // <Avatar>member</Avatar>;
-							<Avatar
-								className="mr-4"
-								style={{ backgroundColor: "#f56a00" }}
-								src={member.profilePic}
-							/>;
-						})} */}
-					{/* <Avatar className="mr-4" src="path-to-image1.jpg" />
-						<Avatar className="mr-4" src="path-to-image2.jpg" />
-						<Avatar className="mr-4" src="path-to-image3.jpg" /> */}
-					{/* Add more Avatar components */}
-					{/* </Avatar.Group> */}
-					{/* <EllipsisOutlined className="text-gray-600 ml-4" /> */}
 				</div>
 			</div>
 			{/* Instead of comment, we add a button */}

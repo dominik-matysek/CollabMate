@@ -332,7 +332,6 @@ function Project() {
 										<Button
 											type="default"
 											onClick={() => {
-												setDescription(initialDescription);
 												setEditMode(false);
 											}}
 											className="mr-2"

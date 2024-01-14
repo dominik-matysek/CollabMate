@@ -26,10 +26,6 @@ const taskService = {
 	deleteTask: async (taskId) => {
 		return apiRequest("DELETE", `${taskAPI}/tasks/${taskId}`);
 	},
-
-	getCommentsForTask: async (taskId) => {
-		return apiRequest("GET", `${taskAPI}/tasks/${taskId}/comments`);
-	},
 };
 
 module.exports = taskService;

@@ -76,23 +76,6 @@ function Projects() {
 		}
 	};
 
-	// const onDelete = async (id) => {
-	// 	try {
-	// 		dispatch(SetLoading(true));
-	// 		const response = await teamService.deleteTeam(id);
-	// 		if (response.success) {
-	// 			message.success(response.message);
-	// 			fetchTeams();
-	// 		} else {
-	// 			throw new Error(response.error);
-	// 		}
-	// 		dispatch(SetLoading(false));
-	// 	} catch (error) {
-	// 		dispatch(SetLoading(false));
-	// 		message.error(error.message);
-	// 	}
-	// };
-
 	const countStats = () => {
 		const projectCount = projects.length;
 		const leaderCount = leaders.length;
@@ -145,31 +128,6 @@ function Projects() {
 				</Col>
 			</Row>
 		</>
-		// <div>
-		// 	{user.role === "ADMIN" && (
-		// 		<div className="flex justify-end">
-		// 			<Button
-		// 				type="default"
-		// 				onClick={() => {
-		// 					setSelectedTeam(null);
-		// 					setShow(true);
-		// 				}}
-		// 			>
-		// 				Utwórz zespół
-		// 			</Button>
-		// 		</div>
-		// 	)}
-		// 	<Table columns={columns} data={teams} onRow={onRowClick} />
-		// 	{show && (
-		// 		<TeamForm
-		// 			show={show}
-		// 			setShow={setShow}
-		// 			reloadData={fetchTeams}
-		// 			team={selectedTeam}
-		// 			users={users}
-		// 		/>
-		// 	)}
-		// </div>
 	);
 }
 

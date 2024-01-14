@@ -28,6 +28,4 @@ router.patch("/tasks/:taskId", verifyToken, checkTaskAccess, tasks.editTask);
 
 router.delete("/tasks/:taskId", verifyToken, checkTaskAccess, tasks.deleteTask);
 
-router.get("/tasks/:taskId/comments", verifyToken, tasks.getComments); //probably niepotrzebne bo w getTaskById możesz mieć już to zrobione chyba
-
 module.exports = router;

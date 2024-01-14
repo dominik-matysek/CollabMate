@@ -13,6 +13,7 @@ import Test from "./pages/Test";
 import Projects from "./pages/Projects";
 import Project from "./pages/Projects/Project";
 import Tasks from "./pages/Tasks";
+import Task from "./pages/Tasks/Task";
 function App() {
 	const { loading } = useSelector((state) => state.loaders);
 	return (
@@ -68,22 +69,22 @@ function App() {
 							</ProtectedPage>
 						}
 					/>
-					{/* <Route
-						path="/projects"
-						element={
-							<ProtectedPage>
-								<Projects />
-							</ProtectedPage>
-						}
-					/> */}
-					{/* <Route
-						path="/tasks"
+					<Route // W takim roucie jak ten, powineineś sprawdzać czy user należy do teamId - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
+						path="/projects/:projectId/tasks"
 						element={
 							<ProtectedPage>
 								<Tasks />
 							</ProtectedPage>
 						}
-					/> */}
+					/>
+					<Route // W takim roucie jak ten, powineineś sprawdzać czy user należy do teamId - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
+						path="/tasks/:taskId"
+						element={
+							<ProtectedPage>
+								<Task />
+							</ProtectedPage>
+						}
+					/>
 					<Route // W takim roucie jak ten, powineineś sprawdzać czy user jest adminem - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
 						path="/users"
 						element={
