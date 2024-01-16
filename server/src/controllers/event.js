@@ -14,6 +14,10 @@ exports.createEvent = async (req, res) => {
 		const userId = req.userId;
 		const teamId = req.params.teamId;
 
+		console.log("req.body: ", title, " ", description, " ", date);
+		console.log("req.userId: ", userId);
+		console.log("req.teamId: ", teamId);
+
 		// Basic date validation
 		if (new Date(date).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)) {
 			return res
@@ -61,6 +65,7 @@ exports.getAllEvents = async (req, res) => {
 	try {
 		const teamId = req.params.teamId; // Assuming teamId is part of the route parameters
 
+		console.log("W get all events team id: ", teamId);
 		// Find the team's calendar and retrieve all events
 		const team = await Team.findById(teamId).populate({
 			path: "events",

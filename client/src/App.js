@@ -14,6 +14,7 @@ import Projects from "./pages/Projects";
 import Project from "./pages/Projects/Project";
 import Tasks from "./pages/Tasks";
 import Task from "./pages/Tasks/Task";
+import Calendar from "./pages/Calendar";
 function App() {
 	const { loading } = useSelector((state) => state.loaders);
 	return (
@@ -53,14 +54,14 @@ function App() {
 							</ProtectedPage>
 						}
 					/>
-					{/* <Route // W takim roucie jak ten, powineineś sprawdzać czy user należy do teamId - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
-						path="/teams/:teamId/calendar"
+					<Route // W takim roucie jak ten, powineineś sprawdzać czy user należy do teamId - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
+						path="/teams/:teamId/events"
 						element={
 							<ProtectedPage>
 								<Calendar />
 							</ProtectedPage>
 						}
-					/> */}
+					/>
 					<Route // W takim roucie jak ten, powineineś sprawdzać czy user należy do teamId - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
 						path="/projects/:projectId"
 						element={

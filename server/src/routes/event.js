@@ -8,35 +8,35 @@ const {
 } = require("../middlewares/auth");
 
 router.post(
-	"teams/:teamId/events",
+	"/teams/:teamId/events",
 	verifyToken,
 	checkTeamAccess,
 	events.createEvent
 );
 
 router.get(
-	"teams/:teamId/events",
+	"/teams/:teamId/events",
 	verifyToken,
 	checkTeamAccess,
 	events.getAllEvents
 );
 
 router.get(
-	"events/:eventId",
+	"/events/:eventId",
 	verifyToken,
 	checkTeamAccess,
 	events.getEventById
 );
 
 router.patch(
-	"events/:eventId",
+	"/events/:eventId",
 	verifyToken,
 	verifyEventCreator,
 	events.editEvent
 );
 
 router.delete(
-	"events/:eventId",
+	"/events/:eventId",
 	verifyToken,
 	verifyEventCreator,
 	events.deleteEvent

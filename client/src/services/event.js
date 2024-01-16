@@ -8,6 +8,7 @@ const eventService = {
 	},
 
 	getAllEvents: async (teamId) => {
+		console.log("service: ", teamId);
 		return apiRequest("GET", `${eventAPI}/teams/${teamId}/events`);
 	},
 

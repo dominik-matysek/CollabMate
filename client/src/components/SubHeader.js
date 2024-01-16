@@ -29,7 +29,7 @@ const itemsWhenInTeam = [
 	},
 	{
 		name: "Kalendarz",
-		link: "/teams/:teamId/calendar",
+		link: "/teams/:teamId/events",
 	},
 ];
 
