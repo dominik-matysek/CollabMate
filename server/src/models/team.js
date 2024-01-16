@@ -26,11 +26,12 @@ const teamSchema = new Schema(
 				required: true,
 			},
 		],
-		calendar: {
-			type: Schema.Types.ObjectId,
-			ref: "Calendar",
-			required: true,
-		},
+		events: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: "Event",
+			},
+		],
 	},
 	{ timestamps: true }
 );

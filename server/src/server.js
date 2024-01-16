@@ -1,7 +1,7 @@
 // Server file
 
 if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config();
+	require("dotenv").config();
 }
 
 const express = require("express");
@@ -50,11 +50,11 @@ app.use(cookieParser());
 app.use(morgan("combined"));
 app.use(mongoSanitize());
 app.use(
-  cors({
-    origin: "http://localhost:3000", // specify the origin of your frontend
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    credentials: true, // allow credentials like cookies, authorization headers, etc.
-  })
+	cors({
+		origin: "http://localhost:3000", // specify the origin of your frontend
+		methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+		credentials: true, // allow credentials like cookies, authorization headers, etc.
+	})
 );
 app.use(express.json());
 
@@ -65,7 +65,7 @@ const projectRoutes = require("./routes/project");
 const taskRoutes = require("./routes/task");
 const commentRoutes = require("./routes/comment");
 const notificationRoutes = require("./routes/notification");
-const calendarRoutes = require("./routes/calendar");
+const eventRoutes = require("./routes/event");
 
 // console.log("User routes base path:", userRoutes);
 
@@ -75,6 +75,6 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/notifications", notificationRoutes);
-app.use("/api/calendar", calendarRoutes);
+app.use("/api/event", eventRoutes);
 
 app.listen(port, () => console.log(`Node JS server listening on port ${port}`));

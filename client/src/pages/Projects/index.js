@@ -124,7 +124,9 @@ function Projects() {
 							reloadData={reloadAllData}
 						/>
 					)}
-					<UserList users={[...leaders, ...members]} title="Członkowie" />
+					<div className="mt-10">
+						<UserList users={[...leaders, ...members]} title="Członkowie" />
+					</div>
 				</Col>
 			</Row>
 		</>

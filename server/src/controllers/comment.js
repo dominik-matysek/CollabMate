@@ -6,29 +6,27 @@ const commentValidation = require("../utils/commentValidation");
 // Controller to create a new comment
 exports.createComment = async (req, res) => {
 	try {
-		const { error } = commentValidation.validate(req.body);
-		if (error)
-			return res.status(400).json({ message: error.details[0].message });
-
+		// const { error } = commentValidation.validate(req.body);
+		// if (error)
+		// 	return res.status(400).json({ message: error.details[0].message });
+		const userId = req.userId;
 		const { content } = req.body;
 		const taskId = req.params.taskId; // Assuming your route parameter is taskId
+		console.log("UserID: ", userId);
+		console.log("Kontent: ", content);
+		console.log("TaskID: ", taskId);
 
 		// Check if the user creating the comment is an assignee of the task
-		const task = await Task.findOne({
-			_id: taskId,
-			members: req.user._id,
-		});
+		const task = await Task.findById(taskId);
 
 		if (!task) {
-			return res
-				.status(403)
-				.json({ error: "User is not an assignee of the task" });
+			return res.status(403).json({ error: "Task not found" });
 		}
 
 		// Create a new comment
 		const comment = new Comment({
 			content,
-			createdBy: req.user._id,
+			createdBy: userId,
 		});
 
 		await comment.save();
@@ -40,7 +38,34 @@ exports.createComment = async (req, res) => {
 		res.status(200).json({
 			success: true,
 			message: "Dodano komentarz",
-			data: comment,
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: "Internal Server Error" });
+	}
+};
+
+exports.getComments = async (req, res) => {
+	try {
+		const { taskId } = req.params;
+		const task = await Task.findById(taskId).populate({
+			path: "comments",
+			select: "content createdBy createdAt",
+			populate: {
+				path: "createdBy",
+				select: "firstName lastName profilePic",
+			},
+		});
+
+		if (!task) {
+			return res.status(404).json({ message: "Task not found" });
+		}
+
+		console.log("Komentarze: ", task.comments);
+
+		res.status(200).json({
+			success: true,
+			comments: task.comments,
 		});
 	} catch (error) {
 		console.error(error);
@@ -51,82 +76,45 @@ exports.createComment = async (req, res) => {
 // Controller to delete a comment
 exports.deleteComment = async (req, res) => {
 	try {
-		const commentId = req.params.commentId;
+		const { taskId, commentId } = req.params;
+		const userId = req.userId;
+		const userRole = req.userRole;
 
 		// Find the comment by ID
 		const comment = await Comment.findById(commentId);
+		const task = await Task.findById(taskId);
 
 		if (!comment) {
 			return res.status(404).json({ error: "Comment not found" });
 		}
-
-		// Check if the user deleting the comment is the creator of the comment
-		if (comment.createdBy.toString() !== req.user._id.toString()) {
-			return res
-				.status(403)
-				.json({ error: "User is not the creator of the comment" });
-		}
-
-		// Delete the comment by ID
-		const deletedComment = await Comment.findByIdAndDelete(commentId);
-
-		if (!deletedComment) {
-			return res.status(404).json({ error: "Comment not found" });
-		}
-
-		// Remove the comment from the task's comments array
-		const task = await Task.findByIdAndUpdate(
-			req.task._id,
-			{ $pull: { comments: commentId } },
-			{ new: true }
-		);
 
 		if (!task) {
 			return res.status(404).json({ error: "Task not found" });
 		}
 
-		res.status(200).json({
-			success: true,
-			message: "Usunięto komentarz",
-		});
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: "Internal Server Error" });
-	}
-};
+		// Check if the user is the comment's author or a team leader
+		const isAuthor = comment.createdBy.toString() === userId;
+		const isTeamLeader = userRole === "TEAM LEADER"; // Assuming user role is stored in req.user
 
-// Controller to edit a comment
-exports.editComment = async (req, res) => {
-	try {
-		const commentId = req.params.commentId;
-		const { content } = req.body;
+		if (!isAuthor && !isTeamLeader) {
+			return res
+				.status(403)
+				.json({ error: "Unauthorized to delete the comment" });
+		}
 
-		const { error } = commentValidation.validate(content);
-		if (error)
-			return res.status(400).json({ message: error.details[0].message });
+		// Delete the comment by ID
+		await Comment.findByIdAndDelete(commentId);
 
-		// Update a comment by ID
-		const comment = await Comment.findByIdAndUpdate(
-			commentId,
-			{ content },
+		// Remove the comment from the task's comments array
+		await Task.findByIdAndUpdate(
+			taskId,
+			{ $pull: { comments: commentId } },
 			{ new: true }
 		);
 
-		if (!comment) {
-			return res.status(404).json({ error: "Comment not found" });
-		}
-
-		// Check if the user editing the comment is the creator of the comment
-		if (comment.createdBy.toString() !== req.user._id.toString()) {
-			return res
-				.status(403)
-				.json({ error: "User is not the creator of the comment" });
-		}
-
 		res.status(200).json({
 			success: true,
-			message: "Edytowano komentarz",
-			data: comment,
+			message: "Usunięto komentarz",
 		});
 	} catch (error) {
 		console.error(error);

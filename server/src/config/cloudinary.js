@@ -7,10 +7,10 @@ cloudinary.config({
 	api_secret: process.env.cloudinary_api_secret,
 });
 
-const storage = new CloudinaryStorage({
+const profileStorage = new CloudinaryStorage({
 	cloudinary,
 	params: {
-		folder: "CollabMate",
+		folder: "CollabMate/ProfilePictures",
 		allowedFormats: ["jpeg", "png", "jpg"],
 		transformation: [
 			{ width: 256, height: 256, crop: "fill", gravity: "auto" },
@@ -18,7 +18,36 @@ const storage = new CloudinaryStorage({
 	},
 });
 
+const attachementStorage = new CloudinaryStorage({
+	cloudinary,
+	params: {
+		folder: "CollabMate/Attachments",
+		allowedFormats: ["jpeg", "png", "jpg", "pdf", "docx", "doc", "zip"],
+		public_id: (req, file) => {
+			// Extract the filename without the extension
+			const fileNameWithoutExtension = file.originalname
+				.split(".")
+				.slice(0, -1)
+				.join(".");
+			return fileNameWithoutExtension;
+		},
+	},
+});
+
+const deleteFile = async (publicId) => {
+	try {
+		console.log("Deleting file with Public ID:", publicId);
+		await cloudinary.uploader.destroy(publicId);
+		return { success: true };
+	} catch (error) {
+		console.error("Error deleting image from Cloudinary:", error);
+		return { success: false, error };
+	}
+};
+
 module.exports = {
 	cloudinary,
-	storage,
+	profileStorage,
+	attachementStorage,
+	deleteFile,
 };

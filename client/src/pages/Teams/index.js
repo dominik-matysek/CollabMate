@@ -131,7 +131,9 @@ function Teams() {
 					{user.role === "ADMIN" && (
 						<TeamForm users={users} reloadData={reloadAllData} />
 					)}
-					<UserList users={leaders} title="Liderzy" />
+					<div className="mt-10">
+						<UserList users={leaders} title="Liderzy" />
+					</div>
 				</Col>
 			</Row>
 		</>

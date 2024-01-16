@@ -3,23 +3,22 @@ import { Modal, Form, Select, message, Button, Checkbox } from "antd";
 import { SetButtonLoading } from "../../../redux/loadersSlice";
 import { getAntdFormInputRules } from "../../../utils/helpers";
 import { useDispatch } from "react-redux";
+import projectService from "../../../services/project";
 import taskService from "../../../services/task";
 
-const AddUserForm = ({ project, isVisible, onClose, reloadData }) => {
+const AddUserForm = ({ task, isVisible, onClose, reloadData }) => {
 	const [form] = Form.useForm();
 	const [members, setMembers] = useState([]);
 	const dispatch = useDispatch();
 	const [selectedUserIds, setSelectedUserIds] = useState([]);
 
-	const fetchTeamMembers = async () => {
+	const fetchProjectMembers = async () => {
 		try {
-			const response = await teamService.getMembers(project.team);
+			const response = await projectService.getProjectById(task.project);
 			if (response.success) {
-				const currentProjectMemberIds = project.members.map(
-					(member) => member._id
-				);
-				const filteredMembers = response.data.filter(
-					(member) => !currentProjectMemberIds.includes(member._id)
+				const currentTaskMemberIds = task.members.map((member) => member._id);
+				const filteredMembers = response.data.members.filter(
+					(member) => !currentTaskMemberIds.includes(member._id)
 				);
 				setMembers(filteredMembers);
 				form.resetFields();
@@ -33,7 +32,7 @@ const AddUserForm = ({ project, isVisible, onClose, reloadData }) => {
 
 	useEffect(() => {
 		if (isVisible) {
-			fetchTeamMembers();
+			fetchProjectMembers();
 		}
 	}, [isVisible]);
 
@@ -45,10 +44,7 @@ const AddUserForm = ({ project, isVisible, onClose, reloadData }) => {
 				userIds: values.member,
 				// roleType: roleType, // "member" or "leader"
 			};
-			const response = await projectService.addMembersToProject(
-				project._id,
-				payload
-			);
+			const response = await taskService.addMembersToTask(task._id, payload);
 			dispatch(SetButtonLoading(false));
 			if (response.success) {
 				message.success("User(s) added successfully");
@@ -65,7 +61,7 @@ const AddUserForm = ({ project, isVisible, onClose, reloadData }) => {
 
 	return (
 		<Modal
-			title="Dodaj użytkowników do projektu"
+			title="Dodaj użytkowników do zadania"
 			open={isVisible}
 			onOk={handleOk}
 			onCancel={onClose}

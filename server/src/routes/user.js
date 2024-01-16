@@ -2,11 +2,11 @@ const express = require("express");
 const router = express.Router();
 const users = require("../controllers/user");
 const { verifyToken, verifyAdmin } = require("../middlewares/auth");
-const { cloudinary, storage } = require("../config/cloudinary");
+const { cloudinary, profileStorage } = require("../config/cloudinary");
 const multer = require("multer");
 
 const upload = multer({
-	storage: storage,
+	storage: profileStorage,
 	limits: { fileSize: 1024 * 1024 * 5 },
 });
 

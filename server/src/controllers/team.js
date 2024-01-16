@@ -1,6 +1,5 @@
 const Team = require("../models/team");
 const User = require("../models/user");
-const Calendar = require("../models/calendar");
 const teamCreateValidation = require("../utils/teamValidation");
 
 // Create a team
@@ -57,13 +56,7 @@ exports.createTeam = async (req, res) => {
 			teamLeaders: teamLeads.map((lead) => lead._id),
 		});
 
-		// Automatically create a calendar for the team
-		const newCalendar = new Calendar();
-		newTeam.calendar = newCalendar._id;
-
-		// Save the team and the calendar
 		const savedTeam = await newTeam.save();
-		await newCalendar.save();
 
 		const teamLeadUpdates = teamLeads.map((lead) => {
 			return User.findByIdAndUpdate(lead._id, {
@@ -172,10 +165,6 @@ exports.deleteTeam = async (req, res) => {
 			return res
 				.status(400)
 				.json({ message: "Cannot delete team with active projects" });
-		}
-		// Delete associated calendar
-		if (team.calendar) {
-			await Calendar.findByIdAndDelete(team.calendar);
 		}
 
 		// Remove team from users' teams property

@@ -149,15 +149,16 @@ exports.addMembersToProject = async (req, res) => {
 			return res.status(404).json({ error: "Project not found" });
 		}
 
-		// Check if any users are already members of the project
-		const alreadyMembers = userIds.filter((userId) =>
-			project.members.includes(userId)
-		);
-		if (alreadyMembers.length > 0) {
-			return res.status(400).json({
-				error: "One or more users are already members of the project",
-			});
-		}
+		// to niżej chyba niepotrzebne bo w updatedProject jest sprawdzane czy nie ma duplikatów przypadkiem
+		// // Check if any users are already members of the project
+		// const alreadyMembers = userIds.filter((userId) =>
+		// 	project.members.includes(userId)
+		// );
+		// if (alreadyMembers.length > 0) {
+		// 	return res.status(400).json({
+		// 		error: "One or more users are already members of the project",
+		// 	});
+		// }
 
 		// Check if all users are members of the team associated with the project
 		const areAllUsersTeamMembers = userIds.every((userId) =>

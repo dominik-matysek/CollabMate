@@ -14,34 +14,31 @@ const eventSchema = new Schema(
 			type: Date,
 			required: true,
 		},
-		timeStart: {
-			type: Date,
-			required: true,
-		},
-		timeEnd: {
-			type: Date,
-			required: true,
-		},
+		// timeStart: {
+		// 	type: Date,
+		// 	required: true,
+		// },
+		// timeEnd: {
+		// 	type: Date,
+		// 	required: true,
+		// },
 		createdBy: {
 			type: Schema.Types.ObjectId,
 			ref: "User",
 			required: true,
 		},
-		participants: [
+		members: [
 			{
 				type: Schema.Types.ObjectId,
 				ref: "User",
 			},
 		],
-		// reminder: {
-		//   type: Number, // Represents the time in minutes before the event
-		// },
+		team: {
+			type: Schema.Types.ObjectId,
+			ref: "Team",
+		},
 	},
 	{ timestamps: true }
 );
 
-const calendarSchema = new Schema({
-	events: [eventSchema],
-});
-
-module.exports = mongoose.model("Calendar", calendarSchema);
+module.exports = mongoose.model("Event", eventSchema);

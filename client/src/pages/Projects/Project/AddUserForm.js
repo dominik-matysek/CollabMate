@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Form, Select, message, Button, Checkbox } from "antd";
-import userService from "../../../services/user";
 import teamService from "../../../services/team";
 import { SetButtonLoading } from "../../../redux/loadersSlice";
 import { getAntdFormInputRules } from "../../../utils/helpers";

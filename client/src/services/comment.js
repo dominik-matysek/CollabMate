@@ -3,20 +3,14 @@ const { apiRequest } = require(".");
 const commentAPI = "/api/comments";
 
 const commentService = {
-	createComment: async (taskId, commentData) => {
-		return apiRequest(
-			"POST",
-			`${commentAPI}/${taskId}/comments/create`,
-			commentData
-		);
+	createComment: async (taskId, content) => {
+		return apiRequest("POST", `${commentAPI}/${taskId}/comments/create`, {
+			content,
+		});
 	},
 
-	editComment: async (taskId, commentId, updatedData) => {
-		return apiRequest(
-			"PATCH",
-			`${commentAPI}/${taskId}/comments/${commentId}`,
-			updatedData
-		);
+	getComments: async (taskId) => {
+		return apiRequest("GET", `${commentAPI}/${taskId}/comments`);
 	},
 
 	deleteComment: async (taskId, commentId) => {

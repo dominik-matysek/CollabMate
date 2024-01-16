@@ -47,7 +47,7 @@ const taskSchema = new Schema(
 		// niżej może nie tylko zdjęcia, ale też jakieś pliki typu pdf czy coś przydatne do tasków
 		attachments: [
 			{
-				type: Array,
+				type: String,
 				default: [],
 			},
 		],

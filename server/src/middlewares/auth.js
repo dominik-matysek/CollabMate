@@ -3,6 +3,7 @@ const User = require("../models/user");
 const Team = require("../models/team");
 const Project = require("../models/project");
 const Task = require("../models/task");
+const Event = require("../models/event");
 
 const verifyToken = (req, res, next) => {
 	try {
@@ -20,6 +21,7 @@ const verifyToken = (req, res, next) => {
 
 		// Attach the userId to the request for later use in route handlers
 		req.userId = decryptedToken.userId;
+		req.userRole = decryptedToken.userRole;
 
 		next();
 	} catch (error) {
@@ -85,6 +87,76 @@ const verifyLeader = async (req, res, next) => {
 	}
 };
 
+const verifyEventCreator = async (req, res, next) => {
+	try {
+		const userId = req.userId;
+
+		if (!userId) {
+			return res.status(401).json({ message: "Unauthorized access." });
+		}
+
+		const eventId = req.params.eventId || req.body.eventId;
+
+		const event = await Event.findById(eventId);
+		if (!event) {
+			return res.status(404).json({ message: "Event not found." });
+		}
+
+		// Fetch the user from the database
+		const user = await User.findById(userId);
+		if (!user) {
+			return res.status(404).json({ message: "User not found." });
+		}
+
+		if (user.role === "TEAM LEADER" || userId === event.createdBy) {
+			// User is a team leader, allow the request to proceed
+			console.log("User to team leader lub event creator");
+			next();
+		} else {
+			// User is not an team leader, send a 403
+			res.status(403).json({ message: "Permission denied." });
+		}
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: "Internal Server Error." });
+	}
+};
+
+const verifyCreator = async (req, res, next) => {
+	try {
+		const userId = req.userId;
+
+		if (!userId) {
+			return res.status(401).json({ message: "Unauthorized access." });
+		}
+
+		const taskId = req.params.taskId || req.body.taskId;
+
+		const task = await Task.findById(taskId);
+		if (!task) {
+			return res.status(404).json({ message: "Task not found." });
+		}
+
+		// Fetch the user from the database
+		const user = await User.findById(userId);
+		if (!user) {
+			return res.status(404).json({ message: "User not found." });
+		}
+
+		if (user.role === "TEAM LEADER" || userId === task.createdBy) {
+			// User is a team leader, allow the request to proceed
+			console.log("User to team leader or a task creator");
+			next();
+		} else {
+			// User is not an team leader, send a 403
+			res.status(403).json({ message: "Permission denied." });
+		}
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: "Internal Server Error." });
+	}
+};
+
 const checkTeamAccess = async (req, res, next) => {
 	try {
 		const userId = req.userId;
@@ -98,6 +170,7 @@ const checkTeamAccess = async (req, res, next) => {
 		if (!teamId) {
 			const projectId = req.params.projectId || req.body.projectId;
 			const taskId = req.params.taskId || req.body.taskId;
+			const eventId = req.params.eventId || req.body.eventId;
 
 			console.log("Project ID in checkTeamAccess: ", projectId);
 
@@ -120,6 +193,12 @@ const checkTeamAccess = async (req, res, next) => {
 						.json({ message: "Project not found for the task." });
 				}
 				teamId = project.team;
+			} else if (eventId) {
+				const event = await Event.findById(eventId);
+				if (!event) {
+					return res.status(404).json({ message: "Event not found." });
+				}
+				teamId = event.team;
 			} else {
 				return res
 					.status(400)
@@ -251,8 +330,10 @@ module.exports = {
 	verifyToken,
 	verifyAdmin,
 	verifyLeader,
+	verifyCreator,
 	checkTeamAccess,
 	checkProjectAccess,
 	checkTaskAccess,
 	verifyAdminOrTeamMember,
+	verifyEventCreator,
 };

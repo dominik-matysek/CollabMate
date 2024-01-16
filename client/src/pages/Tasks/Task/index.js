@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, message, Table, Modal } from "antd";
+import { Input, Button, message, Select, Row, Col } from "antd";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { SetLoading, SetButtonLoading } from "../../../redux/loadersSlice";
 import { getSimpleDateFormat } from "../../../utils/helpers";
 import { SetNotifications, SetUser } from "../../../redux/usersSlice";
-import { IoTrashBin } from "react-icons/io5";
-import { UserOutlined } from "@ant-design/icons";
 import AddUserForm from "./AddUserForm";
 import { getAntdFormInputRules } from "../../../utils/helpers";
 import taskService from "../../../services/task";
+import UserList from "../../../components/UserList";
+import FileUpload from "../../../components/FileUpload";
+import FileList from "../../../components/FileList";
+import Comments from "../../../components/Comments";
+import CommentInput from "../../../components/CommentInput";
+import commentService from "../../../services/comment";
+
+const { Option } = Select;
 
 function Task() {
-	const { projectId } = useParams();
-	const [project, setProject] = useState(null);
+	const { taskId } = useParams();
+	const [task, setTask] = useState(null);
 	const dispatch = useDispatch();
 	const { user } = useSelector((state) => state.users);
 
@@ -21,25 +27,33 @@ function Task() {
 	const [description, setDescription] = useState(null);
 
 	const [status, setStatus] = useState(null);
+	const [priority, setPriority] = useState(null);
 	const [initialDescription, setInitialDescription] = useState(null);
 	const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+
+	const [allowedTransitions, setAllowedTransitions] = useState([]);
 
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
+	const [comments, setComments] = useState([]);
+
 	const navigate = useNavigate();
 
-	const fetchProjectData = async () => {
+	const fetchTaskData = async () => {
 		try {
 			dispatch(SetLoading(true));
-			const response = await projectService.getProjectById(projectId);
+			const response = await taskService.getTaskById(taskId);
 			dispatch(SetLoading(false));
 			if (response.success) {
-				setProject(response.data);
+				setTask(response.data);
 				setStatus(response.data.status);
+				setPriority(response.data.priority);
 				setDescription(response.data.description);
 				setInitialDescription(description);
-				console.log("Projekt dane:", project);
+				setAllowedTransitions(response.allowedTransitions || []);
+				console.log("USERID: ", user._id);
+				console.log("USERROLE: ", user.role);
 			} else {
 				throw new Error(response.message);
 			}
@@ -49,23 +63,40 @@ function Task() {
 		}
 	};
 
-	const cycleStatus = () => {
-		const nextStatus = {
-			active: "completed",
-			completed: "archived",
-			archived: "active",
-		};
-		return nextStatus[status];
+	const fetchAllComments = async () => {
+		try {
+			dispatch(SetLoading(true));
+			const response = await commentService.getComments(taskId);
+			dispatch(SetLoading(false));
+			if (response.success) {
+				setComments(response.comments);
+				console.log("Komentarze", response.comments);
+			} else {
+				throw new Error(response.message);
+			}
+		} catch (error) {
+			dispatch(SetLoading(false));
+			message.error(error.message);
+		}
 	};
 
-	const handleStatusChange = async () => {
-		if (user.role === "TEAM LEADER") {
+	const cyclePriority = () => {
+		const nextPriority = {
+			low: "medium",
+			medium: "high",
+			high: "low",
+		};
+		return nextPriority[priority];
+	};
+
+	const handlePriorityChange = async () => {
+		if (user.role === "TEAM LEADER" || user._id === task.createdBy) {
 			try {
 				dispatch(SetButtonLoading(true));
-				const response = await projectService.changeProjectStatus(projectId);
+				const response = await taskService.changeTaskPriority(taskId);
 				if (response.success) {
-					const newStatus = cycleStatus();
-					setStatus(newStatus);
+					const newPriority = cyclePriority();
+					setPriority(newPriority);
 				} else {
 					throw new Error(response.message);
 				}
@@ -78,20 +109,41 @@ function Task() {
 	};
 
 	const handleDescriptionChange = (e) => {
-		setDescription(e.target.value);
+		const newDescription = e.target.value;
+		setDescription(newDescription);
 		setIsButtonDisabled(
-			e.target.value === initialDescription ||
-				e.target.value.length < 5 ||
-				e.target.value.length > 250
+			newDescription === initialDescription ||
+				newDescription.length < 5 ||
+				newDescription.length > 250
 		);
 	};
 
+	const handleStatusChange = async (newStatus) => {
+		if (user.role === "TEAM LEADER" || user._id === task.createdBy) {
+			try {
+				dispatch(SetButtonLoading(true));
+				const response = await taskService.changeTaskStatus(taskId, newStatus);
+				if (response.success) {
+					setStatus(newStatus);
+					message.success("Task status updated successfully");
+					reloadData();
+				} else {
+					throw new Error(response.message);
+				}
+				dispatch(SetButtonLoading(false));
+			} catch (error) {
+				dispatch(SetButtonLoading(false));
+				message.error(error.message);
+			}
+		}
+	};
+
 	const saveDescription = async () => {
-		if (user.role === "TEAM LEADER") {
+		if (user.role === "TEAM LEADER" || (task && user._id === task.createdBy)) {
 			try {
 				dispatch(SetLoading(true));
-				const response = await projectService.changeProjectDescription(
-					projectId,
+				const response = await taskService.changeTaskDescription(
+					taskId,
 					description
 				);
 				if (response.success) {
@@ -108,8 +160,116 @@ function Task() {
 		}
 	};
 
+	const translateStatus = (status) => {
+		const statusTranslations = {
+			pending: "Oczekujący",
+			inProgress: "W trakcie",
+			completed: "Zakończony",
+			approved: "Zaakceptowany",
+			cancelled: "Anulowany",
+			overdue: "Po terminie",
+		};
+
+		return statusTranslations[status] || status;
+	};
+
+	const handleFileUpload = async (selectedFiles) => {
+		const formData = new FormData();
+		selectedFiles.forEach((file) => {
+			formData.append("file", file);
+		});
+
+		try {
+			dispatch(SetLoading(true));
+			const response = await taskService.uploadAttachments(taskId, formData);
+			dispatch(SetLoading(false));
+			if (response.success) {
+				message.success("Files uploaded successfully");
+				reloadData(); // Reload task data to update the list of attachments
+			} else {
+				throw new Error(response.message);
+			}
+		} catch (error) {
+			dispatch(SetLoading(false));
+			message.error(error.message);
+		}
+	};
+
+	const removeFile = async (id) => {
+		try {
+			dispatch(SetLoading(true));
+			console.log("w onDelete, oto id:", id);
+			const response = await taskService.removeAttachment(taskId, id);
+			if (response.success) {
+				message.success(response.message);
+				reloadData();
+			} else {
+				message.error(response.message);
+				throw new Error(response.error);
+			}
+			dispatch(SetLoading(false));
+		} catch (error) {
+			dispatch(SetLoading(false));
+		}
+	};
+
+	const removeMember = async (id) => {
+		try {
+			dispatch(SetLoading(true));
+			console.log("w onDelete, oto id:", id);
+			const response = await taskService.removeMemberFromTask(taskId, id);
+			if (response.success) {
+				message.success(response.message);
+				reloadData();
+			} else {
+				message.error(response.message);
+				throw new Error(response.error);
+			}
+			dispatch(SetLoading(false));
+		} catch (error) {
+			dispatch(SetLoading(false));
+		}
+	};
+
+	const handleCommentSubmit = async (commentContent) => {
+		try {
+			dispatch(SetLoading(true));
+			const response = await commentService.createComment(
+				taskId,
+				commentContent
+			);
+			if (response.success) {
+				message.success("Comment added successfully");
+				await reloadData(); // Refresh the comments list
+			} else {
+				message.error(response.message);
+				throw new Error(response.message);
+			}
+		} catch (error) {
+			message.error(error.message);
+			dispatch(SetLoading(false));
+		}
+	};
+
+	const onDeleteComment = async (id) => {
+		try {
+			dispatch(SetLoading(true));
+			const response = await commentService.deleteComment(taskId, id);
+			if (response.success) {
+				message.success(response.message);
+				reloadData();
+			} else {
+				message.error(response.message);
+				throw new Error(response.error);
+			}
+		} catch (error) {
+			dispatch(SetLoading(false));
+		}
+	};
+
 	const reloadData = async () => {
-		await fetchProjectData();
+		await fetchTaskData();
+		await fetchAllComments();
 	};
 
 	const showDeleteTeamModal = () => {
@@ -130,131 +290,81 @@ function Task() {
 
 	useEffect(() => {
 		reloadData();
-	}, [projectId]);
+	}, [taskId]);
 
-	const onRowClick = (record) => {
-		return {
-			onClick: () => {
-				navigate(`/profile/${record._id}`);
-			},
-		};
-	};
-
-	const onDelete = async (id) => {
-		try {
-			dispatch(SetLoading(true));
-			console.log("w onDelete, oto id:", id);
-			const response = await projectService.removeMemberFromProject(
-				projectId,
-				id
-			);
-			if (response.success) {
-				message.success(response.message);
-				reloadData();
-			} else {
-				message.error(response.message);
-				throw new Error(response.error);
-			}
-			dispatch(SetLoading(false));
-		} catch (error) {
-			dispatch(SetLoading(false));
-		}
-	};
-
-	const getRandomProjectMember = () => {
-		if (project && project.members && project.members.length > 0) {
-			const randomIndex = Math.floor(Math.random() * project.members.length);
-			console.log("Członek projektu random: ", project.members[randomIndex]);
-			return project.members[randomIndex];
-		}
-	};
-
-	let currentMember = getRandomProjectMember();
-
-	// const isTeamIdInUserTeams = user.team;
-
-	console.log("Random lider: ", currentMember);
-
-	let columns = [
-		// Tu by mogło być jeszcze małe zdjecie profilowe kwadratowe albo okrągłe, jak juz ogarniesz zdjecia
-		{
-			title: "Imię",
-			dataIndex: "firstName",
-		},
-		{
-			title: "Nazwisko",
-			dataIndex: "lastName",
-		},
-		{
-			title: "Data dołączenia",
-			dataIndex: "createdAt",
-			render: (text) => getSimpleDateFormat(text),
-		},
-	];
-
-	if (user.role === "TEAM LEADER") {
-		columns = [
-			...columns,
-			{
-				title: "Akcja",
-				dataIndex: "action",
-				render: (text, record) => {
-					return (
-						<div
-							className="flex justify-center"
-							onClick={(e) => e.stopPropagation()}
-						>
-							<IoTrashBin onClick={() => onDelete(record._id)} />
-						</div>
-					);
-				},
-			},
-		];
+	if (task && task.members) {
+		console.log("TASK: ", task);
+		console.log("TASK MEMBERS: ", task.members);
 	}
 
 	return (
-		project && (
+		task && (
 			<div className="container mx-auto my-5 p-5">
-				{/* {isTeamIdInUserTeams && <Sidebar />}  */}
-				{/* Team Name and Creation Date */}
 				<div className="flex justify-between items-center mb-6">
 					<div>
-						<h1 className="text-3xl font-bold text-gray-900 mb-3">
-							{project.name}
+						<h1 className="text-3xl font-bold text-gray-900 mb-2">
+							{task.name}
 						</h1>
-						{user.role === "TEAM LEADER" && (
+						<p className="mb-2">
+							Data utworzenia: {getSimpleDateFormat(task.createdAt)}
+						</p>
+						{(user.role === "TEAM LEADER" || user._id === task.createdBy) && (
 							<Button type="primary" danger onClick={showDeleteTeamModal}>
-								Usuń projekt
+								Usuń zadanie
 							</Button>
 						)}
 					</div>
-					{/* Project Status */}
-					<div>
+					{/* Task Status */}
+					<div c>
 						<h2 className="text-2xl font-semibold text-gray-800 mb-3">
-							Status projektu
+							Status zadania
+						</h2>
+
+						<Select
+							value={translateStatus(status)}
+							style={{ width: 200 }}
+							onChange={(newStatus) => handleStatusChange(newStatus)}
+							disabled={allowedTransitions?.length === 0}
+						>
+							{allowedTransitions.map((transitionStatus) => (
+								<Option key={transitionStatus} value={transitionStatus}>
+									{translateStatus(transitionStatus)}
+								</Option>
+							))}
+						</Select>
+					</div>
+					{/* Task Priority  */}
+					<div className="flex justify-center items-center flex-col">
+						<h2 className="text-2xl font-semibold text-gray-800 mb-3">
+							Stopień ważności
 						</h2>
 
 						<Button
 							type="primary"
-							onClick={handleStatusChange}
+							onClick={handlePriorityChange}
 							className={` ${
-								status === "active"
+								priority === "low"
 									? "bg-green-500"
-									: status === "completed"
+									: priority === "medium"
 									? "bg-blue-500"
-									: "bg-gray-500"
+									: "bg-red-500"
 							}`}
 						>
-							{status === "active"
-								? "Aktywny"
-								: status === "completed"
-								? "Zakończony"
-								: "Zarchiwizowany"}
+							{priority === "low"
+								? "Niski"
+								: priority === "medium"
+								? "Średni"
+								: "Wysoki"}
 						</Button>
 					</div>
-					<p className="text-gray-600">
-						Data utworzenia: {getSimpleDateFormat(project.createdAt)}
-					</p>
+					{/* Due date */}
+					<div>
+						<h2 className="text-2xl font-semibold text-gray-800 mb-3">
+							Planowana data zakończenia:
+						</h2>
+						<h3 className="text-center">{getSimpleDateFormat(task.dueDate)}</h3>
+					</div>
+
 					{/* {user.role === "TEAM LEADER" && (
 						<Button type="primary" onClick={showAddUserModal}>
 							Dodaj pracownika
@@ -263,131 +373,129 @@ function Task() {
 				</div>
 
 				<div className="md:flex no-wrap md:-mx-2 ">
-					{currentMember && (
-						<div className="w-full md:w-3/12 md:mx-2 ">
-							<div className="bg-white p-3 border-t-4 border-green-400 rounded-md">
-								<div className="image overflow-hidden">
-									<img
-										className="h-auto w-full mx-auto"
-										src={currentMember.profilePic}
-										alt="Zdjęcie profilowe"
-									/>
-								</div>
-								<h1 className="text-gray-900 font-bold text-xl leading-8 my-1">
-									{currentMember.firstName} {currentMember.lastName}
-								</h1>
-								<h3 className="text-gray-600 font-lg text-semibold leading-6">
-									Pracownik
-								</h3>
+					{/* Tu będzie lista członków zadania w stylu UserList 
+					+ możliwośc dodawania i usuwania */}
+					<div className="w-full md:w-3/12 md:mx-2 ">
+						{(user.role === "TEAM LEADER" || user._id === task.createdBy) && (
+							<Button
+								type="primary"
+								onClick={showAddUserModal}
+								className="mb-4"
+							>
+								Dodaj pracownika
+							</Button>
+						)}
 
-								<ul className="bg-gray-100 text-gray-600 hover:text-gray-700 hover:shadow py-2 px-3 mt-3 divide-y rounded shadow-sm">
-									<li className="flex items-center py-3">
-										<span>Status</span>
-										<span className="ml-auto">
-											<span className="bg-green-500 py-1 px-2 rounded text-white text-sm">
-												Aktywny
-											</span>
-										</span>
-									</li>
-									<li className="flex items-center py-3">
-										<span>Data dołączenia</span>
-										<span className="ml-auto">
-											{getSimpleDateFormat(currentMember.createdAt)}
-										</span>
-									</li>
-								</ul>
-							</div>
+						<UserList
+							users={task.members}
+							title="Członkowie"
+							showDelete={
+								user.role === "TEAM LEADER" || user._id === task.createdBy
+							}
+							onDelete={removeMember}
+							creatorId={task.createdBy}
+						/>
+					</div>
+					{/* Task Description */}
+
+					<div className="w-full md:w-6/12 mx-2 ">
+						<Row gutter={16}>
+							<Col span={24} className="mb-8">
+								<div
+									className="mb-6 bg-indigo-100 p-4 rounded-md shadow-md"
+									style={{ minHeight: "150px" }}
+								>
+									{" "}
+									<div className="flex justify-between items-center">
+										<h2 className="text-xl font-semibold text-gray-800">
+											Opis zadania
+										</h2>
+										{(user.role === "TEAM LEADER" ||
+											user._id === task.createdBy) &&
+											!editMode && (
+												<Button
+													type="default"
+													onClick={() => setEditMode(true)}
+												>
+													Edytuj
+												</Button>
+											)}
+									</div>
+									{editMode ? (
+										<div className="mt-2">
+											<Input.TextArea
+												value={description}
+												onChange={handleDescriptionChange}
+												rows={4}
+												autoFocus
+												showCount
+												minLength={5}
+												maxLength={250}
+											/>
+											<div className="flex justify-end mt-6">
+												<Button
+													type="default"
+													onClick={() => {
+														setEditMode(false);
+													}}
+													className="mr-2"
+												>
+													Anuluj
+												</Button>
+												<Button
+													type="primary"
+													onClick={saveDescription}
+													disabled={isButtonDisabled}
+												>
+													Zapisz
+												</Button>
+											</div>
+										</div>
+									) : (
+										<p
+											className="text-gray-600 mt-2 overflow-auto"
+											style={{ maxHeight: "100px" }}
+										>
+											{description}
+										</p>
+									)}
+								</div>
+							</Col>
+							<Col span={24}>
+								{/* Komentarze */}
+
+								{comments && (
+									<Comments
+										comments={comments}
+										currentUserId={user._id}
+										onDeleteComment={onDeleteComment}
+									/>
+								)}
+								<CommentInput onCommentSubmit={handleCommentSubmit} />
+							</Col>
+						</Row>
+					</div>
+					{(user.role === "TEAM LEADER" ||
+						task.members.some((member) => member._id === user._id)) && (
+						<div className="w-full md:w-3/12 mx-2 ">
+							<Row gutter={16}>
+								<Col span={24} className="mb-8">
+									{/* FileUpload component */}
+									<FileUpload onFileUpload={handleFileUpload} />
+								</Col>
+								<Col span={24}>
+									{/* FileList component */}
+									<FileList
+										attachments={task?.attachments}
+										onDelete={removeFile}
+									/>
+								</Col>
+							</Row>
 						</div>
 					)}
-					{/* Project Description */}
 
-					<div className="w-full md:w-9/12 mx-2 ">
-						<div
-							className="mb-6 bg-indigo-100 p-4 rounded-md shadow-md"
-							style={{ minHeight: "150px" }}
-						>
-							{" "}
-							<div className="flex justify-between items-center">
-								<h2 className="text-xl font-semibold text-gray-800">
-									Opis projektu
-								</h2>
-								{user.role === "TEAM LEADER" && !editMode && (
-									<Button type="default" onClick={() => setEditMode(true)}>
-										Edytuj
-									</Button>
-								)}
-							</div>
-							{editMode ? (
-								<div className="mt-2">
-									<Input.TextArea
-										value={description}
-										onChange={handleDescriptionChange}
-										rows={4}
-										autoFocus
-										showCount
-										minLength={5}
-										maxLength={250}
-									/>
-									<div className="flex justify-end mt-6">
-										<Button
-											type="default"
-											onClick={() => {
-												setEditMode(false);
-											}}
-											className="mr-2"
-										>
-											Anuluj
-										</Button>
-										<Button
-											type="primary"
-											onClick={saveDescription}
-											disabled={isButtonDisabled}
-										>
-											Zapisz
-										</Button>
-									</div>
-								</div>
-							) : (
-								<p
-									className="text-gray-600 mt-2 overflow-auto"
-									style={{ maxHeight: "100px" }}
-								>
-									{description}
-								</p>
-							)}
-						</div>
-
-						<div className="bg-white p-3 shadow-sm rounded-md">
-							<div className="flex items-center justify-between font-semibold text-gray-900 leading-8">
-								<div className="flex items-center space-x-2">
-									<span>
-										<UserOutlined />
-									</span>
-									<span className="tracking-wide">Lista członków</span>
-								</div>
-
-								{user.role === "TEAM LEADER" && (
-									<div>
-										<Button type="primary" onClick={showAddUserModal}>
-											Dodaj pracownika
-										</Button>
-									</div>
-								)}
-							</div>
-							{project.members && (
-								<Table
-									dataSource={project.members}
-									columns={columns}
-									className="mt-4 zebra-table"
-									onRow={onRowClick}
-									pagination={{ pageSize: 50 }}
-									scroll={{ y: 200 }}
-								/>
-							)}
-						</div>
-					</div>
 					<AddUserForm
-						project={project}
+						task={task}
 						isVisible={isModalVisible}
 						onClose={closeAddUserModal}
 						reloadData={reloadData}
