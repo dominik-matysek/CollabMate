@@ -14,14 +14,6 @@ const eventSchema = new Schema(
 			type: Date,
 			required: true,
 		},
-		// timeStart: {
-		// 	type: Date,
-		// 	required: true,
-		// },
-		// timeEnd: {
-		// 	type: Date,
-		// 	required: true,
-		// },
 		createdBy: {
 			type: Schema.Types.ObjectId,
 			ref: "User",

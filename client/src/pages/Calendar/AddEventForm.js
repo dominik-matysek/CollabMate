@@ -18,10 +18,14 @@ function AddEventForm({ teamId, reloadData }) {
 		try {
 			dispatch(SetLoading(true));
 			// Format the date to match your backend expectations
+			console.log("wartości: ", values);
 			const formattedValues = {
-				...values,
-				date: moment(values.date).format("YYYY-MM-DD"), // Or your desired format
+				title: values.title,
+				description: values.description,
+				date: values.date,
 			};
+
+			console.log("wartości zmienione: ", formattedValues);
 
 			const response = await eventService.createEvent(teamId, formattedValues);
 			if (response.success) {

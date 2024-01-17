@@ -128,8 +128,6 @@ function TaskForm({ user, projectId, reloadData, users }) {
 					</Select>
 				</Form.Item>
 
-				{/* Musi być jeszcze wybór dueDate i priority */}
-
 				<Form.Item>
 					<Button type="primary" htmlType="submit" className="w-full">
 						Utwórz zadanie

@@ -92,8 +92,13 @@ exports.getEventById = async (req, res) => {
 	try {
 		const eventId = req.params.eventId;
 
+		console.log("EventID: ", eventId);
+
 		// Find the specific event by its ID
-		const event = await Event.findById(eventId).populate("members"); // Populate members if needed
+		const event = await Event.findById(eventId).populate(
+			"members",
+			"firstName lastName profilePic role"
+		); // Populate members if needed
 
 		if (!event) {
 			return res.status(404).json({ error: "Event not found" });
@@ -189,6 +194,10 @@ exports.addMembersToEvent = async (req, res) => {
 	try {
 		const eventId = req.params.eventId;
 		const { memberIds } = req.body; // Extract memberIds from request body
+
+		console.log("EVENTID: ", eventId);
+
+		console.log("Userzy w evencie do dodania: ", memberIds);
 
 		// Find the event and populate the team reference
 		const event = await Event.findById(eventId).populate("team", "members");
