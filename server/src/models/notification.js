@@ -6,7 +6,7 @@ const notificationSchema = new Schema(
 		users: [
 			{
 				type: Schema.Types.ObjectId,
-				ref: "users",
+				ref: "User",
 				required: true,
 			},
 		],
