@@ -5,10 +5,26 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const express = require("express");
+const http = require("http");
 const rateLimit = require("express-rate-limit");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
+const socketIo = require("socket.io");
+
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+	cors: {
+		origin: "http://localhost:3000", // specify the origin of your frontend
+		methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+		credentials: true, // allow credentials like cookies, authorization headers, etc.
+	},
+});
+
+app.io = io;
+
+require("./websocket")(io);
+
 const db = require("./config/db");
 const port = process.env.PORT || 5000;
 const cookieParser = require("cookie-parser");
@@ -76,5 +92,10 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/event", eventRoutes);
+// app.all('*', require('./routes/404'))
 
-app.listen(port, () => console.log(`Node JS server listening on port ${port}`));
+server.listen(port, () =>
+	console.log(`Node JS server listening on port ${port}`)
+);
+
+// app.listen(port, () => console.log(`Node JS server listening on port ${port}`));

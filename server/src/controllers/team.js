@@ -1,4 +1,8 @@
 const Team = require("../models/team");
+const Project = require("../models/project");
+const Task = require("../models/task");
+const Comment = require("../models/comment");
+const Event = require("../models/event");
 const User = require("../models/user");
 const teamCreateValidation = require("../utils/teamValidation");
 
@@ -8,6 +12,8 @@ exports.createTeam = async (req, res) => {
 		console.log("Tworzenie teamu");
 
 		const { name, teamLeadIds } = req.body;
+
+		console.log("A co to: ", teamLeadIds);
 
 		// const { error } = teamCreateValidation.validate(req.body);
 		// if (error) {
@@ -23,7 +29,8 @@ exports.createTeam = async (req, res) => {
 		const teamLeads = await User.find({
 			_id: { $in: teamLeadIds },
 			role: { $ne: "ADMIN" },
-			team: { $exists: false },
+			// team: {$or{$exists: false, null} },
+			$or: [{ team: { $exists: false } }, { team: null }],
 		});
 
 		console.log("Ile leadów teraz: ", teamLeads.length);
@@ -160,22 +167,45 @@ exports.deleteTeam = async (req, res) => {
 
 		const team = await Team.findById(teamId);
 
-		// If there are projects in team, forbid to delete team
-		if (team.projects.length > 0) {
+		if (!team) {
+			return res.status(404).json({ message: "Team not found" });
+		}
+
+		const activeProjects = await Project.find({
+			team: teamId,
+			status: "active",
+		});
+		if (activeProjects.length > 0) {
 			return res
 				.status(400)
 				.json({ message: "Cannot delete team with active projects" });
 		}
 
+		// Delete associated projects and their tasks, comments
+		const projects = await Project.find({ team: teamId });
+		for (const project of projects) {
+			const tasks = await Task.find({ project: project._id });
+			for (const task of tasks) {
+				await Comment.deleteMany({ _id: { $in: task.comments } });
+				await Task.findByIdAndDelete(task._id);
+			}
+			await Project.findByIdAndDelete(project._id);
+		}
+
+		// Delete associated events
+		await Event.deleteMany({ _id: { $in: team.events } });
+
+		// Update role of team leaders to 'EMPLOYEE'
+		await User.updateMany(
+			{ _id: { $in: team.teamLeaders }, role: "TEAM LEADER" },
+			{ $set: { role: "EMPLOYEE" } }
+		);
+
 		// Remove team from users' teams property
 		await User.updateMany({ teams: teamId }, { $pull: { teams: teamId } });
 
 		// Finally, delete the team
-		const deletedTeam = await Team.findByIdAndDelete(teamId);
-
-		if (!deletedTeam) {
-			return res.status(404).json({ message: "Team not found" });
-		}
+		await Team.findByIdAndDelete(teamId);
 
 		res
 			.status(200)

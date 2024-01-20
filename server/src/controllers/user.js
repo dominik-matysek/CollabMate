@@ -101,7 +101,7 @@ exports.login = async (req, res) => {
 			.json({
 				success: true,
 				message: "User logged in successfully",
-				data: { role: user.role },
+				data: { role: user.role, userId: user._id },
 			});
 	} catch (error) {
 		console.error(error);

@@ -1,6 +1,7 @@
 const Project = require("../models/project");
 const Team = require("../models/team");
-const User = require("../models/user");
+const Task = require("../models/task");
+const Comment = require("../models/comment");
 
 const projectCreateValidation = require("../utils/projectValidation");
 
@@ -96,29 +97,40 @@ exports.deleteProject = async (req, res) => {
 
 		const project = await Project.findById(projectId);
 
-		// If there are tasks in project, forbid to delete project
-		if (project.tasks.length > 0) {
-			return res
-				.status(400)
-				.json({ message: "Cannot delete project with active tasks" });
-		}
-
-		const deletedProject = await Project.findByIdAndDelete(projectId);
-
-		if (!deletedProject) {
+		if (!project) {
 			return res.status(404).json({ error: "Project not found" });
 		}
 
+		// Check if there are tasks with status 'inProgress' or 'completed' in the project
+		const activeTasks = await Task.find({
+			project: projectId,
+			status: { $in: ["inProgress", "completed"] },
+		});
+
+		if (activeTasks.length > 0) {
+			return res.status(400).json({
+				message: "Cannot delete project with tasks in progress or completed",
+			});
+		}
+
+		// Fetch all tasks associated with the project
+		const tasks = await Task.find({ project: projectId });
+
+		// Delete comments associated with each task, then delete the task
+		for (const task of tasks) {
+			await Comment.deleteMany({ _id: { $in: task.comments } });
+			await Task.findByIdAndDelete(task._id);
+		}
+
+		// Delete the project
+		await Project.findByIdAndDelete(projectId);
+
 		// Remove the project from the team's projects array
 		const team = await Team.findByIdAndUpdate(
-			req.team._id,
+			project.team,
 			{ $pull: { projects: projectId } },
 			{ new: true }
 		);
-
-		if (!team) {
-			return res.status(404).json({ error: "Team not found" });
-		}
 
 		res
 			.status(200)
@@ -194,6 +206,19 @@ exports.removeMemberFromProject = async (req, res) => {
 	try {
 		const projectId = req.params.projectId;
 		const userId = req.body.memberId;
+
+		// Check if the user is a member of any task in the project
+		const taskWithMember = await Task.findOne({
+			project: projectId,
+			members: userId,
+		});
+
+		if (taskWithMember) {
+			return res.status(400).json({
+				error:
+					"User is a member of a task in the project and cannot be removed",
+			});
+		}
 
 		// Remove a member from a project
 		const project = await Project.findByIdAndUpdate(

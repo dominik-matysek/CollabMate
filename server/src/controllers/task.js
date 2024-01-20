@@ -1,5 +1,6 @@
 const Task = require("../models/task");
 const Team = require("../models/team");
+const Comment = require("../models/comment");
 const Project = require("../models/project");
 const moment = require("moment");
 const { getAllowedStatusTransitions } = require("../utils/allowedStatus");
@@ -165,6 +166,9 @@ exports.deleteTask = async (req, res) => {
 		if (!task) {
 			return res.status(404).json({ error: "Task not found" });
 		}
+
+		// Delete all comments associated with the task
+		await Comment.deleteMany({ _id: { $in: task.comments } });
 
 		// Delete the task
 		await Task.findByIdAndDelete(taskId);

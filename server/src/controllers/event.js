@@ -170,7 +170,7 @@ exports.deleteEvent = async (req, res) => {
 			return res.status(404).json({ error: "Event not found" });
 		}
 
-		// Remove the project from the team's projects array
+		// Remove the event from the team's event array
 		const team = await Team.findByIdAndUpdate(
 			event.team,
 			{ $pull: { events: eventId } },

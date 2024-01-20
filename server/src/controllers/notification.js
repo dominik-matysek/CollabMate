@@ -1,24 +1,33 @@
 const Notification = require("../models/notification");
+const { getSocketIdForUser } = require("../websocket");
 
 // Controller to create a new notification
 exports.createNotification = async (req, res) => {
 	try {
 		const { title, description, link, users } = req.body;
 
-		// Create a new notification for each user
-		const notifications = await Notification.create(
-			users.map((userId) => ({
-				user: userId,
+		let createdNotifications = [];
+		for (const userId of users) {
+			const notification = await Notification.create({
+				users: userId,
 				title,
 				description,
 				link,
-			}))
-		);
+			});
+
+			createdNotifications.push(notification);
+
+			// Emit event to specific user
+			const socketId = getSocketIdForUser(userId);
+			if (socketId) {
+				req.app.io.to(socketId).emit("new-notification", notification);
+			}
+		}
 
 		res.status(200).json({
 			success: true,
 			message: "Powiadomienie dodane",
-			data: notifications,
+			data: createdNotifications,
 		});
 	} catch (error) {
 		console.error(error);
@@ -26,20 +35,20 @@ exports.createNotification = async (req, res) => {
 	}
 };
 
-// Controller to get notifications for the authenticated user
+// Controller to get all notifications for the authenticated user
 exports.getNotifications = async (req, res) => {
 	try {
-		const userId = req.user._id;
+		const userId = req.userId;
 
-		// Get unread notifications for the user
-		const unreadNotifications = await Notification.find({
-			user: userId,
-			read: false,
-		}).sort({ createdAt: -1 });
+		// Get all notifications for the user, sorted with unread ones first
+		const notifications = await Notification.find({ users: userId }).sort({
+			read: 1,
+			createdAt: -1,
+		});
 
 		res.status(200).json({
 			success: true,
-			data: unreadNotifications,
+			data: notifications,
 		});
 	} catch (error) {
 		console.error(error);
@@ -50,18 +59,29 @@ exports.getNotifications = async (req, res) => {
 // Controller to mark notifications as read
 exports.readNotifications = async (req, res) => {
 	try {
-		const userId = req.user._id;
+		const { notificationId } = req.params;
+		const userId = req.userId;
 
-		// Mark unread notifications as read for the user
-		const notifications = await Notification.updateMany(
-			{ user: userId, read: false },
-			{ $set: { read: true } }
-		);
+		console.log("Co w params: ", req.params);
+		console.log("ID powiadomienia: ", notificationId);
+
+		const notification = await Notification.findById(notificationId);
+		if (!notification) {
+			return res.status(404).json({ error: "Notification not found" });
+		}
+
+		if (!notification.users.includes(userId)) {
+			// If the notification does not belong to the user, deny the action
+			return res.status(403).json({ error: "Unauthorized action" });
+		}
+
+		// Mark the notification as read
+		notification.read = true;
+		await notification.save();
 
 		res.status(200).json({
 			success: true,
 			message: "Powiadomienia przeczytane",
-			data: notifications,
 		});
 	} catch (error) {
 		console.error(error);
@@ -72,16 +92,22 @@ exports.readNotifications = async (req, res) => {
 // Controller to delete a specific notification
 exports.deleteNotification = async (req, res) => {
 	try {
-		const notificationId = req.params.notificationId;
+		const { notificationId } = req.params;
+		const userId = req.userId; // Assuming req.userId is populated
 
-		// Delete the notification by ID
-		const deletedNotification = await Notification.findByIdAndDelete(
-			notificationId
-		);
-
-		if (!deletedNotification) {
+		// Find the notification and check if it belongs to the user
+		const notification = await Notification.findById(notificationId);
+		if (!notification) {
 			return res.status(404).json({ error: "Notification not found" });
 		}
+
+		if (!notification.users.includes(userId)) {
+			// If the notification does not belong to the user, deny the action
+			return res.status(403).json({ error: "Unauthorized action" });
+		}
+
+		// Delete the notification since it belongs to the user
+		await notification.deleteOne();
 
 		res
 			.status(200)
@@ -95,10 +121,10 @@ exports.deleteNotification = async (req, res) => {
 // Controller to delete all notifications for the authenticated user
 exports.deleteAllNotifications = async (req, res) => {
 	try {
-		const userId = req.user._id;
+		const userId = req.userId;
 
 		// Delete all notifications for the user
-		await Notification.deleteMany({ user: userId });
+		await Notification.deleteMany({ users: { $in: [userId] } });
 
 		res.status(200).json({
 			success: true,

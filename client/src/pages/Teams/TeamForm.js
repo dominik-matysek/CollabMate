@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { SetLoading } from "../../redux/loadersSlice";
 import teamService from "../../services/team";
 import { getAntdFormInputRules } from "../../utils/helpers";
+import notificationService from "../../services/notification";
 
 const { Option } = Select;
 
@@ -38,6 +39,15 @@ function TeamForm({ reloadData, users }) {
 
 				form.resetFields();
 				reloadData();
+
+				// Send notification to added team leaders
+				const notificationPayload = {
+					users: values.teamLeaders, // Array of user IDs
+					title: "Added to Team",
+					description: `You have been added to the team ${values.name}.`,
+					link: `/teams/${response.data._id}}`, // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(notificationPayload);
 			} else {
 				throw new Error(response.error);
 			}
