@@ -202,7 +202,7 @@ exports.deleteTeam = async (req, res) => {
 		);
 
 		// Remove team from users' teams property
-		await User.updateMany({ teams: teamId }, { $pull: { teams: teamId } });
+		await User.updateMany({ team: teamId }, { $set: { team: null } });
 
 		// Finally, delete the team
 		await Team.findByIdAndDelete(teamId);

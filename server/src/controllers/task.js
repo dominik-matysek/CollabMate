@@ -161,17 +161,34 @@ exports.deleteTask = async (req, res) => {
 	try {
 		const taskId = req.params.taskId;
 
+		const userId = req.userId;
+
 		// Retrieve the task with its project ID
-		const task = await Task.findById(taskId).select("project");
+		const task = await Task.findById(taskId);
 		if (!task) {
 			return res.status(404).json({ error: "Task not found" });
 		}
 
+		console.log("Status zadania: ", task.status);
+
+		// Check if the task status is inProgress or completed
+		if (task.status === "inProgress" || task.status === "completed") {
+			return res.status(400).json({
+				error: "Cannot delete a task that is in progress or completed",
+			});
+		}
+
+		const isCreator = task.createdBy === userId;
+		const isTeamLeader = req.userRole === "TEAM LEADER";
+
+		if (!isCreator && !isTeamLeader) {
+			return res.status(403).json({
+				error: "Only the task creator or a team leader can delete this task",
+			});
+		}
+
 		// Delete all comments associated with the task
 		await Comment.deleteMany({ _id: { $in: task.comments } });
-
-		// Delete the task
-		await Task.findByIdAndDelete(taskId);
 
 		// Remove the task from the project's tasks array
 		await Project.findByIdAndUpdate(
@@ -179,6 +196,9 @@ exports.deleteTask = async (req, res) => {
 			{ $pull: { tasks: taskId } },
 			{ new: true }
 		);
+
+		// Delete the task
+		await Task.findByIdAndDelete(taskId);
 
 		res
 			.status(200)

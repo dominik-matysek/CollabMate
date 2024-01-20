@@ -50,39 +50,33 @@ const Navbar = ({ user, toggleSidebar, handleLogout }) => {
 	);
 
 	const handleDeleteNotification = async (event, notificationId) => {
-		//event.stopPropagation();
+		event.stopPropagation();
 		try {
-			dispatch(SetLoading(true));
 			const response = await notificationService.deleteNotification(
 				notificationId
 			);
-			dispatch(SetLoading(false));
 			if (response.success) {
 				dispatch(RemoveNotification(notificationId));
 			} else {
 				throw new Error(response.message);
 			}
 		} catch (error) {
-			dispatch(SetLoading(false));
 			message.error(error.message);
 		}
 	};
 
 	const handleMarkAsRead = async (event, notificationId) => {
-		//event.stopPropagation();
+		event.stopPropagation();
 		try {
-			dispatch(SetLoading(true));
 			const response = await notificationService.markNotificationAsRead(
 				notificationId
 			);
-			dispatch(SetLoading(false));
 			if (response.success) {
 				dispatch(MarkNotificationAsRead(notificationId));
 			} else {
 				throw new Error(response.message);
 			}
 		} catch (error) {
-			dispatch(SetLoading(false));
 			message.error(error.message);
 		}
 	};
@@ -90,16 +84,13 @@ const Navbar = ({ user, toggleSidebar, handleLogout }) => {
 	const removeAllNotifications = async (event) => {
 		// event.stopPropagation();
 		try {
-			dispatch(SetLoading(true));
 			const response = await notificationService.deleteAllNotifications();
-			dispatch(SetLoading(false));
 			if (response.success) {
 				dispatch(ClearNotifications());
 			} else {
 				throw new Error(response.message);
 			}
 		} catch (error) {
-			dispatch(SetLoading(false));
 			message.error(error.message);
 		}
 	};
@@ -122,13 +113,16 @@ const Navbar = ({ user, toggleSidebar, handleLogout }) => {
 						<div className="flex justify-between items-center">
 							<p className="font-bold my-auto">{notification.title}</p>
 							<div className="flex items-center space-x-2">
-								<Button
-									icon={<CheckOutlined />}
-									onClick={(e) => handleMarkAsRead(e, notification._id)}
-									size="small"
-									type="text"
-									className="text-green-800"
-								/>
+								{!notification.read && (
+									<Button
+										icon={<CheckOutlined />}
+										onClick={(e) => handleMarkAsRead(e, notification._id)}
+										size="small"
+										type="text"
+										className="text-green-800"
+									/>
+								)}
+
 								<Button
 									icon={<CloseOutlined />}
 									danger

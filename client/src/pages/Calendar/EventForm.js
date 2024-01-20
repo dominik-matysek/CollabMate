@@ -14,6 +14,7 @@ import { IoTrashBin, IoBuild, IoPerson } from "react-icons/io5";
 import { SetLoading, SetButtonLoading } from "../../redux/loadersSlice";
 import { useSelector, useDispatch } from "react-redux";
 import eventService from "../../services/event";
+import notificationService from "../../services/notification";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 const { Option } = Select;
@@ -23,6 +24,8 @@ function EventForm({
 	onCancel,
 	currentUser,
 	allMembers,
+	reloadData,
+	reloadEventData,
 }) {
 	const [form] = Form.useForm();
 	const [selectedMembers, setSelectedMembers] = useState([]);
@@ -57,7 +60,15 @@ function EventForm({
 			if (response.success) {
 				message.success("User(s) added successfully");
 				setSelectedMembers(null);
-				// reloadData();
+				reloadEventData(eventDetails._id);
+
+				const notificationPayload = {
+					users: values.member, // Array of user IDs
+					title: "Dodano cię do wydarzenia",
+					description: `Zostałeś dodany do wydarzenia w twoim zespole: ${eventDetails.name}.`,
+					link: `/teams/${eventDetails.team}/events`, // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(notificationPayload);
 			} else {
 				throw new Error(response.error);
 			}
@@ -77,7 +88,15 @@ function EventForm({
 			);
 			if (response.success) {
 				message.success(response.message);
-				// reloadData();
+				reloadEventData(eventDetails._id);
+
+				const notificationPayload = {
+					users: id, // Array of user IDs
+					title: "Usunięto cię z wydarzenia",
+					description: `Zostałeś usunięty z wydarzenia w twoim zespole: ${eventDetails.name}.`,
+					link: `/teams/${eventDetails.team}/events`, // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(notificationPayload);
 			} else {
 				message.error(response.message);
 				throw new Error(response.error);
@@ -85,6 +104,24 @@ function EventForm({
 			dispatch(SetLoading(false));
 		} catch (error) {
 			dispatch(SetLoading(false));
+		}
+	};
+
+	const deleteEvent = async () => {
+		try {
+			dispatch(SetLoading(true));
+			const response = await eventService.deleteEvent(eventDetails._id);
+			if (response.success) {
+				message.success(response.message);
+				onCancel();
+				reloadData();
+			} else {
+				throw new Error(response.error);
+			}
+			dispatch(SetLoading(false));
+		} catch (error) {
+			dispatch(SetLoading(false));
+			message.error(error.message);
 		}
 	};
 
@@ -217,17 +254,22 @@ function EventForm({
 					>
 						Dodaj użytkownika
 					</Button>
-					<div className="flex justify-end mt-4">
-						<Button onClick={onCancel} className="mr-2">
-							Anuluj
+					<div className="flex justify-between mt-4">
+						<Button danger type="primary" onClick={deleteEvent}>
+							Usuń wydarzenie
 						</Button>
-						<Button
-							type="primary"
-							htmlType="submit"
-							disabled={!formChanged || !isEditable}
-						>
-							Zapisz
-						</Button>
+						<div>
+							<Button onClick={onCancel} className="mr-2">
+								Anuluj
+							</Button>
+							<Button
+								type="primary"
+								htmlType="submit"
+								disabled={!formChanged || !isEditable}
+							>
+								Zapisz
+							</Button>
+						</div>
 					</div>
 				</>
 			)}

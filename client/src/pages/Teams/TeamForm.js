@@ -43,8 +43,8 @@ function TeamForm({ reloadData, users }) {
 				// Send notification to added team leaders
 				const notificationPayload = {
 					users: values.teamLeaders, // Array of user IDs
-					title: "Added to Team",
-					description: `You have been added to the team ${values.name}.`,
+					title: "Dodano do zespołu",
+					description: `Zostałeś dodany do zespołu: ${values.name}.`,
 					link: `/teams/${response.data._id}}`, // Adjust link to point to the team page or relevant resource
 				};
 				await notificationService.createNotification(notificationPayload);

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Form, Input, Button, message, Table, Modal } from "antd";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import teamService from "../../../services/team";
+import notificationService from "../../../services/notification";
 import { useSelector, useDispatch } from "react-redux";
 import { SetLoading } from "../../../redux/loadersSlice";
 import { getSimpleDateFormat } from "../../../utils/helpers";
@@ -47,7 +48,7 @@ function Team() {
 	};
 
 	const closeDeleteTeamModal = () => {
-		setIsModalVisible(false);
+		setIsDeleteModalVisible(false);
 	};
 
 	const showAddUserModal = () => {
@@ -70,6 +71,31 @@ function Team() {
 		};
 	};
 
+	const confirmDeleteTeam = async () => {
+		try {
+			dispatch(SetLoading(true));
+			const response = await teamService.deleteTeam(teamId);
+			if (response.success) {
+				message.success(response.message);
+				navigate("/teams");
+
+				const notificationPayload = {
+					users: [...team.teamLeaders, ...team.members], // Array of user IDs
+					title: "Usunięto zespół",
+					description: `Twój zespół został usunięty przez administratora.`,
+					link: "/teams", // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(notificationPayload);
+			} else {
+				throw new Error(response.message);
+			}
+			dispatch(SetLoading(false));
+		} catch (error) {
+			dispatch(SetLoading(false));
+			message.error(error.message);
+		}
+	};
+
 	const onDelete = async (id) => {
 		try {
 			dispatch(SetLoading(true));
@@ -78,6 +104,22 @@ function Team() {
 			if (response.success) {
 				message.success(response.message);
 				reloadData();
+				const notificationPayload = {
+					users: team.teamLeaders, // Array of user IDs
+					title: "Usunięto członka",
+					description: `Z twojego zespołu usunięto jednego lub więcej członków: ${team.name}.`,
+					link: `/teams/${team.id}}`, // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(notificationPayload);
+				const notificationPayloadToRemoved = {
+					users: id, // Array of user IDs
+					title: "Usunięto cię z zespołu",
+					description: `Zostałeś usunięty z zespołu: ${team.name}.`,
+					link: `/teams`, // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(
+					notificationPayloadToRemoved
+				);
 			} else {
 				message.error(response.message);
 				throw new Error(response.error);
@@ -165,6 +207,22 @@ function Team() {
 							</Button>
 						)}
 					</div>
+					{isDeleteModalVisible && (
+						<Modal
+							title="Potwierdź operację"
+							open={isDeleteModalVisible}
+							onOk={confirmDeleteTeam}
+							onCancel={closeDeleteTeamModal}
+							okText="Tak"
+							cancelText="Anuluj"
+						>
+							<p>Czy na pewno chcesz usunąć ten zespół?</p>
+							<p>
+								Wszystkie składowe - projekty, zadania, wydarzenia - również
+								zostaną usunięte
+							</p>
+						</Modal>
+					)}
 					<p className="text-gray-600">
 						Data utworzenia: {getSimpleDateFormat(team.createdAt)}
 					</p>
@@ -252,7 +310,7 @@ function Team() {
 						</div>
 					</div>
 					<AddUserForm
-						teamId={teamId}
+						team={team}
 						isVisible={isModalVisible}
 						onClose={closeAddUserModal}
 						reloadData={reloadData}

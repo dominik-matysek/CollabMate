@@ -10,6 +10,7 @@ import { UserOutlined } from "@ant-design/icons";
 import AddUserForm from "./AddUserForm";
 import { getAntdFormInputRules } from "../../../utils/helpers";
 import projectService from "../../../services/project";
+import notificationService from "../../../services/notification";
 
 function Project() {
 	const { projectId } = useParams();
@@ -26,6 +27,8 @@ function Project() {
 
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+
+	const teamId = project ? project.team : null;
 
 	const navigate = useNavigate();
 
@@ -112,12 +115,12 @@ function Project() {
 		await fetchProjectData();
 	};
 
-	const showDeleteTeamModal = () => {
+	const showDeleteProjectModal = () => {
 		setIsDeleteModalVisible(true);
 	};
 
-	const closeDeleteTeamModal = () => {
-		setIsModalVisible(false);
+	const closeDeleteProjectModal = () => {
+		setIsDeleteModalVisible(false);
 	};
 
 	const showAddUserModal = () => {
@@ -140,6 +143,30 @@ function Project() {
 		};
 	};
 
+	const confirmDeleteProject = async () => {
+		try {
+			dispatch(SetLoading(true));
+			const response = await projectService.deleteProject(projectId);
+			if (response.success) {
+				message.success(response.message);
+				navigate(`/teams/${teamId}/projects`);
+				const notificationPayload = {
+					users: project.members, // Array of user IDs
+					title: "Usunięto projekt",
+					description: `Usunięto projekt którego byłeś członkiem z twojego zespołu.`,
+					link: `/projects`, // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(notificationPayload);
+			} else {
+				throw new Error(response.message);
+			}
+			dispatch(SetLoading(false));
+		} catch (error) {
+			dispatch(SetLoading(false));
+			message.error(error.message);
+		}
+	};
+
 	const onDelete = async (id) => {
 		try {
 			dispatch(SetLoading(true));
@@ -151,6 +178,13 @@ function Project() {
 			if (response.success) {
 				message.success(response.message);
 				reloadData();
+				const notificationPayload = {
+					users: id, // Array of user IDs
+					title: "Usunięto z projektu",
+					description: `Zostałeś usunięty z projektu w swoim zespole.`,
+					link: `/projects`, // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(notificationPayload);
 			} else {
 				message.error(response.message);
 				throw new Error(response.error);
@@ -223,11 +257,27 @@ function Project() {
 							{project.name}
 						</h1>
 						{user.role === "TEAM LEADER" && (
-							<Button type="primary" danger onClick={showDeleteTeamModal}>
+							<Button type="primary" danger onClick={showDeleteProjectModal}>
 								Usuń projekt
 							</Button>
 						)}
 					</div>
+					{isDeleteModalVisible && (
+						<Modal
+							title="Potwierdź operację"
+							open={isDeleteModalVisible}
+							onOk={confirmDeleteProject}
+							onCancel={closeDeleteProjectModal}
+							okText="Tak"
+							cancelText="Anuluj"
+						>
+							<p>Czy na pewno chcesz usunąć ten projekt?</p>
+							<p>
+								Wszystkie składowe - zadania, pliki, komentarze - również
+								zostaną usunięte
+							</p>
+						</Modal>
+					)}
 					{/* Project Status */}
 					<div>
 						<h2 className="text-2xl font-semibold text-gray-800 mb-3">

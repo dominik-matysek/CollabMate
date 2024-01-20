@@ -5,6 +5,7 @@ import { SetButtonLoading } from "../../../redux/loadersSlice";
 import { getAntdFormInputRules } from "../../../utils/helpers";
 import { useDispatch } from "react-redux";
 import projectService from "../../../services/project";
+import notificationService from "../../../services/notification";
 
 const AddUserForm = ({ project, isVisible, onClose, reloadData }) => {
 	const [form] = Form.useForm();
@@ -55,6 +56,14 @@ const AddUserForm = ({ project, isVisible, onClose, reloadData }) => {
 				message.success("User(s) added successfully");
 				onClose();
 				reloadData();
+
+				const notificationPayload = {
+					users: values.member, // Array of user IDs
+					title: "Nowy projekt",
+					description: `Zostałeś dodany do nowego projektu w swoim zespole.`,
+					link: `/projects/${project._id}`, // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(notificationPayload);
 			} else {
 				throw new Error(response.error);
 			}

@@ -26,12 +26,12 @@ const usersSlice = createSlice({
 		},
 		RemoveNotification(state, action) {
 			state.notifications = state.notifications.filter(
-				(notification) => notification.id !== action.payload
+				(notification) => notification._id !== action.payload
 			);
 		},
 		MarkNotificationAsRead(state, action) {
 			state.notifications = state.notifications.map((notification) =>
-				notification.id === action.payload
+				notification._id === action.payload
 					? { ...notification, read: true }
 					: notification
 			);

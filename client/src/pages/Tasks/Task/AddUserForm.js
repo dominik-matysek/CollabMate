@@ -5,6 +5,7 @@ import { getAntdFormInputRules } from "../../../utils/helpers";
 import { useDispatch } from "react-redux";
 import projectService from "../../../services/project";
 import taskService from "../../../services/task";
+import notificationService from "../../../services/notification";
 
 const AddUserForm = ({ task, isVisible, onClose, reloadData }) => {
 	const [form] = Form.useForm();
@@ -50,6 +51,14 @@ const AddUserForm = ({ task, isVisible, onClose, reloadData }) => {
 				message.success("User(s) added successfully");
 				onClose();
 				reloadData();
+
+				const notificationPayload = {
+					users: values.members, // Array of user IDs
+					title: "Dodano do zadania",
+					description: `Zostałeś dodany do zadania w projekcie.`,
+					link: `/projects/${task.project}/tasks/${task._id}`, // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(notificationPayload);
 			} else {
 				throw new Error(response.error);
 			}

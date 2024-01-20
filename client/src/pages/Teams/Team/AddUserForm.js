@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Modal, Form, Select, message, Button, Checkbox } from "antd";
 import userService from "../../../services/user";
 import teamService from "../../../services/team";
+import notificationService from "../../../services/notification";
 import { SetButtonLoading } from "../../../redux/loadersSlice";
 import { getAntdFormInputRules } from "../../../utils/helpers";
 import { useDispatch } from "react-redux";
 
-const AddUserForm = ({ teamId, isVisible, onClose, reloadData }) => {
+const AddUserForm = ({ team, isVisible, onClose, reloadData }) => {
 	const [form] = Form.useForm();
 	const [users, setUsers] = useState([]);
 	const [roleType, setRoleType] = useState("EMPLOYEE");
@@ -43,12 +44,32 @@ const AddUserForm = ({ teamId, isVisible, onClose, reloadData }) => {
 				userIds: values.user,
 				roleType: roleType, // "member" or "leader"
 			};
-			const response = await teamService.addUsersToTeam(teamId, payload);
+			const response = await teamService.addUsersToTeam(team._id, payload);
 			dispatch(SetButtonLoading(false));
 			if (response.success) {
 				message.success("User(s) added successfully");
 				onClose();
 				reloadData();
+
+				// Send notification to added team leaders
+				const notificationPayload = {
+					users: team.teamLeaders, // Array of user IDs
+					title: "Nowy członek",
+					description: `Do twojego zespołu dodano nowego członka: ${team.name}.`,
+					link: `/teams/${team.id}}`, // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(notificationPayload);
+
+				// Send notification to added team leaders
+				const notificationPayloadToMember = {
+					users: values.user, // Array of user IDs
+					title: "Nowy zespół",
+					description: `Zostałeś dodany do nowego zespołu: ${team.name}.`,
+					link: `/teams/${team.id}}`, // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(
+					notificationPayloadToMember
+				);
 			} else {
 				throw new Error(response.error);
 			}

@@ -98,6 +98,10 @@ function CalendarPage() {
 		await fetchEvents();
 	};
 
+	const reloadEventData = async (eventId) => {
+		await fetchEventDetails(eventId);
+	};
+
 	useEffect(() => {
 		reloadData();
 	}, [teamId]);
@@ -252,6 +256,8 @@ function CalendarPage() {
 						onCancel={handleCancel} // Already defined in your code
 						currentUser={user} // Current user data
 						allMembers={[...leaders, ...members]} // Array of all members
+						reloadData={reloadData}
+						reloadEventData={reloadEventData}
 					/>
 				)}
 			</Modal>

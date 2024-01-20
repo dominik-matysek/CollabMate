@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Input, Button, message, Select, Row, Col } from "antd";
+import { Input, Button, message, Select, Row, Col, Modal } from "antd";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { SetLoading, SetButtonLoading } from "../../../redux/loadersSlice";
@@ -14,6 +14,7 @@ import FileList from "../../../components/FileList";
 import Comments from "../../../components/Comments";
 import CommentInput from "../../../components/CommentInput";
 import commentService from "../../../services/comment";
+import notificationService from "../../../services/notification";
 
 const { Option } = Select;
 
@@ -39,6 +40,8 @@ function Task() {
 	const [comments, setComments] = useState([]);
 
 	const navigate = useNavigate();
+
+	const projectId = task ? task.project : null;
 
 	const fetchTaskData = async () => {
 		try {
@@ -186,6 +189,14 @@ function Task() {
 			if (response.success) {
 				message.success("Files uploaded successfully");
 				reloadData(); // Reload task data to update the list of attachments
+
+				const notificationPayload = {
+					users: task.members, // Array of user IDs
+					title: "Dodanie pliku",
+					description: `Dodano plik do zadania którego jesteś członkiem.`,
+					link: `/projects/${task.project}/tasks/${taskId}`, // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(notificationPayload);
 			} else {
 				throw new Error(response.message);
 			}
@@ -221,6 +232,13 @@ function Task() {
 			if (response.success) {
 				message.success(response.message);
 				reloadData();
+				const notificationPayload = {
+					users: id, // Array of user IDs
+					title: "Usunięcie z zadania",
+					description: `Usunięto Cię z zadania którego byłeś członkiem.`,
+					link: `/projects/${task.project}/tasks`, // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(notificationPayload);
 			} else {
 				message.error(response.message);
 				throw new Error(response.error);
@@ -241,6 +259,14 @@ function Task() {
 			if (response.success) {
 				message.success("Comment added successfully");
 				await reloadData(); // Refresh the comments list
+
+				const notificationPayload = {
+					users: task.members, // Array of user IDs
+					title: "Dodano komentarz",
+					description: `Dodano komentarz do zadania którego jesteś członkiem.`,
+					link: `/projects/${task.project}/tasks/${taskId}`, // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(notificationPayload);
 			} else {
 				message.error(response.message);
 				throw new Error(response.message);
@@ -272,12 +298,12 @@ function Task() {
 		await fetchAllComments();
 	};
 
-	const showDeleteTeamModal = () => {
+	const showDeleteTaskModal = () => {
 		setIsDeleteModalVisible(true);
 	};
 
-	const closeDeleteTeamModal = () => {
-		setIsModalVisible(false);
+	const closeDeleteTaskModal = () => {
+		setIsDeleteModalVisible(false);
 	};
 
 	const showAddUserModal = () => {
@@ -286,6 +312,31 @@ function Task() {
 
 	const closeAddUserModal = () => {
 		setIsModalVisible(false);
+	};
+
+	const confirmDeleteTask = async () => {
+		try {
+			dispatch(SetLoading(true));
+			const response = await taskService.deleteTask(taskId);
+			if (response.success) {
+				message.success(response.message);
+				navigate(`/projects/${projectId}/tasks`);
+
+				const notificationPayload = {
+					users: task.members, // Array of user IDs
+					title: "Usunięto zadanie",
+					description: `Usunięto zadanie którego byłeś członkiem.`,
+					link: `/projects/${task.project}/tasks`, // Adjust link to point to the team page or relevant resource
+				};
+				await notificationService.createNotification(notificationPayload);
+			} else {
+				throw new Error(response.error);
+			}
+			dispatch(SetLoading(false));
+		} catch (error) {
+			dispatch(SetLoading(false));
+			message.error(error.message);
+		}
 	};
 
 	useEffect(() => {
@@ -309,11 +360,27 @@ function Task() {
 							Data utworzenia: {getSimpleDateFormat(task.createdAt)}
 						</p>
 						{(user.role === "TEAM LEADER" || user._id === task.createdBy) && (
-							<Button type="primary" danger onClick={showDeleteTeamModal}>
+							<Button type="primary" danger onClick={showDeleteTaskModal}>
 								Usuń zadanie
 							</Button>
 						)}
 					</div>
+					{isDeleteModalVisible && (
+						<Modal
+							title="Potwierdź operację"
+							open={isDeleteModalVisible}
+							onOk={confirmDeleteTask}
+							onCancel={closeDeleteTaskModal}
+							okText="Tak"
+							cancelText="Anuluj"
+						>
+							<p>Czy na pewno chcesz usunąć to zadanie?</p>
+							<p>
+								Wszystkie składowe - komentarze, pliki - również zostaną
+								usunięte
+							</p>
+						</Modal>
+					)}
 					{/* Task Status */}
 					<div c>
 						<h2 className="text-2xl font-semibold text-gray-800 mb-3">
