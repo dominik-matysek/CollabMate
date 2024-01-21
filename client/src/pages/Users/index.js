@@ -16,6 +16,8 @@ function Users() {
 	const [users, setUsers] = useState([]);
 	const dispatch = useDispatch();
 
+	const isAdmin = user.role === "ADMIN";
+
 	const navigate = useNavigate();
 
 	const fetchUsers = async () => {
@@ -146,7 +148,7 @@ function Users() {
 		];
 	}
 
-	return (
+	return isAdmin ? (
 		<div>
 			<Table
 				columns={columns}
@@ -154,6 +156,17 @@ function Users() {
 				onRow={onRowClick}
 				className="mt-4"
 			/>
+		</div>
+	) : (
+		<div class="flex items-center justify-center h-screen">
+			<div>
+				<h1 class="text-4xl font-bold text-center" style={{ color: "#138585" }}>
+					403 - Forbidden
+				</h1>
+				<p class="text-2xl text-center">
+					Niestety, nie posiadasz dostępu do tej zawartości
+				</p>
+			</div>
 		</div>
 	);
 }

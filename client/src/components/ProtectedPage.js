@@ -22,10 +22,9 @@ import notificationService from "../services/notification";
 const { Content } = Layout;
 
 function ProtectedPage({ children }) {
-	// const [showNotifications, setShowNotifications] = useState(false);
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
-	const { user, notifications } = useSelector((state) => state.users);
+	const { user } = useSelector((state) => state.users);
 	console.log(`User in Protected Page ${user}`);
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -95,7 +94,6 @@ function ProtectedPage({ children }) {
 			}
 		} catch (error) {
 			console.error("Error fetching notifications:", error);
-			// Handle error
 		}
 	};
 

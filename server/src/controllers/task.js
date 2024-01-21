@@ -11,33 +11,32 @@ const taskCreateValidation = require("../utils/taskValidation");
 // Controller to create a new task
 exports.createTask = async (req, res) => {
 	try {
-		// const { error } = taskCreateValidation.validate(req.body);
-		// if (error)
-		// 	return res.status(400).json({ message: error.details[0].message });
-		console.log("Body: ", req.body);
-		console.log("projectId: ", req.params.projectId);
-		console.log("creatorId: ", req.userId);
 		const { name, description, priority, dueDate, memberIds } = req.body;
+
+		const { error } = taskCreateValidation.validate(req.body);
+		if (error)
+			return res.status(400).json({ message: error.details[0].message });
+
 		const projectId = req.params.projectId;
-		const creatorId = req.userId; //albo req.userId
+		const creatorId = req.userId;
 
 		// Validate dueDate
 		if (!moment(dueDate).isAfter(moment().startOf("day"))) {
 			return res
 				.status(400)
-				.json({ message: "Due date must be a future date." });
+				.json({ message: "Termin musi istnieć w przyszłości." });
 		}
 
 		// Retrieve the specified project and populate team members
 		const project = await Project.findById(projectId).populate("team");
 		if (!project) {
-			return res.status(404).json({ message: "Project not found" });
+			return res.status(404).json({ message: "Nie znaleziono projektu." });
 		}
 
 		// Retrieve the team associated with the project
 		const team = await Team.findById(project.team);
 		if (!team) {
-			return res.status(404).json({ message: "Team not found" });
+			return res.status(404).json({ message: "Nie znaleziono zespołu." });
 		}
 
 		// Include the creator's ID in the members list and filter validMemberIds
@@ -70,7 +69,6 @@ exports.createTask = async (req, res) => {
 		res.status(200).json({
 			success: true,
 			message: "Stworzono zadanie",
-			// data: task, // TUTAJ CHYBA data ci nie jest potrzebna, podobnie powinieneś zrobić w create projekt i innych takich - sprawdzać gdzie na froncie bierzesz tylko response.status, a gdzie response.data ci faktycznie jest potrzebne
 		});
 	} catch (error) {
 		console.error(error);
@@ -90,17 +88,17 @@ exports.getAllTasks = async (req, res) => {
 			populate: [
 				{
 					path: "members",
-					select: "profilePic", // Add additional fields you want to select here
+					select: "profilePic",
 				},
 				{
 					path: "createdBy",
-					select: "firstName lastName", // Include profilePic here if needed
+					select: "firstName lastName",
 				},
 			],
 		});
 
 		if (!project) {
-			return res.status(404).json({ error: "Project not found" });
+			return res.status(404).json({ error: "Nie znaleziono projektu." });
 		}
 
 		res.status(200).json({
@@ -118,9 +116,7 @@ exports.getAllTasks = async (req, res) => {
 exports.getTaskById = async (req, res) => {
 	try {
 		const taskId = req.params.taskId;
-		const userId = req.userId;
 		const userRole = req.userRole;
-		console.log(userRole);
 
 		// Retrieve a task by ID and populate the 'members' and 'comments' fields
 		const task = await Task.findById(taskId).populate(
@@ -129,7 +125,7 @@ exports.getTaskById = async (req, res) => {
 		);
 
 		if (!task) {
-			return res.status(404).json({ error: "Task not found" });
+			return res.status(404).json({ error: "Nie znaleziono zadania." });
 		}
 
 		if (new Date() > new Date(task.dueDate) && task.status !== "overdue") {
@@ -141,8 +137,6 @@ exports.getTaskById = async (req, res) => {
 			task.status,
 			userRole
 		);
-
-		console.log("allowedTransitions: ", allowedTransitions);
 
 		res.status(200).json({
 			success: true,
@@ -166,15 +160,14 @@ exports.deleteTask = async (req, res) => {
 		// Retrieve the task with its project ID
 		const task = await Task.findById(taskId);
 		if (!task) {
-			return res.status(404).json({ error: "Task not found" });
+			return res.status(404).json({ error: "Nie znaleziono zadania." });
 		}
-
-		console.log("Status zadania: ", task.status);
 
 		// Check if the task status is inProgress or completed
 		if (task.status === "inProgress" || task.status === "completed") {
 			return res.status(400).json({
-				error: "Cannot delete a task that is in progress or completed",
+				error:
+					"Nie można usunąć zadania które ma status: w trakcie lub zakończone. Zmień status lub zadbaj o zaakceptowanie przed lidera.",
 			});
 		}
 
@@ -183,7 +176,7 @@ exports.deleteTask = async (req, res) => {
 
 		if (!isCreator && !isTeamLeader) {
 			return res.status(403).json({
-				error: "Only the task creator or a team leader can delete this task",
+				error: "Tylko liderzy lub założyciel zadania mogą go usunąć.",
 			});
 		}
 
@@ -202,7 +195,7 @@ exports.deleteTask = async (req, res) => {
 
 		res
 			.status(200)
-			.json({ success: true, message: "Task deleted successfully" });
+			.json({ success: true, message: "Pomyślnie usunięto zadanie." });
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ error: "Internal Server Error" });
@@ -217,7 +210,7 @@ exports.addMembersToTask = async (req, res) => {
 		const task = await Task.findById(taskId).populate("project", "members");
 
 		if (!task) {
-			return res.status(404).json({ error: "Task not found" });
+			return res.status(404).json({ error: "Nie znaleziono zadania." });
 		}
 
 		const alreadyMembers = userIds.filter((userId) =>
@@ -226,7 +219,7 @@ exports.addMembersToTask = async (req, res) => {
 
 		if (alreadyMembers.length > 0) {
 			return res.status(400).json({
-				error: "One or more users are already members of the task",
+				error: "Jeden lub więcej użytkowników należy już do członków zadania.",
 			});
 		}
 		const areAllUsersProjectMembers = userIds.every((userId) =>
@@ -236,7 +229,9 @@ exports.addMembersToTask = async (req, res) => {
 		if (!areAllUsersProjectMembers) {
 			return res
 				.status(403)
-				.json({ message: "One or more users are not members of the project" });
+				.json({
+					message: "Jeden lub więcej użytkowników nie są członkami projektu.",
+				});
 		}
 
 		const updatedTask = await Task.findByIdAndUpdate(
@@ -269,7 +264,7 @@ exports.removeMemberFromTask = async (req, res) => {
 		);
 
 		if (!task) {
-			return res.status(404).json({ error: "Task not found" });
+			return res.status(404).json({ error: "Nie znaleziono zadania." });
 		}
 
 		res.status(200).json({
@@ -287,7 +282,6 @@ exports.changeTaskPriority = async (req, res) => {
 	try {
 		const { taskId } = req.params;
 		const task = await Task.findById(taskId);
-		// console.log("User: ", req.userId);
 
 		if (!task) {
 			return res.status(404).json({ message: "Nie znaleziono projektu" });
@@ -305,8 +299,6 @@ exports.changeTaskPriority = async (req, res) => {
 		// Update the project status
 		task.priority = newPriority;
 
-		console.log("Priorytet:", task.priority);
-
 		await task.save();
 
 		res.status(200).json({
@@ -323,11 +315,9 @@ exports.changeTaskPriority = async (req, res) => {
 exports.changeTaskStatus = async (req, res) => {
 	try {
 		const { taskId } = req.params;
-		const userId = req.userId;
 		const userRole = req.userRole;
 		const newStatus = req.body.status;
 
-		console.log("Wysłany status: ", newStatus);
 		const task = await Task.findById(taskId);
 		if (!task) {
 			return res.status(404).json({ message: "Task not found" });
@@ -338,10 +328,8 @@ exports.changeTaskStatus = async (req, res) => {
 			userRole
 		);
 
-		console.log("To mozesz: ", allowedTransitions);
-
 		if (!allowedTransitions.includes(newStatus)) {
-			return res.status(400).json({ message: "Invalid status transition" });
+			return res.status(400).json({ message: "Niewłaściwy status." });
 		}
 
 		task.status = newStatus;
@@ -350,7 +338,7 @@ exports.changeTaskStatus = async (req, res) => {
 
 		res.status(200).json({
 			success: true,
-			message: "Task status updated successfully",
+			message: "Pomyślnie zaktualizowano zadanie",
 			data: { status: task.status },
 		});
 	} catch (error) {
@@ -364,9 +352,6 @@ exports.changeTaskDescription = async (req, res) => {
 		const { taskId } = req.params;
 		const { description } = req.body;
 
-		console.log("Tym razem zmiana opisu - ID: ", taskId);
-		console.log("Tym razem zmiana opisu: ", description);
-
 		const result = await Task.updateOne(
 			{ _id: taskId },
 			{ $set: { description: description } }
@@ -375,7 +360,7 @@ exports.changeTaskDescription = async (req, res) => {
 		if (result.nModified === 0) {
 			return res
 				.status(404)
-				.json({ message: "Task not found or description unchanged" });
+				.json({ message: "Nie znaleziono zadania lub nie zmieniono opisu." });
 		}
 
 		res.status(200).json({
@@ -388,21 +373,19 @@ exports.changeTaskDescription = async (req, res) => {
 	}
 };
 
-// I jeszcze ogarnięcie attachements
 exports.uploadAttachments = async (req, res) => {
 	try {
 		const { taskId } = req.params;
 
 		const task = await Task.findById(taskId);
 		if (!task) {
-			return res.status(404).json({ message: "Task not found" });
+			return res.status(404).json({ message: "Nie znaleziono zadania." });
 		}
 
 		if (req.files) {
 			req.files.forEach((file) => {
 				const fileUrl = file.path;
 				task.attachments.push(fileUrl);
-				console.log("Original file name: ", file.originalname);
 			});
 		}
 
@@ -410,7 +393,7 @@ exports.uploadAttachments = async (req, res) => {
 
 		res.status(200).json({
 			success: true,
-			message: "Attachment uploaded successfully",
+			message: "Pomyślnie dodano załączniki",
 			data: { attachmentUrls: task.attachments },
 		});
 	} catch (error) {
@@ -424,8 +407,6 @@ exports.removeAttachment = async (req, res) => {
 		const { taskId } = req.params;
 		const attachmentUrl = decodeURIComponent(req.query.url);
 
-		console.log("Attachment: ", req.params);
-
 		// Update the task and remove the attachment
 		const updatedTask = await Task.findByIdAndUpdate(
 			taskId,
@@ -436,7 +417,10 @@ exports.removeAttachment = async (req, res) => {
 		if (!updatedTask) {
 			return res
 				.status(404)
-				.json({ message: "Task not found or attachment not removed" });
+				.json({
+					message:
+						"Nie znaleziono zadania lub nie wybrano załącznika do usunięcia",
+				});
 		}
 
 		// Extract publicId and use utility function to delete from Cloudinary
@@ -448,12 +432,12 @@ exports.removeAttachment = async (req, res) => {
 		if (!success) {
 			return res
 				.status(500)
-				.json({ error: "Error deleting image from Cloudinary" });
+				.json({ error: "Nie udało się usunąć załącznika z systemu." });
 		}
 
 		res.status(200).json({
 			success: true,
-			message: "Attachment removed successfully",
+			message: "Pomyślnie usunięto załącznik",
 		});
 	} catch (error) {
 		console.error(error);

@@ -27,6 +27,8 @@ function Teams() {
 	const [statsData, setStatsData] = useState([]);
 	const [leaders, setLeaders] = useState([]);
 
+	console.log("Zespół usera: ", user.team);
+
 	const fetchUsers = async () => {
 		try {
 			// Add loading state handling if needed

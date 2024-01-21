@@ -21,8 +21,7 @@ const taskSchema = new Schema(
 		],
 		status: {
 			type: String,
-			required: true, // to moze działać tak że członkowie projektu sobie tworzą zadania, ustalają ich status itp, ale mogą maks ustawic completed - status approved musi ustawić jeden z team leaderów, np. po tym jak pracownicy ustawią status completed team leaderzy dostają powiadomienie i jeden z nich moze ustawic approved
-			// overdue wystepuje np automatycznie tylko wtedy gdy aktualna data jest po dueDate
+			required: true,
 			enum: [
 				"pending",
 				"inProgress",
@@ -44,7 +43,6 @@ const taskSchema = new Schema(
 			ref: "User",
 			required: true,
 		},
-		// niżej może nie tylko zdjęcia, ale też jakieś pliki typu pdf czy coś przydatne do tasków
 		attachments: [
 			{
 				type: String,

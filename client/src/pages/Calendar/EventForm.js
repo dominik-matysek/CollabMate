@@ -146,9 +146,7 @@ function EventForm({
 		const hasChanged =
 			allValues.title !== eventDetails.title ||
 			allValues.description !== eventDetails.description ||
-			(allValues.date &&
-				!allValues.date.isSame(moment(eventDetails.date), "day"));
-		setFormChanged(hasChanged);
+			setFormChanged(hasChanged);
 	};
 
 	return (
@@ -166,10 +164,10 @@ function EventForm({
 			</Form.Item>
 			<Form.Item label="Data" name="date">
 				<DatePicker
-					placeholder="Wybierz termin wykonania"
+					placeholder="Termin wykonania"
 					style={{ width: "100%" }}
 					format={dateFormat}
-					disabled={!isEditable}
+					disabled={true}
 					disabledDate={(current) => {
 						// Disabling past dates including today
 						return current && current < moment().startOf("day");

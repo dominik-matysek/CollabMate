@@ -30,6 +30,8 @@ function Project() {
 
 	const teamId = project ? project.team : null;
 
+	const isSameTeam = user.team._id === teamId;
+
 	const navigate = useNavigate();
 
 	const fetchProjectData = async () => {
@@ -246,7 +248,7 @@ function Project() {
 		];
 	}
 
-	return (
+	return isSameTeam ? (
 		project && (
 			<div className="container mx-auto my-5 p-5">
 				{/* {isTeamIdInUserTeams && <Sidebar />}  */}
@@ -445,6 +447,17 @@ function Project() {
 				</div>
 			</div>
 		)
+	) : (
+		<div class="flex items-center justify-center h-screen">
+			<div>
+				<h1 class="text-4xl font-bold text-center" style={{ color: "#138585" }}>
+					403 - Forbidden
+				</h1>
+				<p class="text-2xl text-center">
+					Niestety, nie posiadasz dostępu do tej zawartości
+				</p>
+			</div>
+		</div>
 	);
 }
 

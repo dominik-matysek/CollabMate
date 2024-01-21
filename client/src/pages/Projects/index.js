@@ -26,6 +26,8 @@ function Projects() {
 	const [statsData, setStatsData] = useState([]);
 	const [leaders, setLeaders] = useState([]);
 
+	const isSameTeam = user.team._id === teamId;
+
 	const fetchTeamMembers = async () => {
 		try {
 			// Add loading state handling if needed
@@ -102,7 +104,7 @@ function Projects() {
 		countStats();
 	}, [projects, members, leaders]); // Depend on teams and users
 
-	return (
+	return isSameTeam ? (
 		<>
 			<Row gutter={24} className="w-full container mx-auto p-6">
 				<Col span={16}>
@@ -130,6 +132,17 @@ function Projects() {
 				</Col>
 			</Row>
 		</>
+	) : (
+		<div class="flex items-center justify-center h-screen">
+			<div>
+				<h1 class="text-4xl font-bold text-center" style={{ color: "#138585" }}>
+					403 - Forbidden
+				</h1>
+				<p class="text-2xl text-center">
+					Niestety, nie posiadasz dostępu do tej zawartości
+				</p>
+			</div>
+		</div>
 	);
 }
 

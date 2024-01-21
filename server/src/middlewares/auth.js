@@ -7,14 +7,12 @@ const Event = require("../models/event");
 
 const verifyToken = (req, res, next) => {
 	try {
-		// const token = req.headers.authorization.split(" ")[1];
-
 		// Retrieve token from HttpOnly cookie
 		const token = req.cookies.token;
 
 		if (!token) {
 			return res.status(401).json({
-				message: "Unauthorized - Token not found.",
+				message: "Brak autoryzacji.",
 			});
 		}
 		const decryptedToken = jwt.verify(token, process.env.jwt_secret);
@@ -25,11 +23,13 @@ const verifyToken = (req, res, next) => {
 
 		next();
 	} catch (error) {
+		if (error.name === "TokenExpiredError") {
+			// Indicate that token has expired
+			return res.status(401).json({ tokenExpired: true });
+		}
 		console.error(error);
-
 		return res.status(401).json({
-			message:
-				"Unauthorized - Invalid or expired token. Please try to log in again.",
+			message: "Brak autoryzacji. Spróbuj zalogować się ponownie.",
 			error: error.message,
 		});
 	}
@@ -38,22 +38,21 @@ const verifyToken = (req, res, next) => {
 const verifyAdmin = async (req, res, next) => {
 	try {
 		if (!req.userId) {
-			return res.status(401).json({ message: "Unauthorized access." });
+			return res.status(401).json({ message: "Brak autoryzacji." });
 		}
 
 		// Fetch the user from the database
 		const user = await User.findById(req.userId);
 		if (!user) {
-			return res.status(404).json({ message: "User not found." });
+			return res.status(404).json({ message: "Nie znaleziono użytkownika." });
 		}
 
 		if (user.role === "ADMIN") {
 			// User is an admin, allow the request to proceed
-			console.log("User to admin hehhe");
 			next();
 		} else {
 			// User is not an admin, send a 403
-			res.status(403).json({ message: "Permission denied." });
+			res.status(403).json({ message: "Brak dostępu." });
 		}
 	} catch (error) {
 		console.error(error);
@@ -64,7 +63,7 @@ const verifyAdmin = async (req, res, next) => {
 const verifyLeader = async (req, res, next) => {
 	try {
 		if (!req.userId) {
-			return res.status(401).json({ message: "Unauthorized access." });
+			return res.status(401).json({ message: "Brak autoryzacji." });
 		}
 
 		// Fetch the user from the database
@@ -75,11 +74,10 @@ const verifyLeader = async (req, res, next) => {
 
 		if (user.role === "TEAM LEADER") {
 			// User is a team leader, allow the request to proceed
-			console.log("User to team leader");
 			next();
 		} else {
 			// User is not an team leader, send a 403
-			res.status(403).json({ message: "Permission denied." });
+			res.status(403).json({ message: "Brak dostępu." });
 		}
 	} catch (error) {
 		console.error(error);
@@ -92,29 +90,28 @@ const verifyEventCreator = async (req, res, next) => {
 		const userId = req.userId;
 
 		if (!userId) {
-			return res.status(401).json({ message: "Unauthorized access." });
+			return res.status(401).json({ message: "Brak autoryzacji." });
 		}
 
 		const eventId = req.params.eventId || req.body.eventId;
 
 		const event = await Event.findById(eventId);
 		if (!event) {
-			return res.status(404).json({ message: "Event not found." });
+			return res.status(404).json({ message: "Nie znaleziono wydarzenia." });
 		}
 
 		// Fetch the user from the database
 		const user = await User.findById(userId);
 		if (!user) {
-			return res.status(404).json({ message: "User not found." });
+			return res.status(404).json({ message: "Nie znaleziono użytkownika." });
 		}
 
 		if (user.role === "TEAM LEADER" || userId === event.createdBy) {
 			// User is a team leader, allow the request to proceed
-			console.log("User to team leader lub event creator");
 			next();
 		} else {
 			// User is not an team leader, send a 403
-			res.status(403).json({ message: "Permission denied." });
+			res.status(403).json({ message: "Brak dostępu." });
 		}
 	} catch (error) {
 		console.error(error);
@@ -127,29 +124,28 @@ const verifyCreator = async (req, res, next) => {
 		const userId = req.userId;
 
 		if (!userId) {
-			return res.status(401).json({ message: "Unauthorized access." });
+			return res.status(401).json({ message: "Brak autoryzacji." });
 		}
 
 		const taskId = req.params.taskId || req.body.taskId;
 
 		const task = await Task.findById(taskId);
 		if (!task) {
-			return res.status(404).json({ message: "Task not found." });
+			return res.status(404).json({ message: "Nie znaleziono zadania." });
 		}
 
 		// Fetch the user from the database
 		const user = await User.findById(userId);
 		if (!user) {
-			return res.status(404).json({ message: "User not found." });
+			return res.status(404).json({ message: "Nie znaleziono użytkownika." });
 		}
 
 		if (user.role === "TEAM LEADER" || userId === task.createdBy) {
 			// User is a team leader, allow the request to proceed
-			console.log("User to team leader or a task creator");
 			next();
 		} else {
 			// User is not an team leader, send a 403
-			res.status(403).json({ message: "Permission denied." });
+			res.status(403).json({ message: "Brak dostępu." });
 		}
 	} catch (error) {
 		console.error(error);
@@ -161,7 +157,7 @@ const checkTeamAccess = async (req, res, next) => {
 	try {
 		const userId = req.userId;
 		if (!userId) {
-			return res.status(401).json({ message: "Unauthorized access." });
+			return res.status(401).json({ message: "Brak autoryzacji." });
 		}
 		let teamId = req.params.teamId || req.body.teamId;
 
@@ -172,43 +168,41 @@ const checkTeamAccess = async (req, res, next) => {
 			const taskId = req.params.taskId || req.body.taskId;
 			const eventId = req.params.eventId || req.body.eventId;
 
-			console.log("Project ID in checkTeamAccess: ", projectId);
-
 			if (projectId) {
 				const project = await Project.findById(projectId);
 				if (!project) {
-					return res.status(404).json({ message: "Project not found." });
+					return res.status(404).json({ message: "Nie znaleziono projektu." });
 				}
 				teamId = project.team;
 			} else if (taskId) {
 				const task = await Task.findById(taskId);
 				if (!task) {
-					return res.status(404).json({ message: "Task not found." });
+					return res.status(404).json({ message: "Nie znaleziono zadania." });
 				}
 				// Assuming task model has a 'project' field referencing the project it belongs to
 				const project = await Project.findById(task.project);
 				if (!project) {
 					return res
 						.status(404)
-						.json({ message: "Project not found for the task." });
+						.json({ message: "Nie znaleziono powiązanego projektu." });
 				}
 				teamId = project.team;
 			} else if (eventId) {
 				const event = await Event.findById(eventId);
 				if (!event) {
-					return res.status(404).json({ message: "Event not found." });
+					return res
+						.status(404)
+						.json({ message: "Nie znaleziono wydarzenia." });
 				}
 				teamId = event.team;
 			} else {
-				return res
-					.status(400)
-					.json({ message: "Insufficient data to determine team membership." });
+				return res.status(400).json({ message: "Brak danych." });
 			}
 		}
 
 		const team = await Team.findById(teamId);
 		if (!team) {
-			return res.status(404).json({ message: "Team not found." });
+			return res.status(404).json({ message: "Nie znaleziono zespołu." });
 		}
 
 		if (team.members.includes(userId) || team.teamLeaders.includes(userId)) {
@@ -217,7 +211,7 @@ const checkTeamAccess = async (req, res, next) => {
 
 		return res
 			.status(403)
-			.json({ message: "Access denied. Not a team member." });
+			.json({ message: "Brak dostępu. Nie jesteś członkiem zespołu." });
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ message: "Internal Server Error." });
@@ -228,17 +222,17 @@ const checkProjectAccess = async (req, res, next) => {
 	try {
 		const userId = req.userId;
 		if (!userId) {
-			return res.status(401).json({ message: "Unauthorized access." });
+			return res.status(401).json({ message: "Brak autoryzacji." });
 		}
 		const projectId = req.params.projectId || req.body.projectId;
 
 		if (!projectId) {
-			return res.status(400).json({ message: "Project ID is required." });
+			return res.status(400).json({ message: "Brak ID projektu." });
 		}
 
 		const project = await Project.findById(projectId);
 		if (!project) {
-			return res.status(404).json({ message: "Project not found." });
+			return res.status(404).json({ message: "Nie znaleziono projektu." });
 		}
 
 		// Check if the user is a member of the project or a team leader of the team owning the project
@@ -252,7 +246,7 @@ const checkProjectAccess = async (req, res, next) => {
 
 		return res
 			.status(403)
-			.json({ message: "Access denied. Not a project member." });
+			.json({ message: "Brak dostępu. Nie jesteś członkiem zespołu" });
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ message: "Internal Server Error." });
@@ -263,17 +257,17 @@ const checkTaskAccess = async (req, res, next) => {
 	try {
 		const userId = req.userId;
 		if (!userId) {
-			return res.status(401).json({ message: "Unauthorized access." });
+			return res.status(401).json({ message: "Brak autoryzacji." });
 		}
 		const taskId = req.params.taskId || req.body.taskId;
 
 		if (!taskId) {
-			return res.status(400).json({ message: "Task ID is required." });
+			return res.status(400).json({ message: "Wymagane ID zadania." });
 		}
 
 		const task = await Task.findById(taskId);
 		if (!task) {
-			return res.status(404).json({ message: "Task not found." });
+			return res.status(404).json({ message: "Nie znaleziono zadania." });
 		}
 
 		// Check if the user is a member of the task or a team leader of the team associated with the project of the task
@@ -281,7 +275,7 @@ const checkTaskAccess = async (req, res, next) => {
 		if (!project) {
 			return res
 				.status(404)
-				.json({ message: "Project not found for the task." });
+				.json({ message: "Nie znaleziono powiązanego projektu." });
 		}
 
 		const team = await Team.findById(project.team);
@@ -294,7 +288,7 @@ const checkTaskAccess = async (req, res, next) => {
 
 		return res
 			.status(403)
-			.json({ message: "Access denied. Not a task member." });
+			.json({ message: "Brak dostępu. Nie jesteś członkiem zespołu." });
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ message: "Internal Server Error." });
@@ -303,13 +297,13 @@ const checkTaskAccess = async (req, res, next) => {
 
 const verifyAdminOrTeamMember = async (req, res, next) => {
 	if (!req.userId) {
-		return res.status(401).json({ message: "Unauthorized access." });
+		return res.status(401).json({ message: "Brak autoryzacji." });
 	}
 
 	try {
 		const user = await User.findById(req.userId);
 		if (!user) {
-			return res.status(404).json({ message: "User not found." });
+			return res.status(404).json({ message: "Nie znaleziono użytkownika." });
 		}
 
 		if (user.role === "ADMIN") {
@@ -320,8 +314,6 @@ const verifyAdminOrTeamMember = async (req, res, next) => {
 		// If not admin, check team access
 		await checkTeamAccess(req, res, next);
 	} catch (error) {
-		// Handle any errors that occur during the process
-		console.error("Error in verifyAdminOrTeamMember:", error);
 		res.status(500).json({ message: "Internal Server Error." });
 	}
 };

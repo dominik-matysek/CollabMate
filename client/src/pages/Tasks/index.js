@@ -14,10 +14,15 @@ import UserList from "../../components/UserList";
 function Tasks() {
 	const { user } = useSelector((state) => state.users);
 	const { projectId } = useParams();
+	const [project, setProject] = useState();
 	const [tasks, setTasks] = useState([]);
 	const [members, setMembers] = useState([]);
 	const dispatch = useDispatch();
 	const [statsData, setStatsData] = useState([]);
+
+	const teamId = project ? project.team : null;
+
+	const isSameTeam = teamId === user.team._id;
 
 	const fetchProjectMembers = async () => {
 		try {
@@ -27,8 +32,7 @@ function Tasks() {
 			const response = await projectService.getProjectById(projectId); // Adjust with your actual API call
 			if (response.success) {
 				setMembers(response.data.members);
-				console.log("Raz: ", response.data.members);
-				console.log("Dwa: ", members);
+				setProject(response.data);
 			} else {
 				throw new Error(response.error);
 			}
@@ -79,7 +83,7 @@ function Tasks() {
 		countStats();
 	}, [tasks, members]); // Depend on teams and users
 
-	return (
+	return isSameTeam ? (
 		<>
 			<Row gutter={24} className="w-full container mx-auto p-6">
 				<Col span={16}>
@@ -108,6 +112,17 @@ function Tasks() {
 				</Col>
 			</Row>
 		</>
+	) : (
+		<div class="flex items-center justify-center h-screen">
+			<div>
+				<h1 class="text-4xl font-bold text-center" style={{ color: "#138585" }}>
+					403 - Forbidden
+				</h1>
+				<p class="text-2xl text-center">
+					Niestety, nie posiadasz dostępu do tej zawartości
+				</p>
+			</div>
+		</div>
 	);
 }
 

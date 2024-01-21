@@ -13,15 +13,12 @@ exports.createProject = async (req, res) => {
 			return res.status(400).json({ message: error.details[0].message });
 
 		const { name, description, memberIds } = req.body;
-		console.log("Siema");
 		const teamId = req.params.teamId;
-
-		console.log(teamId);
 
 		// Fetch the team and validate memberIds
 		const team = await Team.findById(teamId);
 		if (!team) {
-			return res.status(404).json({ error: "Team not found" });
+			return res.status(404).json({ error: "Nie znaleziono zespołu" });
 		}
 
 		// Filter memberIds to include only those who are part of the team
@@ -32,7 +29,7 @@ exports.createProject = async (req, res) => {
 		// Check if there is at least one valid member
 		if (validMemberIds.length === 0) {
 			return res.status(400).json({
-				error: "At least one team member is required for the project.",
+				error: "Przynajmniej jeden członek jest konieczny do projektu.",
 			});
 		}
 
@@ -65,18 +62,13 @@ exports.getProjectById = async (req, res) => {
 	try {
 		const projectId = req.params.projectId;
 
-		console.log("project id: ", projectId);
-
 		// Retrieve a project by ID
 		const project = await Project.findById(projectId)
-			.populate("tasks", "name status priority createdAt") // ten populate chyba do wywalenia
-			.populate(
-				"members",
-				"firstName lastName createdAt profilePic role" // w tym chyba tylko imie nazwisko profilePic starczy
-			);
+			.populate("tasks", "name status priority createdAt")
+			.populate("members", "firstName lastName createdAt profilePic role");
 
 		if (!project) {
-			return res.status(404).json({ error: "Project not found" });
+			return res.status(404).json({ error: "Nie znaleziono projektu." });
 		}
 
 		res.status(200).json({
@@ -98,7 +90,7 @@ exports.deleteProject = async (req, res) => {
 		const project = await Project.findById(projectId);
 
 		if (!project) {
-			return res.status(404).json({ error: "Project not found" });
+			return res.status(404).json({ error: "Nie znaleziono projektu." });
 		}
 
 		// Check if there are tasks with status 'inProgress' or 'completed' in the project
@@ -109,7 +101,8 @@ exports.deleteProject = async (req, res) => {
 
 		if (activeTasks.length > 0) {
 			return res.status(400).json({
-				message: "Cannot delete project with tasks in progress or completed",
+				message:
+					"Nie można usunąć projektu z zadaniami o statusie: aktywny, zakończony.",
 			});
 		}
 
@@ -134,7 +127,7 @@ exports.deleteProject = async (req, res) => {
 
 		res
 			.status(200)
-			.json({ success: true, message: "Project deleted successfully" });
+			.json({ success: true, message: "Pomyślnie usunięto projekt." });
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ error: "Internal Server Error" });
@@ -147,30 +140,15 @@ exports.addMembersToProject = async (req, res) => {
 		const projectId = req.params.projectId;
 		const { userIds } = req.body; // Extract userId from request body
 
-		console.log("userzy: ", userIds);
-
 		// Find the project and populate the team reference
 		const project = await Project.findById(projectId).populate(
 			"team",
 			"members"
 		);
 
-		console.log("Projekt info: ", project.team.members);
-
 		if (!project) {
-			return res.status(404).json({ error: "Project not found" });
+			return res.status(404).json({ error: "Nie znaleziono projektu." });
 		}
-
-		// to niżej chyba niepotrzebne bo w updatedProject jest sprawdzane czy nie ma duplikatów przypadkiem
-		// // Check if any users are already members of the project
-		// const alreadyMembers = userIds.filter((userId) =>
-		// 	project.members.includes(userId)
-		// );
-		// if (alreadyMembers.length > 0) {
-		// 	return res.status(400).json({
-		// 		error: "One or more users are already members of the project",
-		// 	});
-		// }
 
 		// Check if all users are members of the team associated with the project
 		const areAllUsersTeamMembers = userIds.every((userId) =>
@@ -180,13 +158,13 @@ exports.addMembersToProject = async (req, res) => {
 		if (!areAllUsersTeamMembers) {
 			return res
 				.status(403)
-				.json({ message: "One or more users are not members of the team" });
+				.json({ message: "Użytkownicy nie są członkami zespołu" });
 		}
 
 		// Add a member to the project
 		const updatedProject = await Project.findByIdAndUpdate(
 			projectId,
-			{ $addToSet: { members: { $each: userIds } } }, // $addToSet ensures no duplicates
+			{ $addToSet: { members: { $each: userIds } } },
 			{ new: true }
 		).populate("team", "members");
 
@@ -215,8 +193,7 @@ exports.removeMemberFromProject = async (req, res) => {
 
 		if (taskWithMember) {
 			return res.status(400).json({
-				error:
-					"User is a member of a task in the project and cannot be removed",
+				error: "Użytkownik jest członkiem zadania. Najpierw usuń go z zadania.",
 			});
 		}
 
@@ -228,7 +205,7 @@ exports.removeMemberFromProject = async (req, res) => {
 		);
 
 		if (!project) {
-			return res.status(404).json({ error: "Project not found" });
+			return res.status(404).json({ error: "Nie znaleziono projektu." });
 		}
 
 		res.status(200).json({
@@ -252,12 +229,12 @@ exports.getAllProjects = async (req, res) => {
 			select: "name createdAt members status",
 			populate: {
 				path: "members",
-				select: "profilePic", // Add additional fields you want to select here
+				select: "profilePic",
 			},
 		});
 
 		if (!team) {
-			return res.status(404).json({ message: "Team not found" });
+			return res.status(404).json({ message: "Nie znaleziono zespołu." });
 		}
 
 		res.status(200).json({
@@ -309,9 +286,6 @@ exports.changeProjectDescription = async (req, res) => {
 		const { projectId } = req.params;
 		const { description } = req.body;
 
-		console.log("Tym razem zmiana opisu - ID: ", projectId);
-		console.log("Tym razem zmiana opisu: ", description);
-
 		const result = await Project.updateOne(
 			{ _id: projectId },
 			{ $set: { description: description } }
@@ -320,7 +294,9 @@ exports.changeProjectDescription = async (req, res) => {
 		if (result.nModified === 0) {
 			return res
 				.status(404)
-				.json({ message: "Project not found or description unchanged" });
+				.json({
+					message: "Nie znaleziono projektu lub opis nie został zmieniony.",
+				});
 		}
 
 		res.status(200).json({

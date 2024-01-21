@@ -130,6 +130,16 @@ function Task() {
 					setStatus(newStatus);
 					message.success("Task status updated successfully");
 					reloadData();
+
+					if (newStatus === "completed") {
+						const notificationPayload = {
+							users: task.members, // Array of user IDs
+							title: "Zmieniono status",
+							description: `Status zadania którego jesteś członkiem został zmieniony na "Zakończone".`,
+							link: `/projects/${task.project}/tasks/${taskId}`, // Adjust link to point to the team page or relevant resource
+						};
+						await notificationService.createNotification(notificationPayload);
+					}
 				} else {
 					throw new Error(response.message);
 				}

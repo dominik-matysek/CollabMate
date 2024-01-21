@@ -22,7 +22,7 @@ const attachementStorage = new CloudinaryStorage({
 	cloudinary,
 	params: {
 		folder: "CollabMate/Attachments",
-		allowedFormats: ["jpeg", "png", "jpg", "pdf", "docx", "doc", "zip"],
+		allowedFormats: ["jpeg", "png", "jpg", "pdf"],
 		public_id: (req, file) => {
 			// Extract the filename without the extension
 			const fileNameWithoutExtension = file.originalname
@@ -36,11 +36,14 @@ const attachementStorage = new CloudinaryStorage({
 
 const deleteFile = async (publicId) => {
 	try {
-		console.log("Deleting file with Public ID:", publicId);
+		console.log("Usuwanie pliku z Public ID:", publicId);
 		await cloudinary.uploader.destroy(publicId);
 		return { success: true };
 	} catch (error) {
-		console.error("Error deleting image from Cloudinary:", error);
+		console.error(
+			"Wystąpił błąd przy próbie usunięcia pliku z Cloudinary:",
+			error
+		);
 		return { success: false, error };
 	}
 };

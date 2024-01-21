@@ -1,6 +1,5 @@
 // websocket.js
-const User = require("./models/user"); // Adjust the path as needed
-const Notification = require("./models/notification");
+const User = require("../models/user");
 
 let usersSockets = {};
 
@@ -28,8 +27,6 @@ module.exports = function (io) {
 				}
 			}
 		});
-
-		// Additional event handlers as needed
 	});
 };
 

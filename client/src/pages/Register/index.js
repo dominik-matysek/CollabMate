@@ -9,7 +9,7 @@ import { getAntdFormInputRules } from "../../utils/helpers";
 
 function Register() {
 	const navigate = useNavigate();
-	const { buttonLoading } = useSelector((state) => state.loaders);
+	const { buttonLoading, user } = useSelector((state) => state.loaders);
 	const dispatch = useDispatch();
 	const [profileImage, setProfileImage] = useState();
 
@@ -22,24 +22,24 @@ function Register() {
 		setProfileImage(null);
 	};
 
-	const checkAuthentication = async () => {
-		try {
-			// Send a request to the server to check if the user is authenticated
-			const data = await userService.authenticate();
+	// const checkAuthentication = async () => {
+	// 	try {
+	// 		// Send a request to the server to check if the user is authenticated
+	// 		const data = await userService.authenticate();
 
-			if (data.success) {
-				// User is authenticated, redirect to the main page
-				navigate("/");
-				message.warning({
-					content:
-						"Jeżeli pragniesz zmienić konto, proszę wyloguj się najpierw.",
-					duration: 3,
-				});
-			}
-		} catch (error) {
-			console.error("Error checking authentication:", error);
-		}
-	};
+	// 		if (data.success) {
+	// 			// User is authenticated, redirect to the main page
+	// 			navigate("/");
+	// 			message.warning({
+	// 				content:
+	// 					"Jeżeli pragniesz zmienić konto, proszę wyloguj się najpierw.",
+	// 				duration: 3,
+	// 			});
+	// 		}
+	// 	} catch (error) {
+	// 		console.error("Error checking authentication:", error);
+	// 	}
+	// };
 
 	const onFinish = async (values) => {
 		try {
@@ -83,52 +83,16 @@ function Register() {
 		}
 	};
 
-	// const onFinish = async (values) => {
-	//   try {
-	//     dispatch(SetButtonLoading(true));
-
-	//     const formData = new FormData();
-
-	//     // Add user details to the formData
-	//     for (const key in values) {
-	//       formData.append(key, values[key]);
-	//     }
-
-	//     // If a profile image is provided, append it to the formData
-	//     // if (profileImage) {
-	//     //   formData.append("file", profileImage);
-	//     // }
-
-	//     const uploadResponse = await userService.uploadImage(profileImage);
-
-	//     if (uploadResponse.imageUrl) {
-	//       // Add the Cloudinary URL to the user data
-	//       formData.append("profileImageUrl", uploadResponse.imageUrl);
-	//     }
-
-	//     const response = await userService.register(values);
-	//     dispatch(SetButtonLoading(false));
-	//     if (response.success) {
-	//       message.success(response.message);
-	//       navigate("/login"); //navigate user to the login page even if the registration is ok
-	//     } else {
-	//       throw new Error(response.message);
-	//     }
-	//   } catch (error) {
-	//     dispatch(SetButtonLoading(false));
-	//     message.error(error.message);
-	//   }
-	// };
-
-	// useEffect(() => {
-	//   if (localStorage.getItem("token")) {
-	//     navigate("/");
-	//   }
-	// }, []);
-
 	useEffect(() => {
-		checkAuthentication();
-	}, []);
+		// If there's a user object, we assume the user is authenticated and redirect them
+		if (user) {
+			navigate("/");
+			message.warning({
+				content: "Jeżeli pragniesz zmienić konto, proszę wyloguj się najpierw.",
+				duration: 3,
+			});
+		}
+	}, [user]);
 
 	return (
 		<div className="grid grid-cols-2">

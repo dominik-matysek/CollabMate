@@ -1,5 +1,5 @@
 const Notification = require("../models/notification");
-const { getSocketIdForUser } = require("../websocket");
+const { getSocketIdForUser } = require("../config/websocket");
 
 // Controller to create a new notification
 exports.createNotification = async (req, res) => {
@@ -62,17 +62,14 @@ exports.readNotifications = async (req, res) => {
 		const { notificationId } = req.params;
 		const userId = req.userId;
 
-		console.log("Co w params: ", req.params);
-		console.log("ID powiadomienia: ", notificationId);
-
 		const notification = await Notification.findById(notificationId);
 		if (!notification) {
-			return res.status(404).json({ error: "Notification not found" });
+			return res.status(404).json({ error: "Nie znaleziono powiadomienia." });
 		}
 
 		if (!notification.users.includes(userId)) {
 			// If the notification does not belong to the user, deny the action
-			return res.status(403).json({ error: "Unauthorized action" });
+			return res.status(403).json({ error: "Brak dostępu." });
 		}
 
 		// Mark the notification as read
@@ -98,12 +95,12 @@ exports.deleteNotification = async (req, res) => {
 		// Find the notification and check if it belongs to the user
 		const notification = await Notification.findById(notificationId);
 		if (!notification) {
-			return res.status(404).json({ error: "Notification not found" });
+			return res.status(404).json({ error: "Nie znaleziono powiadomienia." });
 		}
 
 		if (!notification.users.includes(userId)) {
 			// If the notification does not belong to the user, deny the action
-			return res.status(403).json({ error: "Unauthorized action" });
+			return res.status(403).json({ error: "Brak dostępu." });
 		}
 
 		// Delete the notification since it belongs to the user
@@ -111,7 +108,7 @@ exports.deleteNotification = async (req, res) => {
 
 		res
 			.status(200)
-			.json({ success: true, message: "Notification deleted successfully" });
+			.json({ success: true, message: "Pomyślnie usunięto powiadomienie." });
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ error: "Internal Server Error" });
@@ -128,7 +125,7 @@ exports.deleteAllNotifications = async (req, res) => {
 
 		res.status(200).json({
 			success: true,
-			message: "All notifications deleted successfully",
+			message: "Pomyślnie usunięto powiadomienia",
 		});
 	} catch (error) {
 		console.error(error);

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login/index";
@@ -15,8 +16,11 @@ import Project from "./pages/Projects/Project";
 import Tasks from "./pages/Tasks";
 import Task from "./pages/Tasks/Task";
 import Calendar from "./pages/Calendar";
+import NotFoundPage from "./pages/NotFoundPage";
+
 function App() {
 	const { loading } = useSelector((state) => state.loaders);
+
 	return (
 		<div>
 			{loading && <Spinner />}
@@ -46,7 +50,7 @@ function App() {
 							</ProtectedPage>
 						}
 					/>
-					<Route // W takim roucie jak ten, powineineś sprawdzać czy user należy do teamId - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
+					<Route
 						path="/teams/:teamId/projects"
 						element={
 							<ProtectedPage>
@@ -54,7 +58,7 @@ function App() {
 							</ProtectedPage>
 						}
 					/>
-					<Route // W takim roucie jak ten, powineineś sprawdzać czy user należy do teamId - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
+					<Route
 						path="/teams/:teamId/events"
 						element={
 							<ProtectedPage>
@@ -62,7 +66,7 @@ function App() {
 							</ProtectedPage>
 						}
 					/>
-					<Route // W takim roucie jak ten, powineineś sprawdzać czy user należy do teamId - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
+					<Route
 						path="/projects/:projectId"
 						element={
 							<ProtectedPage>
@@ -70,7 +74,7 @@ function App() {
 							</ProtectedPage>
 						}
 					/>
-					<Route // W takim roucie jak ten, powineineś sprawdzać czy user należy do teamId - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
+					<Route
 						path="/projects/:projectId/tasks"
 						element={
 							<ProtectedPage>
@@ -78,7 +82,7 @@ function App() {
 							</ProtectedPage>
 						}
 					/>
-					<Route // W takim roucie jak ten, powineineś sprawdzać czy user należy do teamId - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
+					<Route
 						path="/tasks/:taskId"
 						element={
 							<ProtectedPage>
@@ -105,7 +109,7 @@ function App() {
 					<Route path="/login" element={<Login />} />
 					<Route path="/register" element={<Register />} />
 					<Route path="/test" element={<Test />} />
-					{/* <Route path="*" element={<NotFound />} /> */}
+					<Route path="*" element={<NotFoundPage />} />
 				</Routes>
 			</BrowserRouter>
 		</div>

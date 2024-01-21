@@ -10,19 +10,17 @@ const {
 // User registration
 exports.register = async (req, res) => {
 	try {
-		console.log("user registration request received");
-
 		//Validate a user before store the user inputs
-		// const { error } = registerValidation.validate(req.body);
-		// if (error)
-		// 	return res.status(400).json({ message: error.details[0].message });
+		const { error } = registerValidation.validate(req.body);
+		if (error)
+			return res.status(400).json({ message: error.details[0].message });
 
 		const { firstName, lastName, email, password } = req.body;
 
 		// Check if the email is already registered
 		const existingUser = await User.findOne({ email: email });
 		if (existingUser) {
-			return res.status(400).json({ message: "User already exists!" });
+			return res.status(400).json({ message: "Taki użytkownik już istnieje!" });
 		}
 
 		// Hash the password
@@ -37,14 +35,12 @@ exports.register = async (req, res) => {
 			password: hashedPassword,
 		});
 
-		console.log(newUser);
-
 		// Save the user to the database
 		await newUser.save();
 
 		res.status(201).json({
 			success: true,
-			message: "User registered successfully",
+			message: "Pomyślnie założono konto.",
 			userId: newUser._id,
 		});
 	} catch (error) {
@@ -66,13 +62,13 @@ exports.login = async (req, res) => {
 		// Check if the user exists
 		const user = await User.findOne({ email: email });
 		if (!user) {
-			return res.status(401).json({ message: "Invalid email or password" });
+			return res.status(401).json({ message: "Niewłaściwe hasło lub e-mail." });
 		}
 
 		// Compare passwords
 		const isPasswordValid = await bcrypt.compare(password, user.password);
 		if (!isPasswordValid) {
-			return res.status(401).json({ message: "Invalid email or password" });
+			return res.status(401).json({ message: "Niewłaściwe hasło lub e-mail." });
 		}
 
 		// Generate JWT token
@@ -84,25 +80,33 @@ exports.login = async (req, res) => {
 			}
 		);
 
-		// res.status(200).json({
-		//   success: true,
-		//   message: "User registered successfully",
-		//   data: { token: token, role: user.role },
-		// });
+		// Generate JWT Refresh Token
+		const refreshToken = jwt.sign(
+			{ userId: user._id, userRole: user.role },
+			process.env.refresh_token_secret,
+			{ expiresIn: "1d" } // Longer-lived refresh token
+		);
 
-		// testowanie httpsonly czy cos takiego ponizej, powyzej domyslny token jak miales wczensiej
-		res
-			.cookie("token", token, {
-				httpOnly: true,
-				secure: true, // Enable this when deploying your application over HTTPS
-				SameSite: "none",
-				maxAge: 30 * 60 * 1000, // Token expiration time in milliseconds
-			})
-			.json({
-				success: true,
-				message: "User logged in successfully",
-				data: { role: user.role, userId: user._id },
-			});
+		res.cookie("token", token, {
+			httpOnly: true,
+			secure: true,
+			SameSite: "none",
+			maxAge: 30 * 60 * 1000, // Token expiration time in milliseconds
+		});
+
+		// Store Refresh Token in separate HttpOnly cookie
+		res.cookie("refreshToken", refreshToken, {
+			httpOnly: true,
+			secure: true,
+			sameSite: "None",
+			maxAge: 24 * 60 * 60 * 1000, // 1 day
+		});
+
+		res.json({
+			success: true,
+			message: "Pomyślnie zalogowano użytkownika.",
+			data: { role: user.role, userId: user._id },
+		});
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: "Internal Server Error" });
@@ -112,7 +116,8 @@ exports.login = async (req, res) => {
 exports.logout = async (req, res) => {
 	try {
 		res.clearCookie("token");
-		res.json({ success: true, message: "Logged out successfully" });
+		res.clearCookie("refreshToken");
+		res.json({ success: true, message: "Pomyślnie wylogowano użytkownika." });
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: "Internal Server Error" });
@@ -122,9 +127,6 @@ exports.logout = async (req, res) => {
 // User authentication
 exports.authenticate = async (req, res) => {
 	try {
-		// testowanie httpsonly ponizej
-		// const token = req.cookies.token;
-
 		const user = await User.findById(req.userId)
 			.select("-password")
 			.populate({
@@ -137,7 +139,7 @@ exports.authenticate = async (req, res) => {
 			});
 
 		if (!user) {
-			return res.status(404).json({ message: "User not found" });
+			return res.status(404).json({ message: "Nie znaleziono użytkownika." });
 		}
 
 		res.status(200).json({ success: true, data: user });
@@ -152,8 +154,6 @@ exports.setInitialProfilePic = async (req, res) => {
 		const userId = req.params.userId;
 		const { profilePic } = req.body;
 
-		// Optional: Add additional checks to ensure the userId is from a recently created user
-
 		// Update only the profilePic field
 		const updatedUser = await User.findByIdAndUpdate(
 			userId,
@@ -162,12 +162,11 @@ exports.setInitialProfilePic = async (req, res) => {
 		).select("-password");
 
 		if (!updatedUser) {
-			return res.status(404).json({ message: "User not found" });
+			return res.status(404).json({ message: "Nie znaleziono użytkownika." });
 		}
 
 		res.status(200).json({
 			success: true,
-			message: "Profile picture updated successfully",
 			data: updatedUser,
 		});
 	} catch (error) {
@@ -190,9 +189,9 @@ exports.updateProfile = async (req, res) => {
 		if (profilePic) updatedValues.profilePic = profilePic;
 
 		//Validate user input
-		// const { error } = updateValidation.validate(updatedValues);
-		// if (error)
-		//   return res.status(400).json({ message: error.details[0].message });
+		const { error } = updateValidation.validate(updatedValues);
+		if (error)
+			return res.status(400).json({ message: error.details[0].message });
 
 		// Check if the new email already exists
 		if (email) {
@@ -201,7 +200,9 @@ exports.updateProfile = async (req, res) => {
 				_id: { $ne: userId },
 			});
 			if (emailExist)
-				return res.status(400).json({ message: "Email already exists" });
+				return res.status(400).json({
+					message: "Użytkownik o takim e-mailu istnieje już w serwisie.",
+				});
 		}
 
 		const updatedUser = await User.findByIdAndUpdate(
@@ -211,12 +212,12 @@ exports.updateProfile = async (req, res) => {
 		).select("-password");
 
 		if (!updatedUser) {
-			return res.status(404).json({ message: "User not found" });
+			return res.status(404).json({ message: "Nie znaleziono użytkownika." });
 		}
 
 		res.status(200).json({
 			success: true,
-			message: "User edited succesfully",
+			message: "Pomyślnie zaktualizowano profil użytkownika.",
 			data: updatedUser,
 		});
 	} catch (error) {
@@ -234,7 +235,7 @@ exports.uploadImage = async (req, res) => {
 			data: imageUrl,
 		});
 	} catch (error) {
-		res.status(500).json({ message: "Image upload failed" });
+		res.status(500).json({ message: "Nie udało się załączyć zdjęcia." });
 	}
 };
 
@@ -252,9 +253,8 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getUserInfo = async (req, res) => {
 	try {
-		console.log("Kontroler getUserInfo");
 		const userId = req.params.userId;
-		console.log(userId);
+
 		const user = await User.findById(userId)
 			.select("-password")
 			.populate({
@@ -266,7 +266,7 @@ exports.getUserInfo = async (req, res) => {
 				},
 			});
 		if (!user) {
-			return res.status(404).json({ message: "User not found" });
+			return res.status(404).json({ message: "Nie znaleziono użytkownika." });
 		}
 		res.status(200).json({ success: true, data: user });
 	} catch (error) {
@@ -279,8 +279,6 @@ exports.removeUserFromSystem = async (req, res) => {
 	try {
 		const userId = req.params.userId;
 
-		console.log("User do usunięcia: ", userId);
-
 		if (req.userId === userId) {
 			return res
 				.status(403)
@@ -289,12 +287,12 @@ exports.removeUserFromSystem = async (req, res) => {
 
 		const user = await User.findById(userId);
 		if (!user) {
-			return res.status(404).json({ message: "User not found" });
+			return res.status(404).json({ message: "Nie znaleziono użytkownika." });
 		}
 		if (user.team) {
 			return res.status(404).json({
 				message:
-					"Członek zespołu nie może zostać usunięty z serwisu! Najpierw usuń użytkownika z zespołu!",
+					"Członek zespołu nie może zostać usunięty z serwisu! Najpierw usuń użytkownika z zespołu.",
 			});
 		}
 
@@ -303,10 +301,39 @@ exports.removeUserFromSystem = async (req, res) => {
 
 		res.status(200).json({
 			success: true,
-			message: "User has been successfully removed from the system.",
+			message: "Pomyślnie usunięto użytkownika z zespołu.",
 		});
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+exports.refreshToken = async (req, res) => {
+	try {
+		const refreshToken = req.cookies.refreshToken;
+		if (!refreshToken) {
+			return res.status(401).json({ message: "Brak autoryzacji." });
+		}
+		// Verify the refresh token
+		const decryptedToken = jwt.verify(
+			refreshToken,
+			process.env.refresh_token_secret
+		);
+
+		// Issue a new access token
+		const accessToken = jwt.sign(
+			{ userId: decryptedToken.userId, userRole: decryptedToken.userRole },
+			process.env.jwt_secret,
+			{ expiresIn: "30m" } // Example expiration time
+		);
+
+		res.json({ accessToken });
+	} catch (error) {
+		console.error(error);
+		return res.status(403).json({
+			message: "Nieprawidłowy token. Spróbuj zalogować się ponownie.",
+			error: error.message,
+		});
 	}
 };

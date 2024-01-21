@@ -6,31 +6,30 @@ import userService from "../../services/user";
 import { useDispatch, useSelector } from "react-redux";
 import { SetButtonLoading } from "../../redux/loadersSlice";
 import { getAntdFormInputRules } from "../../utils/helpers";
-// import io from "socket.io-client";
 
 function Login() {
 	const navigate = useNavigate();
-	const { buttonLoading } = useSelector((state) => state.loaders);
+	const { buttonLoading, user } = useSelector((state) => state.loaders);
 	const dispatch = useDispatch();
 
-	const checkAuthentication = async () => {
-		try {
-			// Send a request to the server to check if the user is authenticated
-			const data = await userService.authenticate();
+	// const checkAuthentication = async () => {
+	// 	try {
+	// 		// Send a request to the server to check if the user is authenticated
+	// 		const data = await userService.authenticate();
 
-			if (data.success) {
-				// User is authenticated, redirect to the main page
-				navigate("/");
-				message.warning({
-					content:
-						"Jeżeli pragniesz zmienić konto, proszę wyloguj się najpierw.",
-					duration: 3,
-				});
-			}
-		} catch (error) {
-			console.error("Error checking authentication:", error);
-		}
-	};
+	// 		if (data.success) {
+	// 			// User is authenticated, redirect to the main page
+	// 			navigate("/");
+	// 			message.warning({
+	// 				content:
+	// 					"Jeżeli pragniesz zmienić konto, proszę wyloguj się najpierw.",
+	// 				duration: 3,
+	// 			});
+	// 		}
+	// 	} catch (error) {
+	// 		console.error("Error checking authentication:", error);
+	// 	}
+	// };
 
 	const onFinish = async (values) => {
 		try {
@@ -38,23 +37,8 @@ function Login() {
 			const response = await userService.login(values);
 			dispatch(SetButtonLoading(false));
 			if (response.success) {
-				console.log(response.data);
-				// localStorage.setItem("token", response.data);
 				message.success(response.message);
 				navigate("/");
-
-				// // Establish WebSocket connection
-				// const socket = io("http://localhost:5000"); // Adjust with your server URL
-
-				// // Send user ID to register with the socket
-				// // Assuming user ID is part of the login response
-				// const userId = response.data.userId;
-				// socket.emit("register", userId);
-
-				// // Handle incoming notifications
-				// socket.on("new-notification", (notification) => {
-				// 	// Process the notification (e.g., display it or update state)
-				// });
 			} else {
 				throw new Error(response.message);
 			}
@@ -65,8 +49,15 @@ function Login() {
 	};
 
 	useEffect(() => {
-		checkAuthentication();
-	}, []);
+		// If there's a user object, we assume the user is authenticated and redirect them
+		if (user) {
+			navigate("/");
+			message.warning({
+				content: "Jeżeli pragniesz zmienić konto, proszę wyloguj się najpierw.",
+				duration: 3,
+			});
+		}
+	}, [user]);
 
 	return (
 		<div className="grid grid-cols-2">

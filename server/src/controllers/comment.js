@@ -6,21 +6,20 @@ const commentValidation = require("../utils/commentValidation");
 // Controller to create a new comment
 exports.createComment = async (req, res) => {
 	try {
-		// const { error } = commentValidation.validate(req.body);
-		// if (error)
-		// 	return res.status(400).json({ message: error.details[0].message });
 		const userId = req.userId;
 		const { content } = req.body;
+
+		const { error } = commentValidation.validate(content);
+		if (error)
+			return res.status(400).json({ message: error.details[0].message });
+
 		const taskId = req.params.taskId; // Assuming your route parameter is taskId
-		console.log("UserID: ", userId);
-		console.log("Kontent: ", content);
-		console.log("TaskID: ", taskId);
 
 		// Check if the user creating the comment is an assignee of the task
 		const task = await Task.findById(taskId);
 
 		if (!task) {
-			return res.status(403).json({ error: "Task not found" });
+			return res.status(403).json({ error: "Nie znaleziono zadania." });
 		}
 
 		// Create a new comment
@@ -58,10 +57,8 @@ exports.getComments = async (req, res) => {
 		});
 
 		if (!task) {
-			return res.status(404).json({ message: "Task not found" });
+			return res.status(404).json({ message: "Nie znaleziono zadania." });
 		}
-
-		console.log("Komentarze: ", task.comments);
 
 		res.status(200).json({
 			success: true,
@@ -85,11 +82,11 @@ exports.deleteComment = async (req, res) => {
 		const task = await Task.findById(taskId);
 
 		if (!comment) {
-			return res.status(404).json({ error: "Comment not found" });
+			return res.status(404).json({ error: "Nie znaleziono komentarza." });
 		}
 
 		if (!task) {
-			return res.status(404).json({ error: "Task not found" });
+			return res.status(404).json({ error: "Nie znaleziono zadania." });
 		}
 
 		// Check if the user is the comment's author or a team leader
@@ -97,9 +94,7 @@ exports.deleteComment = async (req, res) => {
 		const isTeamLeader = userRole === "TEAM LEADER"; // Assuming user role is stored in req.user
 
 		if (!isAuthor && !isTeamLeader) {
-			return res
-				.status(403)
-				.json({ error: "Unauthorized to delete the comment" });
+			return res.status(403).json({ error: "Brak dostępu." });
 		}
 
 		// Delete the comment by ID

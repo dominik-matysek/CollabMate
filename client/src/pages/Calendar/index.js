@@ -21,6 +21,8 @@ function CalendarPage() {
 	const [selectedEventDetails, setSelectedEventDetails] = useState(null);
 	const [isAddEventModalVisible, setIsAddEventModalVisible] = useState(false);
 
+	const isSameTeam = user.team._id === teamId;
+
 	const fetchEvents = async () => {
 		try {
 			// Add loading state handling if needed
@@ -219,7 +221,7 @@ function CalendarPage() {
 		setIsModalOpen(true);
 	};
 
-	return (
+	return isSameTeam ? (
 		<div>
 			<Button type="primary" onClick={showAddEventModal}>
 				Dodaj wydarzenie
@@ -261,6 +263,17 @@ function CalendarPage() {
 					/>
 				)}
 			</Modal>
+		</div>
+	) : (
+		<div class="flex items-center justify-center h-screen">
+			<div>
+				<h1 class="text-4xl font-bold text-center" style={{ color: "#138585" }}>
+					403 - Forbidden
+				</h1>
+				<p class="text-2xl text-center">
+					Niestety, nie posiadasz dostępu do tej zawartości
+				</p>
+			</div>
 		</div>
 	);
 }

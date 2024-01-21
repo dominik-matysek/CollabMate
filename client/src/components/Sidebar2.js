@@ -70,13 +70,6 @@ const items = [
 		link: "/",
 		current: true,
 	},
-	// {
-	// 	name: "Powiadomienia",
-	// 	icon: <BellTwoTone />,
-	// 	link: "#",
-	// 	notifications: 5,
-	// 	current: false,
-	// },
 	{
 		name: "Zespoły",
 		link: "/teams",
@@ -90,36 +83,6 @@ const items = [
 		icon: <UserOutlined />,
 		current: false,
 	},
-	// {
-	// 	name: "Kluczowe cechy",
-	// 	link: "/",
-	// 	current: false,
-	// 	displayForGuest: true,
-	// 	displayForUser: true,
-	// 	sectionId: "main",
-	// },
-	// {
-	// 	name: "Kontakt",
-	// 	link: "/",
-	// 	current: false,
-	// 	displayForGuest: true,
-	// 	displayForUser: true,
-	// 	sectionId: "contact",
-	// },
-	// {
-	// 	name: "Utwórz konto",
-	// 	link: "/register",
-	// 	current: false,
-	// 	displayForGuest: true,
-	// 	displayForUser: false,
-	// },
-	// {
-	// 	name: "Zaloguj się",
-	// 	link: "/login",
-	// 	current: false,
-	// 	displayForGuest: true,
-	// 	displayForUser: false,
-	// },
 ];
 
 function Sidebar({ user, isSidebarOpen }) {
@@ -130,13 +93,6 @@ function Sidebar({ user, isSidebarOpen }) {
 			link: "/",
 			current: true,
 		},
-		// {
-		// 	name: "Powiadomienia",
-		// 	icon: <BellTwoTone />,
-		// 	link: "#",
-		// 	notifications: 5,
-		// 	current: false,
-		// },
 		{
 			name: "Zespoły",
 			link: "/teams",

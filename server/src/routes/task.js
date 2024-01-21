@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const tasks = require("../controllers/task");
-const { cloudinary, attachementStorage } = require("../config/cloudinary");
+const { attachementStorage } = require("../config/cloudinary");
 const multer = require("multer");
 
 const uploadAttachment = multer({
 	storage: attachementStorage,
-	limits: { fileSize: 1024 * 1024 * 10 }, // Adjust the file size limit as needed
+	limits: { fileSize: 1024 * 1024 * 10 },
 });
 
 const {
@@ -70,8 +70,6 @@ router.patch(
 	tasks.changeTaskDescription
 );
 
-// I jeszcze musi być ogarnięcie attachments
-
 router.post(
 	"/tasks/:taskId/upload-attachments",
 	verifyToken,
@@ -86,7 +84,5 @@ router.delete(
 	checkTaskAccess,
 	tasks.removeAttachment
 );
-
-// jeszcze usuwanie attachementów cnie
 
 module.exports = router;

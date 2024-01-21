@@ -1,28 +1,26 @@
 const Event = require("../models/event");
 const Team = require("../models/team");
 
-const createEventValidation = require("../utils/eventValidation");
+const {
+	createEventValidation,
+	editEventValidation,
+} = require("../utils/eventValidation");
 
 // Controller to create a new event in the calendar
 exports.createEvent = async (req, res) => {
 	try {
-		// const { error } = createEventValidation.validate(req.body);
-		// if (error)
-		// 	return res.status(400).json({ message: error.details[0].message });
-
 		const { title, description, date } = req.body;
+
+		const { error } = createEventValidation.validate(req.body);
+		if (error)
+			return res.status(400).json({ message: error.details[0].message });
+
 		const userId = req.userId;
 		const teamId = req.params.teamId;
 
-		console.log("req.body: ", title, " ", description, " ", date);
-		console.log("req.userId: ", userId);
-		console.log("req.teamId: ", teamId);
-
 		// Basic date validation
 		if (new Date(date).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)) {
-			return res
-				.status(400)
-				.json({ error: "Event date cannot be in the past" });
+			return res.status(400).json({ error: "Data musi istnieć w przyszłości" });
 		}
 
 		// Verify that the user is a member of the specified team
@@ -31,7 +29,7 @@ exports.createEvent = async (req, res) => {
 		if (!team) {
 			return res
 				.status(403)
-				.json({ error: "User is not a member of the specified team" });
+				.json({ error: "Użytkownik nie jest członkiem zespołu." });
 		}
 
 		// Create a new event
@@ -65,7 +63,6 @@ exports.getAllEvents = async (req, res) => {
 	try {
 		const teamId = req.params.teamId; // Assuming teamId is part of the route parameters
 
-		console.log("W get all events team id: ", teamId);
 		// Find the team's calendar and retrieve all events
 		const team = await Team.findById(teamId).populate({
 			path: "events",
@@ -73,7 +70,7 @@ exports.getAllEvents = async (req, res) => {
 		});
 
 		if (!team) {
-			return res.status(404).json({ error: "Team not found" });
+			return res.status(404).json({ error: "Nie znaleziono zespołu." });
 		}
 
 		res.status(200).json({
@@ -92,8 +89,6 @@ exports.getEventById = async (req, res) => {
 	try {
 		const eventId = req.params.eventId;
 
-		console.log("EventID: ", eventId);
-
 		// Find the specific event by its ID
 		const event = await Event.findById(eventId).populate(
 			"members",
@@ -101,7 +96,7 @@ exports.getEventById = async (req, res) => {
 		); // Populate members if needed
 
 		if (!event) {
-			return res.status(404).json({ error: "Event not found" });
+			return res.status(404).json({ error: "Nie znaleziono wydarzenia." });
 		}
 
 		res.status(200).json({
@@ -119,32 +114,22 @@ exports.getEventById = async (req, res) => {
 exports.editEvent = async (req, res) => {
 	try {
 		const eventId = req.params.eventId;
-		const { title, description, date } = req.body;
+		const { title, description } = req.body;
 
-		// const { error } = eventValidation.validate(req.body);
-		// if (error)
-		// 	return res.status(400).json({ message: error.details[0].message });
-
-		if (
-			date &&
-			new Date(date).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)
-		) {
-			return res
-				.status(400)
-				.json({ error: "Event date cannot be in the past" });
-		}
+		const { error } = editEventValidation.validate(req.body);
+		if (error)
+			return res.status(400).json({ message: error.details[0].message });
 
 		// Find and update the specific event
 		const event = await Event.findById(eventId);
 
 		if (!event) {
-			return res.status(404).json({ error: "Event not found" });
+			return res.status(404).json({ error: "Nie znaleziono wydarzenia" });
 		}
 
 		// Update event properties if provided
 		if (title) event.title = title;
 		if (description) event.description = description;
-		if (date) event.date = date;
 
 		await event.save();
 
@@ -167,7 +152,7 @@ exports.deleteEvent = async (req, res) => {
 		const event = await Event.findById(eventId);
 
 		if (!event) {
-			return res.status(404).json({ error: "Event not found" });
+			return res.status(404).json({ error: "Nie znaleziono wydarzenia." });
 		}
 
 		// Remove the event from the team's event array
@@ -178,7 +163,7 @@ exports.deleteEvent = async (req, res) => {
 		);
 
 		if (!team) {
-			return res.status(404).json({ error: "Team not found" });
+			return res.status(404).json({ error: "Nie znaleziono zespołu." });
 		}
 
 		await Event.findByIdAndDelete(eventId);
@@ -195,15 +180,11 @@ exports.addMembersToEvent = async (req, res) => {
 		const eventId = req.params.eventId;
 		const { memberIds } = req.body; // Extract memberIds from request body
 
-		console.log("EVENTID: ", eventId);
-
-		console.log("Userzy w evencie do dodania: ", memberIds);
-
 		// Find the event and populate the team reference
 		const event = await Event.findById(eventId).populate("team", "members");
 
 		if (!event) {
-			return res.status(404).json({ error: "Event not found" });
+			return res.status(404).json({ error: "Nie znaleziono wydarzenia." });
 		}
 
 		// Check if all users are members of the team associated with the event
@@ -212,9 +193,9 @@ exports.addMembersToEvent = async (req, res) => {
 		);
 
 		if (!areAllUsersTeamMembers) {
-			return res
-				.status(403)
-				.json({ error: "One or more users are not members of the team" });
+			return res.status(403).json({
+				error: "Jeden lub więcej użytkowników nie są członkami zespołu",
+			});
 		}
 
 		// Update the event by adding new members, using $addToSet to avoid duplicates
@@ -226,7 +207,7 @@ exports.addMembersToEvent = async (req, res) => {
 
 		res.status(200).json({
 			success: true,
-			message: "Members added to event successfully",
+			message: "Pomyślnie dodano użytkowników",
 		});
 	} catch (error) {
 		console.error(error);
@@ -247,12 +228,12 @@ exports.removeMemberFromEvent = async (req, res) => {
 		);
 
 		if (!updatedEvent) {
-			return res.status(404).json({ error: "Event not found" });
+			return res.status(404).json({ error: "Nie znaleziono wydarzenia." });
 		}
 
 		res.status(200).json({
 			success: true,
-			message: "Member removed from event successfully",
+			message: "Pomyślnie usunięto użytkownika",
 			data: updatedEvent,
 		});
 	} catch (error) {

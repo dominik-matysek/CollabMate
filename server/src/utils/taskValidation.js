@@ -38,15 +38,15 @@ const taskCreateValidation = JoiExtendend.object({
 	memberIds: JoiExtendend.array()
 		.items(
 			JoiExtendend.string().required().messages({
-				"string.base": "Each team member ID should be a valid identifier.",
+				"string.base": "Each task member ID should be a valid identifier.",
 			})
 		)
 		.min(1)
 		.required()
 		.messages({
-			"array.base": "Team member IDs should be an array.",
-			"array.min": "At least one team member is required.",
-			"any.required": "Team member IDs are required.",
+			"array.base": "Task member IDs should be an array.",
+			"array.min": "At least one task member is required.",
+			"any.required": "Task member IDs are required.",
 		}),
 	priority: JoiExtendend.string()
 		.valid("low", "medium", "high")
@@ -56,11 +56,6 @@ const taskCreateValidation = JoiExtendend.object({
 			"any.required": "Priority is required.",
 			"any.only": "Priority must be one of ['low', 'medium', 'high'].",
 		}),
-	createdBy: JoiExtendend.string().required().messages({
-		"string.base": "Created By should be a string.",
-		"string.pattern.base": "Created By must be a valid MongoDB ObjectId.",
-		"any.required": "Created By is required.",
-	}),
 });
 
 module.exports = taskCreateValidation;

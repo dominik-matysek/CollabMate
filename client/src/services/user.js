@@ -43,6 +43,10 @@ const userService = {
 	removeUserFromSystem: async (userId) => {
 		return apiRequest("DELETE", `${userAPI}/${userId}`);
 	},
+
+	refreshToken: async () => {
+		return apiRequest("POST", `${userAPI}/refresh-token`);
+	},
 };
 
 export default userService;

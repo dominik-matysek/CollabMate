@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const users = require("../controllers/user");
 const { verifyToken, verifyAdmin } = require("../middlewares/auth");
-const { cloudinary, profileStorage } = require("../config/cloudinary");
+const { profileStorage } = require("../config/cloudinary");
 const multer = require("multer");
 
 const upload = multer({
@@ -29,5 +29,7 @@ router.get("/", verifyToken, users.getAllUsers);
 router.get("/profile/:userId", verifyToken, users.getUserInfo);
 
 router.delete("/:userId", verifyToken, verifyAdmin, users.removeUserFromSystem);
+
+router.post("/refresh-token", users.refreshToken);
 
 module.exports = router;
