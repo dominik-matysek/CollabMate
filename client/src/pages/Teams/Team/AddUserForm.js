@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Form, Select, message, Button, Checkbox } from "antd";
+import { Modal, Form, Select, message, Button } from "antd";
 import userService from "../../../services/user";
 import teamService from "../../../services/team";
 import notificationService from "../../../services/notification";
@@ -12,7 +12,6 @@ const AddUserForm = ({ team, isVisible, onClose, reloadData }) => {
 	const [users, setUsers] = useState([]);
 	const [roleType, setRoleType] = useState("EMPLOYEE");
 	const dispatch = useDispatch();
-	const [selectedUserIds, setSelectedUserIds] = useState([]);
 
 	const fetchUsers = async () => {
 		try {
@@ -42,30 +41,28 @@ const AddUserForm = ({ team, isVisible, onClose, reloadData }) => {
 			const values = await form.validateFields();
 			const payload = {
 				userIds: values.user,
-				roleType: roleType, // "member" or "leader"
+				roleType: roleType,
 			};
 			const response = await teamService.addUsersToTeam(team._id, payload);
 			dispatch(SetButtonLoading(false));
 			if (response.success) {
-				message.success("User(s) added successfully");
+				message.success(response.message);
 				onClose();
 				reloadData();
 
-				// Send notification to added team leaders
 				const notificationPayload = {
-					users: team.teamLeaders, // Array of user IDs
+					users: team.teamLeaders,
 					title: "Nowy członek",
 					description: `Do twojego zespołu dodano nowego członka: ${team.name}.`,
-					link: `/teams/${team.id}}`, // Adjust link to point to the team page or relevant resource
+					link: `/teams/${team.id}}`,
 				};
 				await notificationService.createNotification(notificationPayload);
 
-				// Send notification to added team leaders
 				const notificationPayloadToMember = {
-					users: values.user, // Array of user IDs
+					users: values.user,
 					title: "Nowy zespół",
 					description: `Zostałeś dodany do nowego zespołu: ${team.name}.`,
-					link: `/teams/${team.id}}`, // Adjust link to point to the team page or relevant resource
+					link: `/teams/${team.id}}`,
 				};
 				await notificationService.createNotification(
 					notificationPayloadToMember
@@ -131,18 +128,6 @@ const AddUserForm = ({ team, isVisible, onClose, reloadData }) => {
 				>
 					Dodaj lidera
 				</Button>
-				{/* <Checkbox
-					onClick={() => setRoleType("EMPLOYEE")}
-					type={roleType === "EMPLOYEE" ? "primary" : "default"}
-				>
-					Dodaj pracownika
-				</Checkbox>
-				<Checkbox
-					onClick={() => setRoleType("TEAM LEADER")}
-					type={roleType === "TEAM LEADER" ? "primary" : "default"}
-				>
-					Dodaj lidera
-				</Checkbox> */}
 			</div>
 		</Modal>
 	);

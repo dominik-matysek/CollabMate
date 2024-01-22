@@ -1,19 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, message, Table, Col, Row } from "antd";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import Divider from "../../components/Divider";
+import { message, Col, Row } from "antd";
+import { useParams } from "react-router-dom";
 import teamService from "../../services/team";
 import projectService from "../../services/project";
 import { useSelector, useDispatch } from "react-redux";
-import { SetLoading, SetButtonLoading } from "../../redux/loadersSlice";
-import { getAntdFormInputRules } from "../../utils/helpers";
-import { getSimpleDateFormat } from "../../utils/helpers";
-import { SetNotifications, SetUser } from "../../redux/usersSlice";
-import { IoTrashBin } from "react-icons/io5";
+import { SetLoading } from "../../redux/loadersSlice";
 import ProjectForm from "./ProjectForm";
 import SingleProjectCard from "../../components/SingleProjectCard";
-import { FaPencilAlt } from "react-icons/fa";
-import { Navigate } from "react-router-dom";
 import StatsCard from "../../components/StatsCard";
 import UserList from "../../components/UserList";
 
@@ -30,9 +23,8 @@ function Projects() {
 
 	const fetchTeamMembers = async () => {
 		try {
-			// Add loading state handling if needed
 			dispatch(SetLoading(true));
-			const response = await teamService.getMembers(teamId); // Adjust with your actual API call
+			const response = await teamService.getMembers(teamId);
 			if (response.success) {
 				setMembers(response.data);
 			} else {
@@ -47,9 +39,8 @@ function Projects() {
 
 	const fetchTeamLeaders = async () => {
 		try {
-			// Add loading state handling if needed
 			dispatch(SetLoading(true));
-			const response = await teamService.getLeaders(teamId); // Adjust with your actual API call
+			const response = await teamService.getLeaders(teamId);
 			if (response.success) {
 				setLeaders(response.data);
 			} else {
@@ -65,7 +56,7 @@ function Projects() {
 	const fetchProjects = async () => {
 		try {
 			dispatch(SetLoading(true));
-			const response = await projectService.getAllProjects(teamId); // Replace with your actual API endpoint
+			const response = await projectService.getAllProjects(teamId);
 			if (response.success) {
 				setProjects(response.data);
 			} else {
@@ -102,7 +93,7 @@ function Projects() {
 
 	useEffect(() => {
 		countStats();
-	}, [projects, members, leaders]); // Depend on teams and users
+	}, [projects, members, leaders]);
 
 	return isSameTeam ? (
 		<>
@@ -133,12 +124,15 @@ function Projects() {
 			</Row>
 		</>
 	) : (
-		<div class="flex items-center justify-center h-screen">
+		<div className="flex items-center justify-center h-screen">
 			<div>
-				<h1 class="text-4xl font-bold text-center" style={{ color: "#138585" }}>
+				<h1
+					className="text-4xl font-bold text-center"
+					style={{ color: "#138585" }}
+				>
 					403 - Forbidden
 				</h1>
-				<p class="text-2xl text-center">
+				<p className="text-2xl text-center">
 					Niestety, nie posiadasz dostępu do tej zawartości
 				</p>
 			</div>

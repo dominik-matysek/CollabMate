@@ -4,7 +4,6 @@ const userAPI = "/api/users";
 
 const userService = {
 	register: async (userData) => {
-		console.log("Registration data:", userData);
 		return apiRequest("POST", `${userAPI}/register`, userData);
 	},
 

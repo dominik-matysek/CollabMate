@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Form, Select, message, Button, Checkbox } from "antd";
+import { Modal, Form, Select, message, Button } from "antd";
 import { SetButtonLoading } from "../../../redux/loadersSlice";
 import { getAntdFormInputRules } from "../../../utils/helpers";
 import { useDispatch } from "react-redux";
@@ -11,7 +11,6 @@ const AddUserForm = ({ task, isVisible, onClose, reloadData }) => {
 	const [form] = Form.useForm();
 	const [members, setMembers] = useState([]);
 	const dispatch = useDispatch();
-	const [selectedUserIds, setSelectedUserIds] = useState([]);
 
 	const fetchProjectMembers = async () => {
 		try {
@@ -43,20 +42,19 @@ const AddUserForm = ({ task, isVisible, onClose, reloadData }) => {
 			const values = await form.validateFields();
 			const payload = {
 				userIds: values.member,
-				// roleType: roleType, // "member" or "leader"
 			};
 			const response = await taskService.addMembersToTask(task._id, payload);
 			dispatch(SetButtonLoading(false));
 			if (response.success) {
-				message.success("User(s) added successfully");
+				message.success(response.message);
 				onClose();
 				reloadData();
 
 				const notificationPayload = {
-					users: values.members, // Array of user IDs
+					users: values.members,
 					title: "Dodano do zadania",
 					description: `Zostałeś dodany do zadania w projekcie.`,
-					link: `/projects/${task.project}/tasks/${task._id}`, // Adjust link to point to the team page or relevant resource
+					link: `/projects/${task.project}/tasks/${task._id}`,
 				};
 				await notificationService.createNotification(notificationPayload);
 			} else {

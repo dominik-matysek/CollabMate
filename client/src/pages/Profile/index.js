@@ -1,20 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Button, message } from "antd";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import userService from "../../services/user";
 import { useSelector, useDispatch } from "react-redux";
 import { SetLoading } from "../../redux/loadersSlice";
 import { getAntdFormInputRules } from "../../utils/helpers";
 import { getSimpleDateFormat } from "../../utils/helpers";
-import { SetNotifications, SetUser } from "../../redux/usersSlice";
+import { SetUser } from "../../redux/usersSlice";
 import SingleCard from "../../components/SingleCard";
 
-// Users masz chyba zrobione - ale tutaj musisz pozmieniać trochę. Prawdopodobnie zrób nowy controller w backendzie i route typu getUserById.
-// Potem tutaj będziesz porównywał czy wchodzisz na profil zalogowanego (swój), czy jakiegoś innego usera (trzeba będzie nwm tokeny porównać albo id?)
-// I w zależności od tego czy wszedłeś na swój profil to wyswietla ci sie info o profilu z mozliwoscia edycji albo bez jesli wszedłeś na czyjś
-
 function Profile() {
-	console.log("Poczatek profile");
 	const { userId } = useParams();
 	const { user: loggedInUser } = useSelector((state) => state.users);
 	const [userProfile, setUserProfile] = useState(null);
@@ -27,18 +22,14 @@ function Profile() {
 	const isOwnProfile = userProfile && userProfile._id === loggedInUser._id;
 
 	const fetchUserData = async () => {
-		console.log("Fetch user kurde");
 		if (userId === loggedInUser._id) {
-			console.log("Ten sam user co profil");
 			setUserProfile(loggedInUser);
 		} else {
 			try {
-				console.log("Inny user co profil");
 				dispatch(SetLoading(true));
 				const response = await userService.getUserInfo(userId);
 				dispatch(SetLoading(false));
 				if (response.success) {
-					console.log("Response data: ", response.data);
 					setUserProfile(response.data);
 					console.log(response.data);
 				} else {
@@ -58,6 +49,7 @@ function Profile() {
 
 			dispatch(SetLoading(false));
 			if (response.success) {
+				// console.log("Updated Profile Data:", response.data);
 				dispatch(SetUser(response.data));
 				message.success(response.message);
 			} else {
@@ -82,12 +74,8 @@ function Profile() {
 	};
 
 	useEffect(() => {
-		console.log("siema tu useeffect");
 		fetchUserData();
 	}, [userId, loggedInUser]);
-
-	// console.log(`${userProfile}`);
-	// console.log(`${userProfile.teams[0].name}`);
 
 	return (
 		<div className="container mx-auto my-5 p-5">
@@ -132,7 +120,7 @@ function Profile() {
 						</div>
 					</div>
 				) : (
-					<p>Loading user data...</p>
+					<p>Ładowanie danych użytkownika...</p>
 				)}
 
 				<div className="w-full md:w-9/12 mx-2 h-64">
@@ -166,7 +154,6 @@ function Profile() {
 											firstName: userProfile.firstName,
 											lastName: userProfile.lastName,
 											email: userProfile.email,
-											// bio: "siema",
 										}}
 										onFinish={onFinish}
 									>
@@ -191,13 +178,6 @@ function Profile() {
 										>
 											<Input />
 										</Form.Item>
-										{/* <Form.Item
-                    name="bio"
-                    label="Bio"
-                    rules={getAntdFormInputRules}
-                  >
-                    <Input.TextArea />
-                  </Form.Item> */}
 										<Form.Item>
 											<Button type="primary" htmlType="submit">
 												Zapisz
@@ -209,7 +189,6 @@ function Profile() {
 									</Form>
 								) : (
 									<div>
-										{/* Display user information in view mode */}
 										<div className="grid md:grid-cols-2 text-sm">
 											<div className="grid grid-cols-2">
 												<div className="px-4 py-2 font-semibold">Imię</div>
@@ -232,7 +211,7 @@ function Profile() {
 												<div className="px-4 py-2">{userProfile.role}</div>
 											</div>
 										</div>
-										{/* ... (rest of your view mode code) */}
+
 										{isOwnProfile && (
 											<Button onClick={handleEdit}>Edytuj</Button>
 										)}
@@ -240,7 +219,7 @@ function Profile() {
 								)}
 							</div>
 						) : (
-							<p>Loading user data...</p>
+							<p>Ładowanie danych użytkownika...</p>
 						)}
 					</div>
 					{userProfile && userProfile.team ? (

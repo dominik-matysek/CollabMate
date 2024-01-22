@@ -6,7 +6,7 @@ const CommentInput = ({ onCommentSubmit }) => {
 
 	const handleSubmit = () => {
 		onCommentSubmit(comment);
-		setComment(""); // Reset comment input after submission
+		setComment("");
 	};
 
 	return (

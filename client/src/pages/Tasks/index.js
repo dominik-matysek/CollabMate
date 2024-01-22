@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, message, Table, Col, Row } from "antd";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { message, Col, Row } from "antd";
+import { useParams } from "react-router-dom";
 import taskService from "../../services/task";
 import projectService from "../../services/project";
 import { useSelector, useDispatch } from "react-redux";
-import { SetLoading, SetButtonLoading } from "../../redux/loadersSlice";
-import { SetNotifications, SetUser } from "../../redux/usersSlice";
+import { SetLoading } from "../../redux/loadersSlice";
 import TaskForm from "./TaskForm";
 import SingleTaskCard from "../../components/SingleTaskCard";
 import StatsCard from "../../components/StatsCard";
@@ -26,10 +25,8 @@ function Tasks() {
 
 	const fetchProjectMembers = async () => {
 		try {
-			// Add loading state handling if needed
 			dispatch(SetLoading(true));
-
-			const response = await projectService.getProjectById(projectId); // Adjust with your actual API call
+			const response = await projectService.getProjectById(projectId);
 			if (response.success) {
 				setMembers(response.data.members);
 				setProject(response.data);
@@ -47,7 +44,7 @@ function Tasks() {
 	const fetchTasks = async () => {
 		try {
 			dispatch(SetLoading(true));
-			const response = await taskService.getAllTasks(projectId); // Replace with your actual API endpoint
+			const response = await taskService.getAllTasks(projectId);
 			if (response.success) {
 				setTasks(response.data);
 			} else {
@@ -55,7 +52,6 @@ function Tasks() {
 			}
 			dispatch(SetLoading(false));
 		} catch (error) {
-			dispatch(SetLoading(false));
 			message.error(error.message);
 		}
 	};
@@ -81,7 +77,7 @@ function Tasks() {
 
 	useEffect(() => {
 		countStats();
-	}, [tasks, members]); // Depend on teams and users
+	}, [tasks, members]);
 
 	return isSameTeam ? (
 		<>
@@ -113,12 +109,15 @@ function Tasks() {
 			</Row>
 		</>
 	) : (
-		<div class="flex items-center justify-center h-screen">
+		<div className="flex items-center justify-center h-screen">
 			<div>
-				<h1 class="text-4xl font-bold text-center" style={{ color: "#138585" }}>
+				<h1
+					className="text-4xl font-bold text-center"
+					style={{ color: "#138585" }}
+				>
 					403 - Forbidden
 				</h1>
-				<p class="text-2xl text-center">
+				<p className="text-2xl text-center">
 					Niestety, nie posiadasz dostępu do tej zawartości
 				</p>
 			</div>

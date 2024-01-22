@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Input, Button, message, Select, Row, Col, Modal } from "antd";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { SetLoading, SetButtonLoading } from "../../../redux/loadersSlice";
 import { getSimpleDateFormat } from "../../../utils/helpers";
-import { SetNotifications, SetUser } from "../../../redux/usersSlice";
 import AddUserForm from "./AddUserForm";
-import { getAntdFormInputRules } from "../../../utils/helpers";
 import taskService from "../../../services/task";
 import UserList from "../../../components/UserList";
 import FileUpload from "../../../components/FileUpload";
@@ -55,8 +53,6 @@ function Task() {
 				setDescription(response.data.description);
 				setInitialDescription(description);
 				setAllowedTransitions(response.allowedTransitions || []);
-				console.log("USERID: ", user._id);
-				console.log("USERROLE: ", user.role);
 			} else {
 				throw new Error(response.message);
 			}
@@ -73,7 +69,6 @@ function Task() {
 			dispatch(SetLoading(false));
 			if (response.success) {
 				setComments(response.comments);
-				console.log("Komentarze", response.comments);
 			} else {
 				throw new Error(response.message);
 			}
@@ -128,15 +123,15 @@ function Task() {
 				const response = await taskService.changeTaskStatus(taskId, newStatus);
 				if (response.success) {
 					setStatus(newStatus);
-					message.success("Task status updated successfully");
+					message.success(response.message);
 					reloadData();
 
 					if (newStatus === "completed") {
 						const notificationPayload = {
-							users: task.members, // Array of user IDs
+							users: task.members,
 							title: "Zmieniono status",
 							description: `Status zadania którego jesteś członkiem został zmieniony na "Zakończone".`,
-							link: `/projects/${task.project}/tasks/${taskId}`, // Adjust link to point to the team page or relevant resource
+							link: `/projects/${task.project}/tasks/${taskId}`,
 						};
 						await notificationService.createNotification(notificationPayload);
 					}
@@ -197,14 +192,14 @@ function Task() {
 			const response = await taskService.uploadAttachments(taskId, formData);
 			dispatch(SetLoading(false));
 			if (response.success) {
-				message.success("Files uploaded successfully");
-				reloadData(); // Reload task data to update the list of attachments
+				message.success(response.message);
+				reloadData();
 
 				const notificationPayload = {
-					users: task.members, // Array of user IDs
+					users: task.members,
 					title: "Dodanie pliku",
 					description: `Dodano plik do zadania którego jesteś członkiem.`,
-					link: `/projects/${task.project}/tasks/${taskId}`, // Adjust link to point to the team page or relevant resource
+					link: `/projects/${task.project}/tasks/${taskId}`,
 				};
 				await notificationService.createNotification(notificationPayload);
 			} else {
@@ -219,7 +214,6 @@ function Task() {
 	const removeFile = async (id) => {
 		try {
 			dispatch(SetLoading(true));
-			console.log("w onDelete, oto id:", id);
 			const response = await taskService.removeAttachment(taskId, id);
 			if (response.success) {
 				message.success(response.message);
@@ -237,16 +231,16 @@ function Task() {
 	const removeMember = async (id) => {
 		try {
 			dispatch(SetLoading(true));
-			console.log("w onDelete, oto id:", id);
 			const response = await taskService.removeMemberFromTask(taskId, id);
 			if (response.success) {
 				message.success(response.message);
 				reloadData();
+
 				const notificationPayload = {
-					users: id, // Array of user IDs
+					users: id,
 					title: "Usunięcie z zadania",
 					description: `Usunięto Cię z zadania którego byłeś członkiem.`,
-					link: `/projects/${task.project}/tasks`, // Adjust link to point to the team page or relevant resource
+					link: `/projects/${task.project}/tasks`,
 				};
 				await notificationService.createNotification(notificationPayload);
 			} else {
@@ -267,14 +261,14 @@ function Task() {
 				commentContent
 			);
 			if (response.success) {
-				message.success("Comment added successfully");
-				await reloadData(); // Refresh the comments list
+				message.success(response.message);
+				await reloadData();
 
 				const notificationPayload = {
-					users: task.members, // Array of user IDs
+					users: task.members,
 					title: "Dodano komentarz",
 					description: `Dodano komentarz do zadania którego jesteś członkiem.`,
-					link: `/projects/${task.project}/tasks/${taskId}`, // Adjust link to point to the team page or relevant resource
+					link: `/projects/${task.project}/tasks/${taskId}`,
 				};
 				await notificationService.createNotification(notificationPayload);
 			} else {
@@ -333,10 +327,10 @@ function Task() {
 				navigate(`/projects/${projectId}/tasks`);
 
 				const notificationPayload = {
-					users: task.members, // Array of user IDs
+					users: task.members,
 					title: "Usunięto zadanie",
 					description: `Usunięto zadanie którego byłeś członkiem.`,
-					link: `/projects/${task.project}/tasks`, // Adjust link to point to the team page or relevant resource
+					link: `/projects/${task.project}/tasks`,
 				};
 				await notificationService.createNotification(notificationPayload);
 			} else {
@@ -352,11 +346,6 @@ function Task() {
 	useEffect(() => {
 		reloadData();
 	}, [taskId]);
-
-	if (task && task.members) {
-		console.log("TASK: ", task);
-		console.log("TASK MEMBERS: ", task.members);
-	}
 
 	return (
 		task && (
@@ -391,7 +380,7 @@ function Task() {
 							</p>
 						</Modal>
 					)}
-					{/* Task Status */}
+
 					<div c>
 						<h2 className="text-2xl font-semibold text-gray-800 mb-3">
 							Status zadania
@@ -410,7 +399,7 @@ function Task() {
 							))}
 						</Select>
 					</div>
-					{/* Task Priority  */}
+
 					<div className="flex justify-center items-center flex-col">
 						<h2 className="text-2xl font-semibold text-gray-800 mb-3">
 							Stopień ważności
@@ -434,24 +423,16 @@ function Task() {
 								: "Wysoki"}
 						</Button>
 					</div>
-					{/* Due date */}
+
 					<div>
 						<h2 className="text-2xl font-semibold text-gray-800 mb-3">
 							Planowana data zakończenia:
 						</h2>
 						<h3 className="text-center">{getSimpleDateFormat(task.dueDate)}</h3>
 					</div>
-
-					{/* {user.role === "TEAM LEADER" && (
-						<Button type="primary" onClick={showAddUserModal}>
-							Dodaj pracownika
-						</Button>
-					)} */}
 				</div>
 
 				<div className="md:flex no-wrap md:-mx-2 ">
-					{/* Tu będzie lista członków zadania w stylu UserList 
-					+ możliwośc dodawania i usuwania */}
 					<div className="w-full md:w-3/12 md:mx-2 ">
 						{(user.role === "TEAM LEADER" || user._id === task.createdBy) && (
 							<Button
@@ -473,7 +454,6 @@ function Task() {
 							creatorId={task.createdBy}
 						/>
 					</div>
-					{/* Task Description */}
 
 					<div className="w-full md:w-6/12 mx-2 ">
 						<Row gutter={16}>
@@ -482,7 +462,6 @@ function Task() {
 									className="mb-6 bg-indigo-100 p-4 rounded-md shadow-md"
 									style={{ minHeight: "150px" }}
 								>
-									{" "}
 									<div className="flex justify-between items-center">
 										<h2 className="text-xl font-semibold text-gray-800">
 											Opis zadania
@@ -539,8 +518,6 @@ function Task() {
 								</div>
 							</Col>
 							<Col span={24}>
-								{/* Komentarze */}
-
 								{comments && (
 									<Comments
 										comments={comments}
@@ -557,11 +534,9 @@ function Task() {
 						<div className="w-full md:w-3/12 mx-2 ">
 							<Row gutter={16}>
 								<Col span={24} className="mb-8">
-									{/* FileUpload component */}
 									<FileUpload onFileUpload={handleFileUpload} />
 								</Col>
 								<Col span={24}>
-									{/* FileList component */}
 									<FileList
 										attachments={task?.attachments}
 										onDelete={removeFile}

@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { Form, Input, Button, message } from "antd";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+// Strona dla nieistniejących adresów URL
+
+import React from "react";
 
 function NotFoundPage() {
 	return (

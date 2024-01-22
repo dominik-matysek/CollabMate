@@ -12,25 +12,6 @@ function Login() {
 	const { buttonLoading, user } = useSelector((state) => state.loaders);
 	const dispatch = useDispatch();
 
-	// const checkAuthentication = async () => {
-	// 	try {
-	// 		// Send a request to the server to check if the user is authenticated
-	// 		const data = await userService.authenticate();
-
-	// 		if (data.success) {
-	// 			// User is authenticated, redirect to the main page
-	// 			navigate("/");
-	// 			message.warning({
-	// 				content:
-	// 					"Jeżeli pragniesz zmienić konto, proszę wyloguj się najpierw.",
-	// 				duration: 3,
-	// 			});
-	// 		}
-	// 	} catch (error) {
-	// 		console.error("Error checking authentication:", error);
-	// 	}
-	// };
-
 	const onFinish = async (values) => {
 		try {
 			dispatch(SetButtonLoading(true));
@@ -49,11 +30,11 @@ function Login() {
 	};
 
 	useEffect(() => {
-		// If there's a user object, we assume the user is authenticated and redirect them
 		if (user) {
 			navigate("/");
 			message.warning({
-				content: "Jeżeli pragniesz zmienić konto, proszę wyloguj się najpierw.",
+				content:
+					"Jeżeli pragniesz zmienić konto, musisz się najpierw wylogować.",
 				duration: 3,
 			});
 		}

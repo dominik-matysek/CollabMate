@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const itemsWhenInTeams = [
 	{
@@ -8,7 +8,7 @@ const itemsWhenInTeams = [
 	},
 	{
 		name: "Mój zespoły",
-		link: "/teams/:teamId", // to by mogło wyglądać tak, że w zakładce wszystkie zespoły pojawiają się wszystkie zespoły jakie istnieją w systemie, a w zakładce mój zespół pojawia się tylko zespół jeden do którego dany user zalogowany należy - jest card w postaci takiej jak pojedynczy zespół ma w zakładce wszystkie zespoły
+		link: "/teams/:teamId",
 		forRole: ["TEAM LEADER", "EMPLOYEE"],
 	},
 	{
@@ -62,11 +62,10 @@ const itemWhenInTask = [
 function SubHeader({ user }) {
 	const location = useLocation();
 	const navigate = useNavigate();
-	const [currentItem, setCurrentItem] = useState("Wszystkie zespoły"); // Default current item
+	const [currentItem, setCurrentItem] = useState("Wszystkie zespoły");
 
 	const pathSegments = location.pathname.split("/").filter((seg) => seg);
 
-	// Function to replace params in the link with actual IDs
 	const getResolvedLink = (link) => {
 		return link
 			.replace(":teamId", user.team?._id)
@@ -75,21 +74,20 @@ function SubHeader({ user }) {
 	};
 
 	const shouldShowItem = (item) => {
-		// If forRole is not defined, everyone can see it
+		// Jeśli nie zdefiniowane, każdy ma podgląd
 		if (!item.forRole) {
 			return true;
 		}
 
-		// If forRole is an array, check if the user's role is included in the array
+		// Sprawdzanie czy rola uzytkownika pasuje
 		if (Array.isArray(item.forRole)) {
 			return item.forRole.includes(user.role);
 		}
 
-		// If forRole is a string, check if it matches the user's role
+		// Sprawdzanie stringa (admin)
 		return item.forRole === user.role;
 	};
 
-	// Function to determine navigation items based on the current URL
 	const getNavigationItems = () => {
 		let items = [];
 
@@ -121,18 +119,17 @@ function SubHeader({ user }) {
 		navigate(getResolvedLink(link));
 	};
 
-	// Function to check if the item is the current item
 	const isCurrentItem = (itemName) => {
 		return currentItem === itemName;
 	};
 
 	return (
 		<div className="py-6 shadow-md" style={{ backgroundColor: "#138585" }}>
-			<div className="flex justify-center space-x-10">
+			<div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-10 overflow-x-auto">
 				{getNavigationItems().map((item, index) => (
 					<span
 						key={index}
-						className={`cursor-pointer text-white ${
+						className={`cursor-pointer text-sm md:text-base text-white ${
 							isCurrentItem(item.name) ? "bg-blue-500" : ""
 						}`}
 						onClick={() => handleItemClick(item.name, item.link)}

@@ -10,14 +10,16 @@ import {
 	Avatar,
 	Divider,
 } from "antd";
-import { IoTrashBin, IoBuild, IoPerson } from "react-icons/io5";
+import { IoTrashBin, IoPerson } from "react-icons/io5";
 import { SetLoading, SetButtonLoading } from "../../redux/loadersSlice";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import eventService from "../../services/event";
 import notificationService from "../../services/notification";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
+
 const { Option } = Select;
+
 function EventForm({
 	eventDetails,
 	onSave,
@@ -50,7 +52,6 @@ function EventForm({
 			const values = await form.validateFields();
 			const payload = {
 				memberIds: values.member,
-				// roleType: roleType, // "member" or "leader"
 			};
 			const response = await eventService.addMembersToEvent(
 				eventDetails._id,
@@ -58,15 +59,15 @@ function EventForm({
 			);
 			dispatch(SetButtonLoading(false));
 			if (response.success) {
-				message.success("User(s) added successfully");
+				message.success(response.message);
 				setSelectedMembers(null);
 				reloadEventData(eventDetails._id);
 
 				const notificationPayload = {
-					users: values.member, // Array of user IDs
+					users: values.member,
 					title: "Dodano cię do wydarzenia",
 					description: `Zostałeś dodany do wydarzenia w twoim zespole: ${eventDetails.name}.`,
-					link: `/teams/${eventDetails.team}/events`, // Adjust link to point to the team page or relevant resource
+					link: `/teams/${eventDetails.team}/events`,
 				};
 				await notificationService.createNotification(notificationPayload);
 			} else {
@@ -81,7 +82,7 @@ function EventForm({
 	const removeMember = async (id) => {
 		try {
 			dispatch(SetLoading(true));
-			console.log("w onDelete, oto id:", id);
+
 			const response = await eventService.removeMemberFromEvent(
 				eventDetails._id,
 				id
@@ -91,10 +92,10 @@ function EventForm({
 				reloadEventData(eventDetails._id);
 
 				const notificationPayload = {
-					users: id, // Array of user IDs
+					users: id,
 					title: "Usunięto cię z wydarzenia",
 					description: `Zostałeś usunięty z wydarzenia w twoim zespole: ${eventDetails.name}.`,
-					link: `/teams/${eventDetails.team}/events`, // Adjust link to point to the team page or relevant resource
+					link: `/teams/${eventDetails.team}/events`,
 				};
 				await notificationService.createNotification(notificationPayload);
 			} else {
@@ -132,7 +133,6 @@ function EventForm({
 			date: eventDetails.date ? moment(eventDetails.date) : null,
 		});
 
-		// Reset state when event details change
 		setFormChanged(false);
 		setSelectedMembers(null);
 	}, [eventDetails, form]);
@@ -169,7 +169,6 @@ function EventForm({
 					format={dateFormat}
 					disabled={true}
 					disabledDate={(current) => {
-						// Disabling past dates including today
 						return current && current < moment().startOf("day");
 					}}
 				/>
@@ -187,7 +186,7 @@ function EventForm({
 								currentUser._id !== member._id && (
 									<IoTrashBin
 										onClick={(e) => {
-											e.stopPropagation(); // Prevents event from propagating to the list item
+											e.stopPropagation();
 											removeMember(member._id);
 										}}
 									/>
@@ -208,10 +207,7 @@ function EventForm({
 							}
 							description={
 								<>
-									<p className="text-xs">
-										{member.role}
-										{/* Displaying role with a team icon */}
-									</p>
+									<p className="text-xs">{member.role}</p>
 								</>
 							}
 						/>
@@ -276,122 +272,3 @@ function EventForm({
 }
 
 export default EventForm;
-
-// import React, { useState, useEffect } from "react";
-// import { Form, Input, DatePicker, Button, Select, message } from "antd";
-// import moment from "moment";
-// import eventService from "../../services/event";
-// import { SetLoading, SetButtonLoading } from "../../redux/loadersSlice";
-// import { useSelector, useDispatch } from "react-redux";
-
-// function EventForm({
-// 	eventDetails,
-// 	onSave,
-// 	onCancel,
-// 	currentUser,
-// 	allMembers,
-// }) {
-// 	const [form] = Form.useForm();
-// 	const [formChanged, setFormChanged] = useState(false);
-// 	const dispatch = useDispatch();
-
-// 	const isEditable =
-// 		currentUser._id === eventDetails.createdBy ||
-// 		currentUser.role === "TEAM LEADER";
-
-// 	const addMember = async () => {
-// 		try {
-// 			dispatch(SetButtonLoading(true));
-// 			const values = await form.validateFields();
-// 			const payload = {
-// 				memberData: values.member,
-// 				// roleType: roleType, // "member" or "leader"
-// 			};
-// 			const response = await eventService.addMembersToEvent(
-// 				eventDetails._id,
-// 				payload
-// 			);
-// 			dispatch(SetButtonLoading(false));
-// 			if (response.success) {
-// 				message.success("User(s) added successfully");
-// 				// onClose();
-// 				// reloadData();
-// 			} else {
-// 				throw new Error(response.error);
-// 			}
-// 		} catch (error) {
-// 			dispatch(SetButtonLoading(false));
-// 			message.error(error.message);
-// 		}
-// 	};
-
-// 	const removeMember = async (id) => {
-// 		try {
-// 			dispatch(SetLoading(true));
-// 			console.log("w onDelete, oto id:", id);
-// 			const response = await eventService.removeMemberFromEvent(
-// 				eventDetails._id,
-// 				id
-// 			);
-// 			if (response.success) {
-// 				message.success(response.message);
-// 				// reloadData();
-// 			} else {
-// 				message.error(response.message);
-// 				throw new Error(response.error);
-// 			}
-// 			dispatch(SetLoading(false));
-// 		} catch (error) {
-// 			dispatch(SetLoading(false));
-// 		}
-// 	};
-
-// 	useEffect(() => {
-// 		form.setFieldsValue({
-// 			title: eventDetails.title,
-// 			description: eventDetails.description,
-// 			date: moment(eventDetails.date),
-// 			members: eventDetails.members.map((member) => member.id),
-// 		});
-// 	}, [eventDetails, form]);
-
-// 	const handleSubmit = (values) => {
-// 		onSave(values);
-// 	};
-
-// 	return (
-// 		<Form form={form} layout="vertical" onFinish={handleSubmit}>
-// 			<Form.Item label="Tytuł" name="title">
-// 				<Input disabled={!isEditable} />
-// 			</Form.Item>
-// 			<Form.Item label="Opis" name="description">
-// 				<Input.TextArea disabled={!isEditable} />
-// 			</Form.Item>
-// 			<Form.Item label="Data" name="date">
-// 				<DatePicker disabled={!isEditable} />
-// 			</Form.Item>
-// 			<Form.Item label="Członkowie" name="members">
-// 				<Select
-// 					mode="multiple"
-// 					options={allMembers.map((member) => ({
-// 						value: member._id,
-// 						label: member.firstName,
-// 					}))}
-// 					disabled={!isEditable}
-// 				/>
-// 			</Form.Item>
-// 			{isEditable && (
-// 				<div className="flex justify-end mt-4">
-// 					<Button onClick={onCancel} className="mr-2">
-// 						Anuluj
-// 					</Button>
-// 					<Button type="primary" htmlType="submit">
-// 						Zapisz
-// 					</Button>
-// 				</div>
-// 			)}
-// 		</Form>
-// 	);
-// }
-
-// export default EventForm;

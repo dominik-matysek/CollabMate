@@ -21,9 +21,7 @@ input,
 select {
 	height: 40px !important;
 	border-radius: 0 !important;
-	/* border: 1px solid #bbbbbb !important; */
 	width: 100% !important;
-	/* padding-left: 15px !important; */
 }
 
 textarea {
@@ -35,7 +33,6 @@ input:focus,
 textarea:focus,
 select:focus {
 	box-shadow: none !important;
-	/* border: 1px solid #343434 !important; */
 }
 
 .ant-form-item {

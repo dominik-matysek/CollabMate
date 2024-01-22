@@ -6,9 +6,6 @@ import { Comment } from "@ant-design/compatible";
 import { IoTrashBin } from "react-icons/io5";
 
 const Comments = ({ comments, currentUserId, onDeleteComment }) => {
-	console.log("Komentarze w Comments: ", comments);
-	console.log("Komentarze createdBy w Comments: ", comments.createdBy);
-
 	return (
 		<>
 			<div

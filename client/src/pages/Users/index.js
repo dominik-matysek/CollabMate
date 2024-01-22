@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, message, Table } from "antd";
+import { message, Table } from "antd";
 import userService from "../../services/user";
 import { useSelector, useDispatch } from "react-redux";
-import { SetLoading, SetButtonLoading } from "../../redux/loadersSlice";
+import { SetLoading } from "../../redux/loadersSlice";
 import { getSimpleDateFormat } from "../../utils/helpers";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { IoTrashBin } from "react-icons/io5";
-import { Menu, Dropdown } from "antd";
-import { DownOutlined } from "@ant-design/icons";
-
-// PAMIĘTAJ DEBILU - JEŻELI REQUEST CI NIE DZIAŁA, TO PROBLEM NA 99% JEST W BACKENDZIE - SPRAWDZAJ LOGI W KONSOLI VSCODE A NIE WEBOWEJ JEŚLI CHODZI O BACKEND, SPRAWDZAJ CZY W REQUESCIE SIĘ ZNAJDUJĄ RZECZY KTÓRE SĄ OCZEKIWANE W KONTROLERZE ITP
 
 function Users() {
 	const { user } = useSelector((state) => state.users);
@@ -22,9 +18,8 @@ function Users() {
 
 	const fetchUsers = async () => {
 		try {
-			// Add loading state handling if needed
 			dispatch(SetLoading(true));
-			const response = await userService.getAllUsers(); // Adjust with your actual API call
+			const response = await userService.getAllUsers();
 			if (response.success) {
 				setUsers(response.data);
 			} else {
@@ -46,14 +41,9 @@ function Users() {
 		};
 	};
 
-	// const stopPropagation = (e) => {
-	// 	e.stopPropagation();
-	// };
-
 	const onDelete = async (id) => {
 		try {
 			dispatch(SetLoading(true));
-			console.log("w onDelete, oto id:", id);
 			const response = await userService.removeUserFromSystem(id);
 			if (response.success) {
 				message.success(response.message);
@@ -82,11 +72,10 @@ function Users() {
 	}));
 
 	let columns = [
-		// Tu by mogło być jeszcze małe zdjecie profilowe kwadratowe albo okrągłe, jak juz ogarniesz zdjecia
 		{
 			title: "Imię",
 			dataIndex: "firstName",
-			sorter: (a, b) => a.firstName.localeCompare(b.firstName), // Sorting function for firstName
+			sorter: (a, b) => a.firstName.localeCompare(b.firstName),
 		},
 		{
 			title: "Nazwisko",
@@ -101,7 +90,7 @@ function Users() {
 		{
 			title: "Data dołączenia",
 			dataIndex: "createdAt",
-			sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt), // Sorting function for createdAt
+			sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
 			render: (text) => getSimpleDateFormat(text),
 		},
 		{
@@ -114,9 +103,9 @@ function Users() {
 					<span
 						onClick={(e) => {
 							e.stopPropagation(); // Prevent onRowClick
-							navigate(`/teams/${team._id}`); // Navigate to the team's page
+							navigate(`/teams/${team._id}`);
 						}}
-						style={{ color: "#1890ff", cursor: "pointer" }} // Add cursor style for better UX
+						style={{ color: "#1890ff", cursor: "pointer" }}
 					>
 						{team.name}
 					</span>
@@ -170,5 +159,4 @@ function Users() {
 		</div>
 	);
 }
-
 export default Users;

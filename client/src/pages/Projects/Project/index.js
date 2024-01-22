@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, message, Table, Modal } from "antd";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Input, Button, message, Table, Modal } from "antd";
+import { useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { SetLoading, SetButtonLoading } from "../../../redux/loadersSlice";
 import { getSimpleDateFormat } from "../../../utils/helpers";
-import { SetNotifications, SetUser } from "../../../redux/usersSlice";
 import { IoTrashBin } from "react-icons/io5";
 import { UserOutlined } from "@ant-design/icons";
 import AddUserForm from "./AddUserForm";
-import { getAntdFormInputRules } from "../../../utils/helpers";
 import projectService from "../../../services/project";
 import notificationService from "../../../services/notification";
 
@@ -44,7 +42,6 @@ function Project() {
 				setStatus(response.data.status);
 				setDescription(response.data.description);
 				setInitialDescription(description);
-				console.log("Projekt dane:", project);
 			} else {
 				throw new Error(response.message);
 			}
@@ -152,11 +149,12 @@ function Project() {
 			if (response.success) {
 				message.success(response.message);
 				navigate(`/teams/${teamId}/projects`);
+
 				const notificationPayload = {
-					users: project.members, // Array of user IDs
+					users: project.members,
 					title: "Usunięto projekt",
 					description: `Usunięto projekt którego byłeś członkiem z twojego zespołu.`,
-					link: `/projects`, // Adjust link to point to the team page or relevant resource
+					link: `/projects`,
 				};
 				await notificationService.createNotification(notificationPayload);
 			} else {
@@ -172,7 +170,7 @@ function Project() {
 	const onDelete = async (id) => {
 		try {
 			dispatch(SetLoading(true));
-			console.log("w onDelete, oto id:", id);
+
 			const response = await projectService.removeMemberFromProject(
 				projectId,
 				id
@@ -181,10 +179,10 @@ function Project() {
 				message.success(response.message);
 				reloadData();
 				const notificationPayload = {
-					users: id, // Array of user IDs
+					users: id,
 					title: "Usunięto z projektu",
 					description: `Zostałeś usunięty z projektu w swoim zespole.`,
-					link: `/projects`, // Adjust link to point to the team page or relevant resource
+					link: `/projects`,
 				};
 				await notificationService.createNotification(notificationPayload);
 			} else {
@@ -200,19 +198,13 @@ function Project() {
 	const getRandomProjectMember = () => {
 		if (project && project.members && project.members.length > 0) {
 			const randomIndex = Math.floor(Math.random() * project.members.length);
-			console.log("Członek projektu random: ", project.members[randomIndex]);
 			return project.members[randomIndex];
 		}
 	};
 
 	let currentMember = getRandomProjectMember();
 
-	// const isTeamIdInUserTeams = user.team;
-
-	console.log("Random lider: ", currentMember);
-
 	let columns = [
-		// Tu by mogło być jeszcze małe zdjecie profilowe kwadratowe albo okrągłe, jak juz ogarniesz zdjecia
 		{
 			title: "Imię",
 			dataIndex: "firstName",
@@ -251,8 +243,6 @@ function Project() {
 	return isSameTeam ? (
 		project && (
 			<div className="container mx-auto my-5 p-5">
-				{/* {isTeamIdInUserTeams && <Sidebar />}  */}
-				{/* Team Name and Creation Date */}
 				<div className="flex justify-between items-center mb-6">
 					<div>
 						<h1 className="text-3xl font-bold text-gray-900 mb-3">
@@ -280,7 +270,7 @@ function Project() {
 							</p>
 						</Modal>
 					)}
-					{/* Project Status */}
+
 					<div>
 						<h2 className="text-2xl font-semibold text-gray-800 mb-3">
 							Status projektu
@@ -307,11 +297,6 @@ function Project() {
 					<p className="text-gray-600">
 						Data utworzenia: {getSimpleDateFormat(project.createdAt)}
 					</p>
-					{/* {user.role === "TEAM LEADER" && (
-						<Button type="primary" onClick={showAddUserModal}>
-							Dodaj pracownika
-						</Button>
-					)} */}
 				</div>
 
 				<div className="md:flex no-wrap md:-mx-2 ">
@@ -351,14 +336,12 @@ function Project() {
 							</div>
 						</div>
 					)}
-					{/* Project Description */}
 
 					<div className="w-full md:w-9/12 mx-2 ">
 						<div
 							className="mb-6 bg-indigo-100 p-4 rounded-md shadow-md"
 							style={{ minHeight: "150px" }}
 						>
-							{" "}
 							<div className="flex justify-between items-center">
 								<h2 className="text-xl font-semibold text-gray-800">
 									Opis projektu
@@ -448,12 +431,15 @@ function Project() {
 			</div>
 		)
 	) : (
-		<div class="flex items-center justify-center h-screen">
+		<div className="flex items-center justify-center h-screen">
 			<div>
-				<h1 class="text-4xl font-bold text-center" style={{ color: "#138585" }}>
+				<h1
+					className="text-4xl font-bold text-center"
+					style={{ color: "#138585" }}
+				>
 					403 - Forbidden
 				</h1>
-				<p class="text-2xl text-center">
+				<p className="text-2xl text-center">
 					Niestety, nie posiadasz dostępu do tej zawartości
 				</p>
 			</div>

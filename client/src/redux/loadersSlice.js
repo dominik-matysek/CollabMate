@@ -1,3 +1,5 @@
+// Redux slice for loading indicators
+
 import { createSlice } from "@reduxjs/toolkit";
 
 export const loadersSlice = createSlice({

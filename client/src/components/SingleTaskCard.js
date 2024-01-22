@@ -1,17 +1,12 @@
 import React from "react";
-import { Avatar, Badge, Button } from "antd";
-import { EllipsisOutlined } from "@ant-design/icons";
+import { Avatar, Button } from "antd";
 import { useNavigate } from "react-router-dom";
 import { getSimpleDateFormat } from "../utils/helpers";
 
-// Tu musisz dorzucić teamleada imie i nazwisko dla każdego carda, te zdjęcia ogarnąć i date utworzenia np.
-
 function SingleTaskCard({ item }) {
 	const navigate = useNavigate();
-	// console.log("Członkowie", team.members[0].firstName);
-	console.log("Co jest w item: ", item);
+
 	return (
-		// <div className="bg-white p-4 rounded-lg shadow mb-6 flex justify-between items-center"></div>
 		<div className="bg-white p-4 rounded-lg shadow mb-6 flex justify-between items-center">
 			<div className="flex justify-between items-center mb-4">
 				<div className="mr-20">

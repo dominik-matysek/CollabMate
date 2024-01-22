@@ -209,7 +209,15 @@ exports.updateProfile = async (req, res) => {
 			userId,
 			{ $set: updatedValues },
 			{ new: true }
-		).select("-password");
+		)
+			.select("-password")
+			.populate({
+				path: "team",
+				populate: {
+					path: "members",
+					select: "profilePic",
+				},
+			});
 
 		if (!updatedUser) {
 			return res.status(404).json({ message: "Nie znaleziono użytkownika." });

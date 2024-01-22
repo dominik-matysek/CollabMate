@@ -1,16 +1,6 @@
-import {
-	Form,
-	Input,
-	message,
-	Modal,
-	Select,
-	Button,
-	Card,
-	DatePicker,
-} from "antd";
-import TextArea from "antd/es/input/TextArea";
-import React, { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { Form, Input, message, Select, Button, Card, DatePicker } from "antd";
+import React from "react";
+import { useDispatch } from "react-redux";
 import { SetLoading } from "../../redux/loadersSlice";
 import { getAntdFormInputRules } from "../../utils/helpers";
 import taskService from "../../services/task";
@@ -28,7 +18,7 @@ function TaskForm({ user, projectId, reloadData, users }) {
 	const onFinish = async (values) => {
 		try {
 			dispatch(SetLoading(true));
-			// create task
+
 			const payload = {
 				name: values.name,
 				description: values.description,
@@ -93,7 +83,6 @@ function TaskForm({ user, projectId, reloadData, users }) {
 					<Input.TextArea placeholder="Opis zadania" allowClear />
 				</Form.Item>
 
-				{/* Due Date Selection */}
 				<Form.Item
 					name="dueDate"
 					rules={[
@@ -105,13 +94,11 @@ function TaskForm({ user, projectId, reloadData, users }) {
 						style={{ width: "100%" }}
 						format={dateFormat}
 						disabledDate={(current) => {
-							// Can not select days before today and today
 							return current && current < moment().endOf("day");
 						}}
 					/>
 				</Form.Item>
 
-				{/* Priority Selection */}
 				<Form.Item
 					name="priority"
 					rules={[

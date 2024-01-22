@@ -1,3 +1,5 @@
+// Proste metody wykorzystywane w projekcie
+
 import moment from "moment";
 
 export const getAntdFormInputRules = [

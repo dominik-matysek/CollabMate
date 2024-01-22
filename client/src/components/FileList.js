@@ -1,6 +1,5 @@
 import React from "react";
 import { List, Button } from "antd";
-import { DownloadOutlined } from "@ant-design/icons";
 import { IoTrashBin } from "react-icons/io5";
 
 const FileList = ({ attachments, onDelete }) => {
@@ -25,8 +24,7 @@ const FileList = ({ attachments, onDelete }) => {
 										className="p-1"
 										onClick={(e) => {
 											e.stopPropagation();
-											onDelete(item); // Pass the item itself, which is the URL
-											console.log("Item to be deleted: ", item);
+											onDelete(item);
 										}}
 									>
 										<IoTrashBin />

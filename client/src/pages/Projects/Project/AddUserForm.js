@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Form, Select, message, Button, Checkbox } from "antd";
+import { Modal, Form, Select, message, Button } from "antd";
 import teamService from "../../../services/team";
 import { SetButtonLoading } from "../../../redux/loadersSlice";
 import { getAntdFormInputRules } from "../../../utils/helpers";
@@ -11,7 +11,6 @@ const AddUserForm = ({ project, isVisible, onClose, reloadData }) => {
 	const [form] = Form.useForm();
 	const [members, setMembers] = useState([]);
 	const dispatch = useDispatch();
-	const [selectedUserIds, setSelectedUserIds] = useState([]);
 
 	const fetchTeamMembers = async () => {
 		try {
@@ -45,7 +44,6 @@ const AddUserForm = ({ project, isVisible, onClose, reloadData }) => {
 			const values = await form.validateFields();
 			const payload = {
 				userIds: values.member,
-				// roleType: roleType, // "member" or "leader"
 			};
 			const response = await projectService.addMembersToProject(
 				project._id,
@@ -53,15 +51,15 @@ const AddUserForm = ({ project, isVisible, onClose, reloadData }) => {
 			);
 			dispatch(SetButtonLoading(false));
 			if (response.success) {
-				message.success("User(s) added successfully");
+				message.success(response.message);
 				onClose();
 				reloadData();
 
 				const notificationPayload = {
-					users: values.member, // Array of user IDs
+					users: values.member,
 					title: "Nowy projekt",
 					description: `Zostałeś dodany do nowego projektu w swoim zespole.`,
-					link: `/projects/${project._id}`, // Adjust link to point to the team page or relevant resource
+					link: `/projects/${project._id}`,
 				};
 				await notificationService.createNotification(notificationPayload);
 			} else {

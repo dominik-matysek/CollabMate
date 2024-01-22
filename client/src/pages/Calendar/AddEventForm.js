@@ -1,13 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { Form, Input, Button, DatePicker, message } from "antd";
 import eventService from "../../services/event";
-import {
-	getSimpleDateFormat,
-	getAntdFormInputRules,
-} from "../../utils/helpers";
+import { getAntdFormInputRules } from "../../utils/helpers";
 import moment from "moment";
 import { SetLoading } from "../../redux/loadersSlice";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 function AddEventForm({ teamId, reloadData }) {
 	const [form] = Form.useForm();
@@ -17,15 +14,12 @@ function AddEventForm({ teamId, reloadData }) {
 	const onFinish = async (values) => {
 		try {
 			dispatch(SetLoading(true));
-			// Format the date to match your backend expectations
-			console.log("wartości: ", values);
+
 			const formattedValues = {
 				title: values.title,
 				description: values.description,
 				date: values.date,
 			};
-
-			console.log("wartości zmienione: ", formattedValues);
 
 			const response = await eventService.createEvent(teamId, formattedValues);
 			if (response.success) {
@@ -38,7 +32,6 @@ function AddEventForm({ teamId, reloadData }) {
 			}
 		} catch (error) {
 			console.error("Error adding event:", error);
-			// Handle error
 		}
 	};
 
@@ -59,7 +52,6 @@ function AddEventForm({ teamId, reloadData }) {
 					placeholder="Wybierz datę"
 					format={dateFormat}
 					disabledDate={(current) => {
-						// Can not select days before today and today
 						return current && current < moment().startOf("day");
 					}}
 				/>

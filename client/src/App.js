@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login/index";
@@ -10,7 +9,6 @@ import ProtectedPage from "./components/ProtectedPage";
 import Home from "./pages/Home";
 import Spinner from "./components/Spinner";
 import Team from "./pages/Teams/Team";
-import Test from "./pages/Test";
 import Projects from "./pages/Projects";
 import Project from "./pages/Projects/Project";
 import Tasks from "./pages/Tasks";
@@ -90,7 +88,7 @@ function App() {
 							</ProtectedPage>
 						}
 					/>
-					<Route // W takim roucie jak ten, powineineś sprawdzać czy user jest adminem - inaczej nie może wejść i go przekierowuje np. do 404 not found albo strony głównej
+					<Route
 						path="/users"
 						element={
 							<ProtectedPage>
@@ -108,7 +106,6 @@ function App() {
 					/>
 					<Route path="/login" element={<Login />} />
 					<Route path="/register" element={<Register />} />
-					<Route path="/test" element={<Test />} />
 					<Route path="*" element={<NotFoundPage />} />
 				</Routes>
 			</BrowserRouter>
@@ -117,5 +114,3 @@ function App() {
 }
 
 export default App;
-
-// WAŻNE!!!!!! - DO SAMEJ PRACY INŻYNIERSKIEJ/DOKUMENTACJI: WZORCE PROJEKTOWE JAKIE DE FACTO WYKORZSTUJESZ W PROJEKCIE TO NP. MVC, OBSERVER

@@ -1,271 +1,216 @@
 import React from "react";
-import { Fragment } from "react";
-import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { Button } from "antd";
-import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import logo from "../assets/Logo.png";
-import { useLocation, useNavigate } from "react-router-dom";
+import {
+	Input,
+	Button,
+	Avatar,
+	Badge,
+	Divider,
+	Menu,
+	Dropdown,
+	message,
+} from "antd";
+import {
+	MenuOutlined,
+	BellOutlined,
+	UserOutlined,
+	CloseOutlined,
+	CheckOutlined,
+} from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { LogoutUser } from "../redux/usersSlice";
+import notificationService from "../services/notification";
+import {
+	ClearNotifications,
+	MarkNotificationAsRead,
+	RemoveNotification,
+} from "../redux/usersSlice";
 
-const navigation = [
-	{
-		name: "Panel główny",
-		link: "/",
-		current: true,
-		displayForGuest: true,
-		displayForUser: true,
-	},
-	{
-		name: "Panel administratora",
-		link: "#",
-		current: false,
-		displayForGuest: false,
-		displayForUser: ["ADMIN"],
-	},
-	{
-		name: "Zespoły",
-		link: "/teams",
-		current: false,
-		displayForGuest: false,
-		displayForUser: ["EMPLOYEE", "TEAM LEADER"],
-	},
-	{
-		name: "Kluczowe cechy",
-		link: "/",
-		current: false,
-		displayForGuest: true,
-		displayForUser: true,
-		sectionId: "main",
-	},
-	{
-		name: "Kontakt",
-		link: "/",
-		current: false,
-		displayForGuest: true,
-		displayForUser: true,
-		sectionId: "contact",
-	},
-	{
-		name: "Utwórz konto",
-		link: "/register",
-		current: false,
-		displayForGuest: true,
-		displayForUser: false,
-	},
-	{
-		name: "Zaloguj się",
-		link: "/login",
-		current: false,
-		displayForGuest: true,
-		displayForUser: false,
-	},
-];
+const { Search } = Input;
 
-const filterNavigation = (navigation, isAuthenticated, userRole) => {
-	// Filter elements based on user authentication status and role
-	return navigation.filter((item) => {
-		if (isAuthenticated) {
-			// Check if displayForUser is true or an array containing the user's role
-			return (
-				item.displayForUser === true ||
-				(Array.isArray(item.displayForUser) &&
-					item.displayForUser.includes(userRole))
-			);
-		} else {
-			// Display elements with displayForGuest set to true for guest users
-			return item.displayForGuest === true;
-		}
-	});
-};
-
-function classNames(...classes) {
-	return classes.filter(Boolean).join(" ");
-}
-
-function Navbar({ user, toggleSidebar, handleLogout }) {
+const Navbar = ({ user, toggleSidebar, handleLogout }) => {
 	const navigate = useNavigate();
-	const location = useLocation();
+	const dispatch = useDispatch();
+	const notifications = useSelector((state) => state.users.notifications);
 
-	const isAuthenticated = !!user;
-	const userRole = user?.role;
-
-	const filteredNavigation = filterNavigation(
-		navigation,
-		isAuthenticated,
-		userRole
-	);
-
-	const handleNavigation = (link, sectionId) => {
-		if (sectionId) {
-			// Scroll to the section
-			if (location.pathname !== "/") {
-				navigate(link);
-			} else {
-				const element = document.getElementById(sectionId);
-				if (element) {
-					element.scrollIntoView({ behavior: "smooth" });
-				} else {
-					console.log("Section not found:", sectionId);
-				}
-			}
-		} else {
-			navigate(link);
+	const onMenuClick = (event) => {
+		const { key } = event;
+		if (key === "logout") {
+			handleLogout();
+		} else if (key === "profile") {
+			navigate(`/profile/${user._id}`);
 		}
 	};
 
-	return (
-		<Disclosure as="nav" className="bg-gray-800 w-full z-50">
-			{({ open }) => (
-				<>
-					<div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-						<div className="relative flex h-16 items-center justify-between">
-							<div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-								{/* Mobile menu button*/}
-								<Disclosure.Button className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-									<span className="absolute -inset-0.5" />
-									<span className="sr-only">Open main menu</span>
-									{open ? (
-										<XMarkIcon className="block h-6 w-6" aria-hidden="true" />
-									) : (
-										<Bars3Icon className="block h-6 w-6" aria-hidden="true" />
-									)}
-								</Disclosure.Button>
-							</div>
-							<div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-								<div className="flex flex-shrink-0 items-center">
-									<img className="h-8 w-auto" src={logo} alt="CollaboMate" />
-								</div>
-								<div className="hidden sm:ml-6 sm:block">
-									<div
-										className="flex space-x-4 
-                  "
-									>
-										{filteredNavigation.map((item) => (
-											<span
-												key={item.name}
-												// onClick={() => navigate(item.link)}
-												// onClick={
-												// 	item.name === "Panel administratora" ||
-												// 	item.name === "Zespoły"
-												// 		? toggleSidebar
-												// 		: () => handleNavigation(item.link, item.sectionId)
-												// }
-												onClick={
-													item.name === "Panel administratora"
-														? toggleSidebar
-														: () => handleNavigation(item.link, item.sectionId)
-												}
-												className={classNames(
-													item.current
-														? "bg-gray-900 text-white cursor-pointer"
-														: "text-gray-300 hover:bg-gray-700 hover:text-white",
-													item.name === "Utwórz konto" ||
-														item.name === "Zaloguj się"
-														? "mr-8" // This will move the item to the right
-														: "",
-													"rounded-md px-3 py-2 text-sm font-medium cursor-pointer"
-												)}
-												aria-current={item.current ? "page" : undefined}
-											>
-												{item.name}
-											</span>
-										))}
-									</div>
-								</div>
-							</div>
-							{isAuthenticated && (
-								<div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-									<button
-										type="button"
-										className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-									>
-										<span className="absolute -inset-1.5" />
-										<span className="sr-only">Podgląd powiadomień</span>
-										<BellIcon className="h-6 w-6" aria-hidden="true" />
-									</button>
+	const menu = (
+		<Menu onClick={onMenuClick}>
+			<Menu.Item key="profile">Twój profil, {user.firstName}</Menu.Item>
+			<Menu.Item key="logout">Wyloguj się</Menu.Item>
+		</Menu>
+	);
 
-									{/* Profile dropdown */}
-									<Menu as="div" className="relative ml-3">
-										<div>
-											<Menu.Button className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-												<span className="absolute -inset-1.5" />
-												<span className="sr-only">Otwórz menu użytkownika</span>
-												<img
-													className="h-8 w-8 rounded-full"
-													src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-													alt="Profile Photo"
-												/>
-											</Menu.Button>
-										</div>
-										<Transition
-											as={Fragment}
-											enter="transition ease-out duration-100"
-											enterFrom="transform opacity-0 scale-95"
-											enterTo="transform opacity-100 scale-100"
-											leave="transition ease-in duration-75"
-											leaveFrom="transform opacity-100 scale-100"
-											leaveTo="transform opacity-0 scale-95"
-										>
-											<Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-												<Menu.Item>
-													{({ active }) => (
-														<span
-															onClick={() => navigate(`/profile/${user._id}`)}
-															className={classNames(
-																active ? "bg-gray-100" : "",
-																"block px-4 py-2 text-sm text-gray-700"
-															)}
-														>
-															Twój Profil, {user?.firstName}
-														</span>
-													)}
-												</Menu.Item>
-												<Menu.Item>
-													{({ active }) => (
-														<span
-															onClick={handleLogout}
-															className={classNames(
-																active ? "bg-gray-100" : "",
-																"block px-4 py-2 text-sm text-gray-700"
-															)}
-														>
-															Wyloguj się
-														</span>
-													)}
-												</Menu.Item>
-											</Menu.Items>
-										</Transition>
-									</Menu>
-								</div>
+	const handleDeleteNotification = async (event, notificationId) => {
+		event.stopPropagation();
+		try {
+			const response = await notificationService.deleteNotification(
+				notificationId
+			);
+			if (response.success) {
+				dispatch(RemoveNotification(notificationId));
+			} else {
+				throw new Error(response.message);
+			}
+		} catch (error) {
+			message.error(error.message);
+		}
+	};
+
+	const handleMarkAsRead = async (event, notificationId) => {
+		event.stopPropagation();
+		try {
+			const response = await notificationService.markNotificationAsRead(
+				notificationId
+			);
+			if (response.success) {
+				dispatch(MarkNotificationAsRead(notificationId));
+			} else {
+				throw new Error(response.message);
+			}
+		} catch (error) {
+			message.error(error.message);
+		}
+	};
+
+	const removeAllNotifications = async (event) => {
+		try {
+			const response = await notificationService.deleteAllNotifications();
+			if (response.success) {
+				dispatch(ClearNotifications());
+			} else {
+				throw new Error(response.message);
+			}
+		} catch (error) {
+			message.error(error.message);
+		}
+	};
+
+	const handleNotificationClick = (notification) => {
+		navigate(notification.link);
+	};
+
+	const notificationMenu =
+		notifications.length > 0 ? (
+			<Menu>
+				{notifications.map((notification, index) => (
+					<Menu.Item
+						key={index}
+						onClick={() => handleNotificationClick(notification)}
+						className={`flex flex-col justify-start ${
+							!notification.read ? "bg-blue-100" : ""
+						}`}
+					>
+						<div className="flex justify-between items-center">
+							<p className="font-bold my-auto">{notification.title}</p>
+							<div className="flex items-center space-x-2">
+								{!notification.read && (
+									<Button
+										icon={<CheckOutlined />}
+										onClick={(e) => handleMarkAsRead(e, notification._id)}
+										size="small"
+										type="text"
+										className="text-green-800"
+									/>
+								)}
+
+								<Button
+									icon={<CloseOutlined />}
+									danger
+									onClick={(e) => handleDeleteNotification(e, notification._id)}
+									size="small"
+									type="text"
+								/>
+							</div>
+						</div>
+						<div>
+							<p>{notification.description}</p>
+							{notification.read ? (
+								<span className="text-gray-500">Przeczytano</span>
+							) : (
+								<span className="text-blue-500">Nowe</span>
 							)}
 						</div>
+					</Menu.Item>
+				))}
+				<Menu.Divider />
+				<Menu.Item key="removeAll">
+					<div
+						onClick={removeAllNotifications}
+						className="text-center text-red-600 "
+					>
+						Usuń powiadomienia
 					</div>
+				</Menu.Item>
+			</Menu>
+		) : (
+			<Menu>
+				<Menu.Item key="noNotifications">
+					<div className="text-center text-gray-500">No notifications</div>
+				</Menu.Item>
+			</Menu>
+		);
 
-					<Disclosure.Panel className="sm:hidden">
-						<div className="space-y-1 px-2 pb-3 pt-2">
-							{filteredNavigation.map((item) => (
-								<Disclosure.Button
-									key={item.name}
-									as="a"
-									onClick={() => navigate(item.key)}
-									className={classNames(
-										item.current
-											? "bg-gray-900 text-white"
-											: "text-gray-300 hover:bg-gray-700 hover:text-white",
-										"block rounded-md px-3 py-2 text-base font-medium"
-									)}
-									aria-current={item.current ? "page" : undefined}
-								>
-									{item.name}
-								</Disclosure.Button>
-							))}
-						</div>
-					</Disclosure.Panel>
-				</>
-			)}
-		</Disclosure>
+	return (
+		<div className="flex items-center justify-between px-4 md:px-6 py-4 bg-white shadow-md">
+			<div className="flex items-center">
+				<Button
+					className="mr-2 md:mr-4"
+					onClick={toggleSidebar}
+					icon={<MenuOutlined />}
+					style={{ width: "4em" }}
+				/>
+
+				<div
+					className="text-lg md:text-xl font-bold mx-2 md:mx-4 cursor-pointer"
+					onClick={() => navigate("/")}
+				>
+					CollaboMate
+				</div>
+
+				<Divider
+					type="vertical"
+					className="hidden sm:block border-gray-400 mx-2 md:mx-4 align-middle"
+					style={{ height: "20px" }}
+				/>
+			</div>
+			<div className="flex items-center pr-2 md:pr-10">
+				<Dropdown
+					overlay={notificationMenu}
+					trigger={["click"]}
+					placement="bottomRight"
+					className="hidden sm:block"
+				>
+					<Badge
+						count={
+							notifications.filter((notification) => !notification.read).length
+						}
+						size="small"
+						className="cursor-pointer mr-2 md:mr-6"
+					>
+						<BellOutlined className="text-lg md:text-2xl" />
+					</Badge>
+				</Dropdown>
+
+				<Dropdown overlay={menu} trigger={["click"]}>
+					<a onClick={(e) => e.preventDefault()}>
+						{user.profilePic ? (
+							<Avatar src={user.profilePic} className="cursor-pointer" />
+						) : (
+							<Avatar icon={<UserOutlined />} className="cursor-pointer" />
+						)}
+					</a>
+				</Dropdown>
+			</div>
+		</div>
 	);
-}
+};
 
 export default Navbar;

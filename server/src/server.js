@@ -31,7 +31,7 @@ const cookieParser = require("cookie-parser");
 // rate limit middleware
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
-	max: 100, // limit each IP to 100 requests per windowMs
+	max: 200, // limit each IP to 100 requests per windowMs
 });
 
 // Enable additional middleware for all routes

@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Divider from "../../components/Divider";
 import userService from "../../services/user";
 import { useSelector, useDispatch } from "react-redux";
-import { SetLoading, SetButtonLoading } from "../../redux/loadersSlice";
+import { SetButtonLoading } from "../../redux/loadersSlice";
 import { getAntdFormInputRules } from "../../utils/helpers";
 
 function Register() {
@@ -17,29 +17,6 @@ function Register() {
 		const file = event.target.files[0];
 		setProfileImage(file);
 	};
-
-	const clearProfileImage = () => {
-		setProfileImage(null);
-	};
-
-	// const checkAuthentication = async () => {
-	// 	try {
-	// 		// Send a request to the server to check if the user is authenticated
-	// 		const data = await userService.authenticate();
-
-	// 		if (data.success) {
-	// 			// User is authenticated, redirect to the main page
-	// 			navigate("/");
-	// 			message.warning({
-	// 				content:
-	// 					"Jeżeli pragniesz zmienić konto, proszę wyloguj się najpierw.",
-	// 				duration: 3,
-	// 			});
-	// 		}
-	// 	} catch (error) {
-	// 		console.error("Error checking authentication:", error);
-	// 	}
-	// };
 
 	const onFinish = async (values) => {
 		try {
@@ -76,7 +53,7 @@ function Register() {
 
 			dispatch(SetButtonLoading(false));
 			message.success("Rejestracja zakończyła się pomyślnie!");
-			navigate("/login"); //navigate user to the login page even if the registration is ok
+			navigate("/login");
 		} catch (error) {
 			dispatch(SetButtonLoading(false));
 			message.error(error.message);
@@ -84,11 +61,11 @@ function Register() {
 	};
 
 	useEffect(() => {
-		// If there's a user object, we assume the user is authenticated and redirect them
 		if (user) {
 			navigate("/");
 			message.warning({
-				content: "Jeżeli pragniesz zmienić konto, proszę wyloguj się najpierw.",
+				content:
+					"Jeżeli pragniesz zmienić konto, musisz się najpierw wylogować.",
 				duration: 3,
 			});
 		}
@@ -139,7 +116,6 @@ function Register() {
 								onChange={handleImageChange}
 								accept="image/*"
 							/>
-							{/* {profileImage && <button onClick={clearProfileImage}>X</button>} */}
 						</Form.Item>
 						<Button
 							type="primary"

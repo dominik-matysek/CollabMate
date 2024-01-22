@@ -1,10 +1,10 @@
-import { Form, Input, message, Modal, Select, Button, Card } from "antd";
-import TextArea from "antd/es/input/TextArea";
-import React, { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { Form, Input, message, Select, Button, Card } from "antd";
+import React from "react";
+import { useDispatch } from "react-redux";
 import { SetLoading } from "../../redux/loadersSlice";
 import { getAntdFormInputRules } from "../../utils/helpers";
 import projectService from "../../services/project";
+import notificationService from "../../services/notification";
 
 const { Option } = Select;
 
@@ -15,7 +15,7 @@ function ProjectForm({ teamId, reloadData, users }) {
 	const onFinish = async (values) => {
 		try {
 			dispatch(SetLoading(true));
-			// create team
+
 			const payload = {
 				name: values.name,
 				description: values.description,
@@ -28,6 +28,14 @@ function ProjectForm({ teamId, reloadData, users }) {
 
 				form.resetFields();
 				reloadData();
+
+				const notificationPayload = {
+					users: values.members,
+					title: "Nowy projekt",
+					description: `Zostałeś dodany do nowego projektu w swoim zespole.`,
+					link: `/projects`,
+				};
+				await notificationService.createNotification(notificationPayload);
 			} else {
 				throw new Error(response.error);
 			}
@@ -51,7 +59,7 @@ function ProjectForm({ teamId, reloadData, users }) {
 						filterOption={(input, option) =>
 							option.children.toLowerCase().includes(input.toLowerCase())
 						}
-						showSearch // Enables the search functionality
+						showSearch
 					>
 						{users
 							.filter((user) => user.role === "EMPLOYEE")
@@ -62,7 +70,7 @@ function ProjectForm({ teamId, reloadData, users }) {
 							))}
 					</Select>
 				</Form.Item>
-				{/* Add the description field here */}
+
 				<Form.Item
 					name="description"
 					rules={[
@@ -76,7 +84,7 @@ function ProjectForm({ teamId, reloadData, users }) {
 				>
 					<Input.TextArea placeholder="Opis projektu" allowClear />
 				</Form.Item>
-				{/* Similar conditional rendering can be applied for other specific fields */}
+
 				<Form.Item>
 					<Button type="primary" htmlType="submit" className="w-full">
 						Utwórz projekt
