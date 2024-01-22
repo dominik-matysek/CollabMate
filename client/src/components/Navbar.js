@@ -100,7 +100,6 @@ const Navbar = ({ user, toggleSidebar, handleLogout }) => {
 	const notificationMenu =
 		notifications.length > 0 ? (
 			<Menu className="flex flex-col h-80 overflow-auto">
-				<Menu.Divider />
 				<Menu.Item key="removeAll">
 					<div
 						onClick={removeAllNotifications}
@@ -109,6 +108,8 @@ const Navbar = ({ user, toggleSidebar, handleLogout }) => {
 						Usuń powiadomienia
 					</div>
 				</Menu.Item>
+				<Menu.Divider />
+
 				{notifications.map((notification, index) => (
 					<Menu.Item
 						key={index}

@@ -41,6 +41,8 @@ function Task() {
 
 	const projectId = task ? task.project : null;
 
+	const teamLeaders = user?.team?.teamLeaders;
+
 	const fetchTaskData = async () => {
 		try {
 			dispatch(SetLoading(true));
@@ -126,12 +128,20 @@ function Task() {
 					message.success(response.message);
 					reloadData();
 
+					const notificationPayload = {
+						users: task.members,
+						title: "Zmieniono status",
+						description: `Status zadania którego jesteś członkiem został zmieniony na ${newStatus}.`,
+						link: `/tasks/${taskId}`,
+					};
+					await notificationService.createNotification(notificationPayload);
+
 					if (newStatus === "completed") {
 						const notificationPayload = {
-							users: task.members,
-							title: "Zmieniono status",
-							description: `Status zadania którego jesteś członkiem został zmieniony na "Zakończone".`,
-							link: `/projects/${task.project}/tasks/${taskId}`,
+							users: teamLeaders,
+							title: "Oczekujące zadanie",
+							description: `Zadanie oczekuje na zaakceptowanie: ${task.name}.`,
+							link: `/tasks/${taskId}`,
 						};
 						await notificationService.createNotification(notificationPayload);
 					}

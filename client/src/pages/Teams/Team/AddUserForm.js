@@ -54,7 +54,7 @@ const AddUserForm = ({ team, isVisible, onClose, reloadData }) => {
 					users: team.teamLeaders,
 					title: "Nowy członek",
 					description: `Do twojego zespołu dodano nowego członka: ${team.name}.`,
-					link: `/teams/${team.id}`,
+					link: `/teams/${team._id}`,
 				};
 				await notificationService.createNotification(notificationPayload);
 
@@ -62,7 +62,7 @@ const AddUserForm = ({ team, isVisible, onClose, reloadData }) => {
 					users: values.user,
 					title: "Nowy zespół",
 					description: `Zostałeś dodany do nowego zespołu: ${team.name}.`,
-					link: `/teams/${team.id}`,
+					link: `/teams/${team._id}`,
 				};
 				await notificationService.createNotification(
 					notificationPayloadToMember

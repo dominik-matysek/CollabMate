@@ -54,7 +54,7 @@ const AddUserForm = ({ task, isVisible, onClose, reloadData }) => {
 					users: values.members,
 					title: "Dodano do zadania",
 					description: `Zostałeś dodany do zadania w projekcie.`,
-					link: `/projects/${task.project}/tasks/${task._id}`,
+					link: `/tasks/${task._id}`,
 				};
 				await notificationService.createNotification(notificationPayload);
 			} else {

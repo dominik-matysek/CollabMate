@@ -114,6 +114,7 @@ function CalendarPage() {
 	const handleCancel = () => {
 		setIsModalOpen(false);
 		setSelectedEventDetails(null);
+		reloadData();
 	};
 
 	const showAddEventModal = () => {
