@@ -4,7 +4,7 @@ import UserListItem from "./UserListItem";
 const UserList = ({ users, title, showDelete, onDelete, creatorId }) => {
 	return (
 		<div
-			className="bg-white rounded-lg shadow "
+			className="bg-white rounded-lg shadow mt-6"
 			style={{ backgroundColor: "#138585" }}
 		>
 			<div className="px-4 py-2 border-b border-gray-200">

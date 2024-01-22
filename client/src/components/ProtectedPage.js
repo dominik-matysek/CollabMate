@@ -42,7 +42,7 @@ function ProtectedPage({ children }) {
 			}
 		} catch (error) {
 			dispatch(SetLoading(false));
-			message.error(error.message);
+			// message.error(error.message);
 			navigate("/login");
 		}
 	};

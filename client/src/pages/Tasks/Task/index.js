@@ -268,7 +268,7 @@ function Task() {
 					users: task.members,
 					title: "Dodano komentarz",
 					description: `Dodano komentarz do zadania którego jesteś członkiem.`,
-					link: `/projects/${task.project}/tasks/${taskId}`,
+					link: `/tasks/${taskId}`,
 				};
 				await notificationService.createNotification(notificationPayload);
 			} else {

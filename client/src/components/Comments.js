@@ -20,11 +20,16 @@ const Comments = ({ comments, currentUserId, onDeleteComment }) => {
 						className="my-2 p-3 border rounded-lg shadow-sm bg-white flex items-center"
 						key={comment._id}
 					>
-						<Avatar
-							className="mr-2"
-							src={comment.createdBy.profilePic}
-							alt={comment.createdBy.firstName}
-						/>
+						<div
+							className="flex-shrink-0"
+							style={{ width: "48px", height: "48px" }}
+						>
+							<Avatar
+								className="flex-shrink-0"
+								src={comment.createdBy.profilePic}
+								alt={comment.createdBy.firstName}
+							/>
+						</div>
 						<div className="flex-grow">
 							<Comment
 								author={

@@ -96,9 +96,13 @@ function Profile() {
 							<h3 className="text-gray-600 font-lg text-semibold leading-6">
 								{userProfile.role === "ADMIN"
 									? "ADMINISTRATOR"
-									: !userProfile.team
-									? "Pracownik"
-									: `${userProfile.role} w zespole: ${userProfile.team.name}`}
+									: userProfile.role === "TEAM LEADER"
+									? `LIDER w zespole: ${
+											userProfile.team ? userProfile.team.name : ""
+									  }`
+									: userProfile.team
+									? `PRACOWNIK w zespole: ${userProfile.team.name}`
+									: "PRACOWNIK"}
 							</h3>
 
 							<ul className="bg-gray-100 text-gray-600 hover:text-gray-700 hover:shadow py-2 px-3 mt-3 divide-y rounded shadow-sm">
@@ -192,28 +196,40 @@ function Profile() {
 										<div className="grid md:grid-cols-2 text-sm">
 											<div className="grid grid-cols-2">
 												<div className="px-4 py-2 font-semibold">Imię</div>
-												<div className="px-4 py-2">{userProfile.firstName}</div>
+												<div className="px-4 py-2 overflow-hidden text-ellipsis whitespace-nowrap">
+													{userProfile.firstName}
+												</div>
 											</div>
 											<div className="grid grid-cols-2">
 												<div className="px-4 py-2 font-semibold">Nazwisko</div>
-												<div className="px-4 py-2">{userProfile.lastName}</div>
+												<div className="px-4 py-2 overflow-hidden text-ellipsis whitespace-nowrap">
+													{userProfile.lastName}
+												</div>
 											</div>
 											<div className="grid grid-cols-2">
 												<div className="px-4 py-2 font-semibold">
 													Adres email
 												</div>
-												<div className="px-4 py-2">
+												<div className="px-4 py-2 overflow-hidden text-ellipsis whitespace-nowrap">
 													<a className="text-blue-800">{userProfile.email}</a>
 												</div>
 											</div>
 											<div className="grid grid-cols-2">
 												<div className="px-4 py-2 font-semibold">Rola</div>
-												<div className="px-4 py-2">{userProfile.role}</div>
+												<div className="px-4 py-2 overflow-hidden text-ellipsis whitespace-nowrap">
+													{userProfile.role}
+												</div>
 											</div>
 										</div>
 
 										{isOwnProfile && (
-											<Button onClick={handleEdit}>Edytuj</Button>
+											<Button
+												type="primary"
+												onClick={handleEdit}
+												className="mt-4"
+											>
+												Edytuj
+											</Button>
 										)}
 									</div>
 								)}

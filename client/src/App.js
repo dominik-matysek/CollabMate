@@ -1,12 +1,11 @@
 import { useSelector } from "react-redux";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login/index";
 import Register from "./pages/Register/index";
 import Profile from "./pages/Profile/index";
 import Teams from "./pages/Teams";
 import Users from "./pages/Users";
 import ProtectedPage from "./components/ProtectedPage";
-import Home from "./pages/Home";
 import Spinner from "./components/Spinner";
 import Team from "./pages/Teams/Team";
 import Projects from "./pages/Projects";
@@ -24,14 +23,7 @@ function App() {
 			{loading && <Spinner />}
 			<BrowserRouter>
 				<Routes>
-					<Route
-						path="/"
-						element={
-							<ProtectedPage>
-								<Home />
-							</ProtectedPage>
-						}
-					/>
+					<Route path="/" element={<Navigate to="/login" />}></Route>
 					<Route
 						path="/teams"
 						element={

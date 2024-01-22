@@ -130,8 +130,7 @@ function CalendarPage() {
 
 			const detailsChanged =
 				updatedEventData.title !== selectedEventDetails.title ||
-				updatedEventData.description !== selectedEventDetails.description ||
-				updatedEventData.date !== selectedEventDetails.date;
+				updatedEventData.description !== selectedEventDetails.description;
 
 			let response;
 
@@ -139,10 +138,11 @@ function CalendarPage() {
 				response = await eventService.editEvent(selectedEventDetails._id, {
 					title: updatedEventData.title,
 					description: updatedEventData.description,
-					date: updatedEventData.date,
 				});
 
-				if (!response.success) {
+				if (response.success) {
+					message.success(response.message);
+				} else {
 					throw new Error(response.error);
 				}
 			}

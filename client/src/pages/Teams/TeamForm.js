@@ -37,7 +37,7 @@ function TeamForm({ reloadData, users }) {
 					users: values.teamLeaders,
 					title: "Dodano do zespołu",
 					description: `Zostałeś dodany do zespołu: ${values.name}.`,
-					link: `/teams/${response.data._id}}`,
+					link: `/teams/${response.data._id}`,
 				};
 				await notificationService.createNotification(notificationPayload);
 			} else {

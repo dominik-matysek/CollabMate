@@ -9,7 +9,9 @@ exports.createComment = async (req, res) => {
 		const userId = req.userId;
 		const { content } = req.body;
 
-		const { error } = commentValidation.validate(content);
+		console.log("Komentarz: ", content);
+
+		const { error } = commentValidation.validate({ content });
 		if (error)
 			return res.status(400).json({ message: error.details[0].message });
 

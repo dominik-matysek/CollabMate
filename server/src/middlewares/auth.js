@@ -37,15 +37,21 @@ const verifyToken = (req, res, next) => {
 
 const verifyAdmin = async (req, res, next) => {
 	try {
+		console.log(req);
+
 		if (!req.userId) {
 			return res.status(401).json({ message: "Brak autoryzacji." });
 		}
+
+		console.log(req.userId);
 
 		// Fetch the user from the database
 		const user = await User.findById(req.userId);
 		if (!user) {
 			return res.status(404).json({ message: "Nie znaleziono użytkownika." });
 		}
+
+		console.log(user.role);
 
 		if (user.role === "ADMIN") {
 			// User is an admin, allow the request to proceed

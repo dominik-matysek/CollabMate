@@ -105,7 +105,7 @@ function Team() {
 					users: team.teamLeaders,
 					title: "Usunięto członka",
 					description: `Z twojego zespołu usunięto jednego lub więcej członków: ${team.name}.`,
-					link: `/teams/${team.id}}`,
+					link: `/teams/${team.id}`,
 				};
 				await notificationService.createNotification(notificationPayload);
 				const notificationPayloadToRemoved = {

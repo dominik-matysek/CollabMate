@@ -13,10 +13,7 @@ function FooterComponent() {
 		>
 			<div className="w-full max-w-screen-xl mx-auto p-4 md:py-8">
 				<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between text-white">
-					<div
-						onClick={() => navigate("/")}
-						className="flex items-center mb-4 lg:mb-0 space-x-3 cursor-pointer"
-					>
+					<div className="flex items-center mb-4 lg:mb-0 space-x-3 cursor-pointer">
 						<img src={logo} className="h-8" alt="CollaboMate Logo" />
 						<span className="self-center text-2xl font-bold mx-4">
 							CollaboMate
@@ -30,12 +27,7 @@ function FooterComponent() {
 							"Polityka prywatności",
 						].map((item, index) => (
 							<li key={index} className="mb-2 lg:mb-0 lg:mr-10">
-								<span
-									className="cursor-pointer hover:underline"
-									onClick={() => navigate("/")}
-								>
-									{item}
-								</span>
+								<span className="cursor-pointer hover:underline">{item}</span>
 							</li>
 						))}
 					</ul>
@@ -43,13 +35,8 @@ function FooterComponent() {
 				<hr className="my-6 border-gray-200 lg:mx-auto lg:my-8" />
 				<span className="block text-sm text-center text-white">
 					© 2023{" "}
-					<span
-						onClick={() => navigate("/")}
-						className="hover:underline cursor-pointer"
-					>
-						CollaboMate™
-					</span>
-					. All Rights Reserved.
+					<span className="hover:underline cursor-pointer">CollaboMate™</span>.
+					All Rights Reserved.
 				</span>
 			</div>
 		</Footer>

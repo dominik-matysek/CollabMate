@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { message } from "antd";
 
 const itemsWhenInTeams = [
 	{
@@ -8,7 +9,7 @@ const itemsWhenInTeams = [
 	},
 	{
 		name: "Mój zespoły",
-		link: "/teams/:teamId",
+		link: "",
 		forRole: ["TEAM LEADER", "EMPLOYEE"],
 	},
 	{
@@ -63,6 +64,10 @@ function SubHeader({ user }) {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const [currentItem, setCurrentItem] = useState("Wszystkie zespoły");
+
+	const hasTeam = user?.team;
+
+	itemsWhenInTeams[1].link = hasTeam ? "/teams/:teamId" : "/teams";
 
 	const pathSegments = location.pathname.split("/").filter((seg) => seg);
 
@@ -129,9 +134,10 @@ function SubHeader({ user }) {
 				{getNavigationItems().map((item, index) => (
 					<span
 						key={index}
-						className={`cursor-pointer text-sm md:text-base text-white ${
-							isCurrentItem(item.name) ? "bg-blue-500" : ""
-						}`}
+						// className={`cursor-pointer text-sm md:text-base text-white relative ${
+						// 	isCurrentItem(item.name) ? "bg-teal-900 rounded-lg p-2" : ""
+						// }`}
+						className="cursor-pointer text-sm md:text-base text-white"
 						onClick={() => handleItemClick(item.name, item.link)}
 					>
 						{item.name}

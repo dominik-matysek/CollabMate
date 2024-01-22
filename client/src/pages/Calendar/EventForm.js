@@ -145,8 +145,8 @@ function EventForm({
 	const handleValuesChange = (_, allValues) => {
 		const hasChanged =
 			allValues.title !== eventDetails.title ||
-			allValues.description !== eventDetails.description ||
-			setFormChanged(hasChanged);
+			allValues.description !== eventDetails.description;
+		setFormChanged(hasChanged);
 	};
 
 	return (
@@ -248,12 +248,17 @@ function EventForm({
 					>
 						Dodaj użytkownika
 					</Button>
-					<div className="flex justify-between mt-4">
-						<Button danger type="primary" onClick={deleteEvent}>
+					<div className="flex flex-col sm:flex-row justify-between mt-4">
+						<Button
+							danger
+							type="primary"
+							onClick={deleteEvent}
+							className="mb-2 sm:mb-0"
+						>
 							Usuń wydarzenie
 						</Button>
-						<div>
-							<Button onClick={onCancel} className="mr-2">
+						<div className="flex flex-col sm:flex-row">
+							<Button onClick={onCancel} className="mb-2 sm:mb-0 sm:mr-2">
 								Anuluj
 							</Button>
 							<Button

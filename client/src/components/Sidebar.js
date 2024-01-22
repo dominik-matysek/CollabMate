@@ -3,18 +3,14 @@ import { TeamOutlined, HomeOutlined, UserOutlined } from "@ant-design/icons";
 import SidebarItem from "./SidebarItem";
 
 function Sidebar({ user, isSidebarOpen }) {
+	const userRole = user.role;
+
 	const items = [
 		{
 			name: "Panel główny",
 			icon: <HomeOutlined />,
-			link: "/",
-			current: true,
-		},
-		{
-			name: "Zespoły",
 			link: "/teams",
-			icon: <TeamOutlined />,
-			current: false,
+			current: true,
 		},
 		{
 			name: "Profil",
@@ -23,6 +19,23 @@ function Sidebar({ user, isSidebarOpen }) {
 			current: false,
 		},
 	];
+
+	if (userRole === "ADMIN") {
+		items.push({
+			name: "Użytkownicy",
+			link: "/users",
+			icon: <TeamOutlined />,
+			current: false,
+		});
+	} else if (user?.team) {
+		items.push({
+			name: "Zespół",
+			link: `/teams/${user?.team?._id}`,
+			icon: <TeamOutlined />,
+			current: false,
+		});
+	}
+
 	return (
 		isSidebarOpen && (
 			<div

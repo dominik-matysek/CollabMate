@@ -5,22 +5,32 @@ function StatsCard({ stats }) {
 	const getSpan = () => {
 		switch (stats.length) {
 			case 2:
-				return 12;
+				return { xs: 24, sm: 12, md: 12, lg: 12 };
 			case 3:
-				return 8;
+				return { xs: 24, sm: 12, md: 8, lg: 8 };
 			default:
-				return 6;
+				return { xs: 24, sm: 12, md: 6, lg: 6 };
 		}
 	};
+
 	const colSpan = getSpan();
+
 	return (
 		<Row gutter={16}>
 			{stats.map((stat, index) => (
-				<Col key={index} span={colSpan}>
+				<Col key={index} {...colSpan}>
 					<Card>
 						<Statistic
 							title={
-								<div style={{ textAlign: "center", fontSize: 14 }}>
+								<div
+									style={{
+										textAlign: "center",
+										fontSize: 14,
+										overflow: "hidden",
+										textOverflow: "ellipsis",
+										whiteSpace: "nowrap",
+									}}
+								>
 									{stat.title}
 								</div>
 							}

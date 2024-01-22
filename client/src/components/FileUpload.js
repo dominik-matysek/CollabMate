@@ -26,6 +26,7 @@ const FileUpload = ({ onFileUpload }) => {
 			beforeUpload={handleBeforeUpload}
 			onChange={handleChange}
 			style={{ padding: 20 }}
+			accept=".jpg,.jpeg,.png,.pdf"
 		>
 			<p className="ant-upload-drag-icon">
 				<InboxOutlined />

@@ -10,7 +10,7 @@ const CommentInput = ({ onCommentSubmit }) => {
 	};
 
 	return (
-		<div>
+		<div className="flex flex-col space-y-2">
 			<Input.TextArea
 				rows={4}
 				value={comment}
@@ -22,7 +22,7 @@ const CommentInput = ({ onCommentSubmit }) => {
 				type="primary"
 				onClick={handleSubmit}
 				disabled={!comment.trim()}
-				className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+				className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full sm:w-auto"
 			>
 				Skomentuj
 			</Button>

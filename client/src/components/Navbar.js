@@ -99,18 +99,25 @@ const Navbar = ({ user, toggleSidebar, handleLogout }) => {
 
 	const notificationMenu =
 		notifications.length > 0 ? (
-			<Menu>
+			<Menu className="flex flex-col h-80 overflow-auto">
+				<Menu.Divider />
+				<Menu.Item key="removeAll">
+					<div
+						onClick={removeAllNotifications}
+						className="text-center text-red-600 "
+					>
+						Usuń powiadomienia
+					</div>
+				</Menu.Item>
 				{notifications.map((notification, index) => (
 					<Menu.Item
 						key={index}
 						onClick={() => handleNotificationClick(notification)}
-						className={`flex flex-col justify-start ${
-							!notification.read ? "bg-blue-100" : ""
-						}`}
+						className={`items-start ${!notification.read ? "bg-blue-100" : ""}`}
 					>
-						<div className="flex justify-between items-center">
+						<div className="flex justify-between ">
 							<p className="font-bold my-auto">{notification.title}</p>
-							<div className="flex items-center space-x-2">
+							<div className="flex space-x-2">
 								{!notification.read && (
 									<Button
 										icon={<CheckOutlined />}
@@ -140,20 +147,11 @@ const Navbar = ({ user, toggleSidebar, handleLogout }) => {
 						</div>
 					</Menu.Item>
 				))}
-				<Menu.Divider />
-				<Menu.Item key="removeAll">
-					<div
-						onClick={removeAllNotifications}
-						className="text-center text-red-600 "
-					>
-						Usuń powiadomienia
-					</div>
-				</Menu.Item>
 			</Menu>
 		) : (
 			<Menu>
 				<Menu.Item key="noNotifications">
-					<div className="text-center text-gray-500">No notifications</div>
+					<div className="text-center text-gray-500">Brak powiadomień</div>
 				</Menu.Item>
 			</Menu>
 		);
@@ -170,7 +168,7 @@ const Navbar = ({ user, toggleSidebar, handleLogout }) => {
 
 				<div
 					className="text-lg md:text-xl font-bold mx-2 md:mx-4 cursor-pointer"
-					onClick={() => navigate("/")}
+					onClick={() => navigate("/teams")}
 				>
 					CollaboMate
 				</div>
@@ -181,12 +179,12 @@ const Navbar = ({ user, toggleSidebar, handleLogout }) => {
 					style={{ height: "20px" }}
 				/>
 			</div>
-			<div className="flex items-center pr-2 md:pr-10">
+			<div className="flex pr-2 md:pr-10">
 				<Dropdown
 					overlay={notificationMenu}
 					trigger={["click"]}
 					placement="bottomRight"
-					className="hidden sm:block"
+					className="hidden sm:block "
 				>
 					<Badge
 						count={

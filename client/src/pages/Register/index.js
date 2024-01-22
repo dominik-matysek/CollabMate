@@ -22,7 +22,14 @@ function Register() {
 		try {
 			dispatch(SetButtonLoading(true));
 
-			const registrationResponse = await userService.register(values);
+			const payload = {
+				firstName: values.firstName,
+				lastName: values.lastName,
+				email: values.email,
+				password: values.password,
+			};
+
+			const registrationResponse = await userService.register(payload);
 
 			if (!registrationResponse.success) {
 				throw new Error(registrationResponse.message);
@@ -62,7 +69,7 @@ function Register() {
 
 	useEffect(() => {
 		if (user) {
-			navigate("/");
+			navigate("/teams");
 			message.warning({
 				content:
 					"Jeżeli pragniesz zmienić konto, musisz się najpierw wylogować.",
@@ -72,18 +79,20 @@ function Register() {
 	}, [user]);
 
 	return (
-		<div className="grid grid-cols-2">
-			<div className="bg-primary h-screen flex flex-col justify-center items-center">
+		<div className="grid grid-cols-1 md:grid-cols-2">
+			<div className="bg-primary min-h-screen flex flex-col justify-center items-center px-4 py-8">
 				<div>
-					<h1 className="text-7xl text-white">CollaboMate</h1>
-					<span className="text-white mt-5">
+					<h1 className="text-3xl md:text-7xl text-white text-center">
+						CollaboMate
+					</h1>
+					<span className="text-white mt-5 block text-center">
 						Współpraca bez granic - dla twojego sukcesu
 					</span>
 				</div>
 			</div>
-			<div className="flex justify-center items-center">
-				<div className="w-[420px]">
-					<h1 className="text-2xl text-gray-700">Zaczynajmy!</h1>
+			<div className="flex justify-center items-center px-4 py-8">
+				<div className="w-full max-w-md">
+					<h1 className="text-2xl text-gray-700 text-center">Zaczynajmy!</h1>
 					<Divider />
 					<Form layout="vertical" onFinish={onFinish}>
 						<Form.Item
