@@ -33,7 +33,7 @@ function ProjectForm({ teamId, reloadData, users }) {
 					users: values.members,
 					title: "Nowy projekt",
 					description: `Zostałeś dodany do nowego projektu w swoim zespole.`,
-					link: `/projects`,
+					link: `/teams/${teamId}/projects`,
 				};
 				await notificationService.createNotification(notificationPayload);
 			} else {

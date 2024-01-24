@@ -1,9 +1,7 @@
 import React from "react";
-import { Avatar, Tooltip, Button } from "antd";
+import { Avatar } from "antd";
 import moment from "moment";
-import { getDateFormat } from "../utils/helpers";
 import { Comment } from "@ant-design/compatible";
-import { IoTrashBin } from "react-icons/io5";
 
 const Comments = ({ comments, currentUserId, onDeleteComment }) => {
 	return (

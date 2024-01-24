@@ -535,7 +535,10 @@ function Task() {
 										onDeleteComment={onDeleteComment}
 									/>
 								)}
-								<CommentInput onCommentSubmit={handleCommentSubmit} />
+								{(user.role === "TEAM LEADER" ||
+									task.members.some((member) => member._id === user._id)) && (
+									<CommentInput onCommentSubmit={handleCommentSubmit} />
+								)}
 							</Col>
 						</Row>
 					</div>

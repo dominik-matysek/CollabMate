@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { message } from "antd";
 
 const itemsWhenInTeams = [
 	{
