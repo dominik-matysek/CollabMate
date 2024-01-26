@@ -41,8 +41,6 @@ const taskCreateValidation = JoiExtendend.object({
 				"string.base": "Each task member ID should be a valid identifier.",
 			})
 		)
-		.min(1)
-		.required()
 		.messages({
 			"array.base": "Task member IDs should be an array.",
 			"array.min": "At least one task member is required.",

@@ -13,12 +13,16 @@ exports.createTask = async (req, res) => {
 	try {
 		const { name, description, priority, dueDate, memberIds } = req.body;
 
+		console.log("Body w tasku: ", req.body);
+
 		const { error } = taskCreateValidation.validate(req.body);
 		if (error)
 			return res.status(400).json({ message: error.details[0].message });
 
 		const projectId = req.params.projectId;
 		const creatorId = req.userId;
+
+		console.log("Twórca: ", creatorId);
 
 		// Validate dueDate
 		if (!moment(dueDate).isAfter(moment().startOf("day"))) {
@@ -227,11 +231,9 @@ exports.addMembersToTask = async (req, res) => {
 		);
 
 		if (!areAllUsersProjectMembers) {
-			return res
-				.status(403)
-				.json({
-					message: "Jeden lub więcej użytkowników nie są członkami projektu.",
-				});
+			return res.status(403).json({
+				message: "Jeden lub więcej użytkowników nie są członkami projektu.",
+			});
 		}
 
 		const updatedTask = await Task.findByIdAndUpdate(
@@ -256,7 +258,7 @@ exports.removeMemberFromTask = async (req, res) => {
 		const taskId = req.params.taskId;
 		const userId = req.body.memberId;
 
-		// Remove a member from a project
+		// Remove a member from a task
 		const task = await Task.findByIdAndUpdate(
 			taskId,
 			{ $pull: { members: userId } },
@@ -415,12 +417,10 @@ exports.removeAttachment = async (req, res) => {
 		);
 
 		if (!updatedTask) {
-			return res
-				.status(404)
-				.json({
-					message:
-						"Nie znaleziono zadania lub nie wybrano załącznika do usunięcia",
-				});
+			return res.status(404).json({
+				message:
+					"Nie znaleziono zadania lub nie wybrano załącznika do usunięcia",
+			});
 		}
 
 		// Extract publicId and use utility function to delete from Cloudinary
