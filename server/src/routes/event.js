@@ -2,58 +2,58 @@ const express = require("express");
 const router = express.Router();
 const events = require("../controllers/event");
 const {
-	verifyToken,
-	checkTeamAccess,
-	verifyEventCreator,
+  verifyToken,
+  checkTeamAccess,
+  verifyEventCreator,
 } = require("../middlewares/auth");
 
 router.post(
-	"/teams/:teamId/events",
-	verifyToken,
-	checkTeamAccess,
-	events.createEvent
+  "/teams/:teamId/events",
+  verifyToken,
+  checkTeamAccess,
+  events.createEvent
 );
 
 router.get(
-	"/teams/:teamId/events",
-	verifyToken,
-	checkTeamAccess,
-	events.getAllEvents
+  "/teams/:teamId/events",
+  verifyToken,
+  checkTeamAccess,
+  events.getAllEvents
 );
 
 router.get(
-	"/events/:eventId",
-	verifyToken,
-	checkTeamAccess,
-	events.getEventById
+  "/events/:eventId",
+  verifyToken,
+  checkTeamAccess,
+  events.getEventById
 );
 
 router.patch(
-	"/events/:eventId",
-	verifyToken,
-	verifyEventCreator,
-	events.editEvent
+  "/events/:eventId",
+  verifyToken,
+  verifyEventCreator,
+  events.editEvent
 );
 
 router.delete(
-	"/events/:eventId",
-	verifyToken,
-	verifyEventCreator,
-	events.deleteEvent
+  "/events/:eventId",
+  verifyToken,
+  verifyEventCreator,
+  events.deleteEvent
 );
 
 router.patch(
-	"/events/:eventId/add-member",
-	verifyToken,
-	verifyEventCreator,
-	events.addMembersToEvent
+  "/events/:eventId/add-member",
+  verifyToken,
+  verifyEventCreator,
+  events.addMembersToEvent
 );
 
 router.patch(
-	"/events/:eventId/remove-member",
-	verifyToken,
-	verifyEventCreator,
-	events.removeMemberFromEvent
+  "/events/:eventId/remove-member",
+  verifyToken,
+  verifyEventCreator,
+  events.removeMemberFromEvent
 );
 
 module.exports = router;
