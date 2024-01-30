@@ -171,7 +171,7 @@ exports.deleteTask = async (req, res) => {
       });
     }
 
-    const isCreator = task.createdBy === userId;
+    const isCreator = task.createdBy == userId;
     const isTeamLeader = req.userRole === "TEAM LEADER";
 
     if (!isCreator && !isTeamLeader) {
