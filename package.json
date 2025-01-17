@@ -33,7 +33,7 @@
     "socket.io": "^4.7.4"
   }, 
   "scripts": {
-  "start": "node server.js",
-  "dev": "nodemon server.js"
+  "start": "node server/src/server.js",
+  "dev": "nodemon server/server.js"
 }
 }
