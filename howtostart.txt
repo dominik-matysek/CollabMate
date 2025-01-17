@@ -1,0 +1,2 @@
+To start backend server: Go to /server/src and run 'nodemon server.js'
+To start frontend app: Go to /client and run 'npm start'
