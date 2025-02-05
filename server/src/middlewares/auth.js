@@ -9,10 +9,11 @@ const verifyToken = (req, res, next) => {
   try {
     // Retrieve token from HttpOnly cookie
     const token = req.cookies.token;
+    console.log("Token from cookies:", token);
 
     if (!token) {
       return res.status(401).json({
-        message: "Brak autoryzacji.",
+        message: "Brak autoryzacji. Test 1",
       });
     }
     const decryptedToken = jwt.verify(token, process.env.jwt_secret);

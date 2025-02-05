@@ -10,7 +10,9 @@ export const apiRequest = async (method, url, payload) => {
 			withCredentials: true,
 		});
 		console.log("API URL:", BASE_URL);
+		console.log(response.data);
 		return response.data;
+		
 	} catch (error) {
 		if (error.response) {
 			console.error("Response error:", error.response.data);

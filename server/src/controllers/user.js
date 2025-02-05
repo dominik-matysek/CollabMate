@@ -322,7 +322,7 @@ exports.refreshToken = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
-      return res.status(401).json({ message: "Brak autoryzacji." });
+      return res.status(401).json({ message: "Brak autoryzacji. Test" });
     }
     // Verify the refresh token
     const decryptedToken = jwt.verify(
