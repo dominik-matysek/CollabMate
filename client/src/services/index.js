@@ -9,9 +9,8 @@ export const apiRequest = async (method, url, payload) => {
 			data: payload,
 			withCredentials: true,
 		});
-
-		return response.data;
 		console.log("API URL:", BASE_URL);
+		return response.data;
 	} catch (error) {
 		if (error.response) {
 			console.error("Response error:", error.response.data);
