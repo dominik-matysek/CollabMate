@@ -90,7 +90,7 @@ exports.login = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
-      SameSite: "None",
+      sameSite: "None",
       maxAge: 30 * 60 * 1000, // Token expiration time in milliseconds
     });
 
