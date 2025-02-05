@@ -8,13 +8,14 @@ const express = require("express");
 const http = require("http");
 const rateLimit = require("express-rate-limit");
 const socketIo = require("socket.io");
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
 
 const app = express();
 
 const server = http.createServer(app);
 const io = socketIo(server, {
 	cors: {
-		origin: "http://localhost:3000", // specify the origin of frontend
+		origin: frontendUrl, // specify the origin of frontend
 		methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 		credentials: true, // allow credentials like cookies, authorization headers, etc.
 	},
@@ -39,7 +40,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const cors = require("cors");
 const mongoSanitize = require("express-mongo-sanitize");
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+
 
 app.use(helmet());
 app.use(cookieParser());

@@ -1,15 +1,17 @@
 import axios from "axios";
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 export const apiRequest = async (method, url, payload) => {
 	try {
 		const response = await axios({
 			method,
-			url,
+			url: `${BASE_URL}${url}`,
 			data: payload,
 			withCredentials: true,
 		});
 
 		return response.data;
+		console.log("API URL:", BASE_URL);
 	} catch (error) {
 		if (error.response) {
 			console.error("Response error:", error.response.data);
