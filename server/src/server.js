@@ -11,8 +11,8 @@ const socketIo = require("socket.io");
 
 
 const app = express();
-// const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-const frontendUrl = process.env.PORT || 4000;
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+//const frontendUrl = process.env.PORT || 4000;
 const server = http.createServer(app);
 const io = socketIo(server, {
 	cors: {
