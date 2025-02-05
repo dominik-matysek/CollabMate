@@ -8,10 +8,11 @@ const express = require("express");
 const http = require("http");
 const rateLimit = require("express-rate-limit");
 const socketIo = require("socket.io");
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+
 
 const app = express();
-
+// const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+const frontendUrl = process.env.PORT || 4000;
 const server = http.createServer(app);
 const io = socketIo(server, {
 	cors: {
