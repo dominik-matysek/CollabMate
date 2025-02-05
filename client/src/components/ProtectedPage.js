@@ -21,6 +21,7 @@ const { Content } = Layout;
 function ProtectedPage({ children }) {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
+	const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 	const { user } = useSelector((state) => state.users);
 
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -49,7 +50,7 @@ function ProtectedPage({ children }) {
 
 	const setupWebSocket = (userId, dispatch) => {
 		if (!socket) {
-			socket = io("http://localhost:5000");
+			socket = io(BASE_URL);
 			socket.emit("register", userId);
 
 			socket.on("new-notification", (notification) => {
