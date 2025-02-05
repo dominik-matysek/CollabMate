@@ -11,7 +11,8 @@ function Login() {
 	const navigate = useNavigate();
 	const { buttonLoading, user } = useSelector((state) => state.loaders);
 	const dispatch = useDispatch();
-
+	const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+	console.log("API URL:", BASE_URL);
 	const onFinish = async (values) => {
 		try {
 			dispatch(SetButtonLoading(true));
