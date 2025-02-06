@@ -20,11 +20,12 @@ const registerValidation = Joi.object({
 		"string.email": "Invalid email format.",
 		"any.required": "Email is required.",
 	}),
-	password: Joi.string().min(6).required().messages({
+	// google oauth
+	password: Joi.string().min(6).optional().messages({
 		"string.base": "Password should be a string.",
 		"string.empty": "Password cannot be empty.",
 		"string.min": "Password should have a minimum length of {#limit}.",
-		"any.required": "Password is required.",
+		//"any.required": "Password is required.",
 	}),
 });
 
@@ -36,11 +37,12 @@ const loginValidation = Joi.object({
 		"string.email": "Invalid email format.",
 		"any.required": "Email is required.",
 	}),
-	password: Joi.string().min(6).required().messages({
+	//google oauth
+	password: Joi.string().min(6).optional().messages({
 		"string.base": "Password should be a string.",
 		"string.empty": "Password cannot be empty.",
 		"string.min": "Password should have a minimum length of {#limit}.",
-		"any.required": "Password is required.",
+		//"any.required": "Password is required.",
 	}),
 });
 

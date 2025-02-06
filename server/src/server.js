@@ -11,6 +11,8 @@ const socketIo = require("socket.io");
 
 
 const app = express();
+//for render hosting
+app.set('trust proxy', 1);
 const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
 //const frontendUrl = process.env.PORT || 4000;
 const server = http.createServer(app);
@@ -41,7 +43,6 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const cors = require("cors");
 const mongoSanitize = require("express-mongo-sanitize");
-
 
 app.use(helmet());
 app.use(cookieParser());

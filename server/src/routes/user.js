@@ -32,4 +32,9 @@ router.delete("/:userId", verifyToken, verifyAdmin, users.removeUserFromSystem);
 
 router.post("/refresh-token", users.refreshToken);
 
+//google oauth
+router.get("/auth/google", users.googleLogin);
+router.get("/auth/google/callback", users.googleCallback);
+
+
 module.exports = router;
