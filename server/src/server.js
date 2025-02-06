@@ -82,6 +82,17 @@ app.use((req, res, next) => {
 	});
 });
 
+// Serve the frontend build (React app) only in production
+if (process.env.NODE_ENV === "production") {
+	// Serve static files from the React build folder
+	app.use(express.static(path.join(__dirname, "../../client/build"))); // Adjusted path to the build folder
+
+	// Handle all other routes by sending index.html to allow React Router to handle routing
+	app.get("*", (req, res) => {
+		res.sendFile(path.resolve(__dirname, "../../client/build", "index.html")); // Adjusted path to the build folder
+	});
+}
+
 server.listen(port, () =>
 	console.log(`Node JS server listening on port ${port}`)
 );
