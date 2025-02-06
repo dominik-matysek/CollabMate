@@ -1,5 +1,4 @@
 // Server file
-const path = require("path");
 
 if (process.env.NODE_ENV !== "production") {
 	require("dotenv").config();
@@ -12,7 +11,7 @@ const socketIo = require("socket.io");
 
 
 const app = express();
-//for render hosting
+//for render
 app.set('trust proxy', 1);
 const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
 //const frontendUrl = process.env.PORT || 4000;
@@ -83,25 +82,6 @@ app.use((req, res, next) => {
 	});
 });
 
-// Serve the frontend build (React app) only in production
-if (process.env.NODE_ENV === "production") {
-	// Serve static files from the React build folder
-	app.use(express.static(path.join(__dirname, "../../client/build")));
-
-	// Handle all other routes by sending index.html to allow React Router to handle routing
-	app.get("*", (req, res) => {
-		res.sendFile(path.resolve(__dirname, "../../client/build", "index.html"));
-	});
-} else {
-	// Catch-all route for non-existing routes in development
-	app.use((req, res) => {
-		res.status(404).json({
-			success: false,
-			message: "Endpoint Not Found",
-		});
-	});
-}
-//console.log('Path: ', path);
 server.listen(port, () =>
 	console.log(`Node JS server listening on port ${port}`)
 );
