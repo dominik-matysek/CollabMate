@@ -92,7 +92,7 @@ exports.login = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "None",
+      SameSite: "None",
       maxAge: 30 * 60 * 1000, // Token expiration time in milliseconds
     });
 
@@ -100,7 +100,7 @@ exports.login = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "None",
+      SameSite: "None",
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
 
@@ -233,14 +233,14 @@ exports.googleCallback = (req, res, next) => {
       res.cookie("token", token, {
         httpOnly: true,
         secure: true,
-        sameSite: "None",
+        SameSite: "None",
         maxAge: 30 * 60 * 1000, // 30 minutes
       });
 
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: "None",
+        SameSite: "None",
         maxAge: 24 * 60 * 60 * 1000, // 1 day
       });
 
