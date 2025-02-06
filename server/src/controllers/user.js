@@ -256,8 +256,13 @@ exports.googleCallback = (req, res, next) => {
 
 exports.logout = async (req, res) => {
   try {
-    res.clearCookie("token");
-    res.clearCookie("refreshToken");
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    }
+    res.clearCookie("token", cookieOptions);
+    res.clearCookie("refreshToken", cookieOptions);
     res.json({ success: true, message: "Pomyślnie wylogowano użytkownika." });
   } catch (error) {
     console.error(error);
