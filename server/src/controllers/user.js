@@ -67,7 +67,10 @@ exports.login = async (req, res) => {
     const { email, password} = req.body;
 
     const ipAddress = req.headers["x-forwarded-for"] || req.ip || req.connection.remoteAddress;
-
+    console.log("IP Address:", ipAddress);
+    console.logI("IP1: ", req.headers["x-forwarded-for"]);
+    console.logI("IP2: ", req.ip);
+    console.logI("IP3: ", req.connection.remoteAddress);
     // Check if the user exists
     const user = await User.findOne({ email: email });
     if (!user) {
