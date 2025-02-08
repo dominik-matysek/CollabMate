@@ -34,7 +34,7 @@ function FooterComponent() {
         </div>
         <hr className="my-6 border-gray-200 lg:mx-auto lg:my-8" />
         <span className="block text-sm text-center text-white">
-          © 2023{" "}
+          © 2025{" "}
           <span className="hover:underline cursor-pointer">CollaboMate™</span>.
           All Rights Reserved.
         </span>

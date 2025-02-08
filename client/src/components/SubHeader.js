@@ -16,6 +16,11 @@ const itemsWhenInTeams = [
 		link: "/users",
 		forRole: "ADMIN",
 	},
+	{
+		name: "Dziennik zdarzeń",
+		link: "/logs",
+		forRole: "ADMIN",
+	},
 ];
 
 const itemsWhenInTeam = [

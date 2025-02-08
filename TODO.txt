@@ -1,0 +1,4 @@
+1. Skończyć frontend dla logów - zmienic pages/Logs/index.js - DONE
+2. Naprawić błąd że domyślne zdj profilowe sie nie ustawiaja przy tworzeniu konta - DONE
+3. Przejrzeć cały kod - przede wszystkim backend - i pousuwać niepotrzebne rzeczy, w tym komentarze oraz console.logi lub returny których nie powinno być w produkcji
+4. Spróbować google oauth ogarnąć

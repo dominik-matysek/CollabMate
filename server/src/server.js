@@ -66,6 +66,7 @@ const taskRoutes = require("./routes/task");
 const commentRoutes = require("./routes/comment");
 const notificationRoutes = require("./routes/notification");
 const eventRoutes = require("./routes/event");
+const logsRoutes = require("./routes/log");
 
 app.use("/api/users", userRoutes);
 app.use("/api/teams", teamRoutes);
@@ -74,6 +75,7 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/event", eventRoutes);
+app.use("/api/logs", logsRoutes);
 app.use((req, res, next) => {
 	// Catch-all route for non-existing routes
 	res.status(404).json({

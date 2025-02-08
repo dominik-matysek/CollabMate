@@ -9,8 +9,6 @@ export const apiRequest = async (method, url, payload) => {
 			data: payload,
 			withCredentials: true,
 		});
-		console.log("API URL:", BASE_URL);
-		console.log(response.data); // this should be commented out in production
 		return response.data;
 		
 	} catch (error) {

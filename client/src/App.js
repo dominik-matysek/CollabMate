@@ -5,6 +5,7 @@ import Register from "./pages/Register/index";
 import Profile from "./pages/Profile/index";
 import Teams from "./pages/Teams";
 import Users from "./pages/Users";
+import Logs from "./pages/Logs";
 import ProtectedPage from "./components/ProtectedPage";
 import Spinner from "./components/Spinner";
 import Team from "./pages/Teams/Team";
@@ -85,6 +86,14 @@ function App() {
 						element={
 							<ProtectedPage>
 								<Users />
+							</ProtectedPage>
+						}
+					/>
+					<Route
+						path="/logs"
+						element={
+							<ProtectedPage>
+								<Logs />
 							</ProtectedPage>
 						}
 					/>

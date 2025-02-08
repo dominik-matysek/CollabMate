@@ -10,7 +10,7 @@ export const getAntdFormInputRules = [
 ];
 
 export const getDateFormat = (date) => {
-	return moment(date).format("Do MMMM YYYY, h:mm A");
+	return moment(date).format("Do MMMM YYYY, h:mm:ss A");
 };
 
 export const getSimpleDateFormat = (date) => {

@@ -8,6 +8,7 @@ const {
 } = require("../utils/userValidation");
 // google oauth
 const passport = require("passport"); 
+const logAction = require("../middlewares/logAction");
 
 // User registration
 exports.register = async (req, res) => {
@@ -40,6 +41,10 @@ exports.register = async (req, res) => {
     // Save the user to the database
     await newUser.save();
 
+    // Logs
+    const ipAddress = req.headers["x-forwarded-for"] || req.ip || req.connection.remoteAddress;
+    await logAction(newUser._id, 'REGISTER', ipAddress);
+
     res.status(201).json({
       success: true,
       message: "Pomyślnie założono konto.",
@@ -61,15 +66,19 @@ exports.login = async (req, res) => {
 
     const { email, password} = req.body;
 
+    const ipAddress = req.headers["x-forwarded-for"] || req.ip || req.connection.remoteAddress;
+
     // Check if the user exists
     const user = await User.findOne({ email: email });
     if (!user) {
+      await logAction(null, "LOGIN_FAILURE", ipAddress);
       return res.status(401).json({ message: "Niewłaściwe hasło lub e-mail." });
     }
 
     // Compare passwords
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      await logAction(user._id, "LOGIN_FAILURE", ipAddress);
       return res.status(401).json({ message: "Niewłaściwe hasło lub e-mail." });
     }
 
@@ -103,6 +112,9 @@ exports.login = async (req, res) => {
       sameSite: "None",
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
+
+    // Logs
+    await logAction(user._id, 'LOGIN_SUCCESS', ipAddress);
 
     res.json({
       success: true,
@@ -256,11 +268,33 @@ exports.googleCallback = (req, res, next) => {
 
 exports.logout = async (req, res) => {
   try {
+    // Logs there are optional
+    // Extract token from cookies
+    const token = req.cookies.token;
+
+    if (token) {
+      try {
+        // Verify token and extract user data
+        const decryptedToken = jwt.verify(
+          token,
+          process.env.jwt_secret
+        );
+        const user = await User.findById(decryptedToken.userId).select("firstName lastName email");
+
+        if (user) {
+          const ipAddress = req.headers["x-forwarded-for"] || req.ip || req.connection.remoteAddress;
+          await logAction(user._id, "LOGOUT", ipAddress);
+        }
+      } catch (err) {
+        console.warn("Token verification failed during logout:", err.message);
+      }
+    }
     const cookieOptions = {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-    }
+    };
+
     res.clearCookie("token", cookieOptions);
     res.clearCookie("refreshToken", cookieOptions);
     res.json({ success: true, message: "Pomyślnie wylogowano użytkownika." });
@@ -325,6 +359,11 @@ exports.setInitialProfilePic = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const userId = req.params.userId;
+
+    if (req.userId !== userId) {
+      return res.status(403).json({ message: "Nie masz uprawnień do edytowania tego profilu." });
+    }
+
     const { firstName, lastName, email, profilePic } = req.body;
 
     const updatedValues = {};
