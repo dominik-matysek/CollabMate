@@ -1,3 +1,2 @@
 To start backend server: Go to /server/src and run 'nodemon server.js'
 To start frontend app: Go to /client and run 'npm start'
-To swtich between hosting and dev, simply comment out # .env files on frontend and backend directory
