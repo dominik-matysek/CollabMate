@@ -27,8 +27,6 @@ podstawowych czynności w jego obszarze. Użytkownik dodany do zadania przez lid
 
 Za nieograniczone zarządzanie wszystkim, co dzieje się w zespole odpowiadają liderzy zespołu. Mają oni dostęp do wszystkich funkcjonalności charakterystycznych dla członków projektów i członków zadań, bez konieczności bycia dodanym do konkretnego zasobu. Mogą więc wpływać na istnienie i właściwości zadań lub wydarzeń nawet jeżeli nie są ich twórcami. Dodatkowo od ich decyzji zależy, czy zadanie zakończone przez pozostałych użytkowników zostanie zaakceptowane. Liderzy mogą również tworzyć nowe projekty, modyfikować ich właściwości oraz dodawać lub usuwać użytkowników z projektów.
 
-
-
 ## Konfiguracja i uruchomienie aplikacji (localhost)
 
 Aby uruchomić projekt lokalnie, po jego pobraniu i rozpakowaniu w odpowiednim miejscu, użyj polecenia do instalacji potrzebnych modułów i bibliotek
@@ -148,4 +146,142 @@ również usunąć wydarzenie
 Użytkownik zaproszony do wydarzenia dostaje stosowne powiadomienie
 ![image](https://github.com/user-attachments/assets/ee3293ff-5a08-49fa-a30e-db36f8e3efa8)
 
+## Wykorzystane technologie
+### Warstwa interfejsu
+Warstwa użytkownika wykorzystuje przede wszystkim bibliotekę React.js która umożliwia tworzenie interaktywnych elementów interfejsu użytkownika.
 
+W celu rozszerzenia możliwości oferowanych przez bibliotekę React, wykorzystano
+dodatkowe, zewnętrzne moduły, takie jak:
+- Ant Design - popularnie znany jako ’antd’. Jest to biblioteka interfejsu użytkownika oferująca zestaw estetycznych, responsywnych i gotowych do użycia komponentów. Obejmuje szeroką gamę elementów, takich jak formularze, przycisku, menu
+i wiele innych.
+- Tailwind CSS - framework CSS używany do szybkiego tworzenia interfejsów
+użytkownika bez wychodzenia z konwencji HTML. Dzięki wykorzystaniu szeregu
+istniejących klas nie ma konieczności rozdzielania plików odpowiedzialnych za styl
+od plików odpowiedzialnych za funkcjonalność.
+- Axios - popularna biblioteka JavaScript służąca do wykonywania żądań HTTP.
+Wykorzystywana przez bibliotekę React do komunikacji z warstwą serwera i API.
+Ceniona za łatwość użycia, możliwości kofniguracji żądań oraz obsługę obietnic.
+- Moment.js - biblioteka wykorzystywana do parsowania, walidacji, manipulacji i formatowania dat, wpływając na znaczne ułatwienie pracy nad nimi.
+- Redux - biblioteka służąca do zarządzania stanem aplikacji. Pozwala na centralne
+przechowywanie całego stanu aplikacji w jednym miejscu zwanym jako "store", co
+ułatwia zarządzaniem stanem w przypadku bardziej rozbudowanych aplikacji.
+- Router - biblioteka będąca standardem w zarządzaniu nawigacją w aplikacjach opartych o React, umożliwiająca łatwe przełączanie się między różnymi widokami i zachowanie spójności struktury aplikacji poprzez wykorzystanie gotowych komponentów takich jak «BrowserRouter» bądź «Router».
+
+### Warstwa serwera
+Warstwa serwera opiera się przede wszystkim na dwóch narzędziach - Node.js oraz
+Express.js. Node.js to środowisko uruchomieniowe JavaScript po stronie serwera, umożliwiające tworzenie szybkich i skalowalnych aplikacji siecowych.
+Express.js to minimalistyczny i elastyczny framework dla aplikacji internetowych
+bazujących na Node.js, który zapewnia imponujący zestaw funkcji ułatwiających zarządzanie trasami oraz obsługę żądąń i odpowiedzi HTTP.
+
+Dodatkowe moduły które wykorzystano w celu usprawnienia pracy nad warstwą serwera to przede wszystkim:
+- bcrypt - moduł Node.js wykorzystywany do haszowania haseł.
+- Joi - biblioteka służąca do walidacji obiektów danych, zanim te zostaną przetworzone
+bądź zapisane do bazy danych
+- JWT - pełna nazwa to jsonwebtoken. Jest to moduł służący do tworzenia i weryfikacji tokenów, będących standardem do przekazywania informacji związanych z
+uwierzytelnianiem i autoryzacją pomiędzy stronami.
+- nodemon - narzędzie zwiększające komfort pracy poprzez automatyczne restartowanie serwera za każdym razem, gdy nastąpi zmiana w plikach kodu.
+- socket.io - biblioteka umożliwiająca komunikację w czasie rzeczywistym między warstwą klienta a serwerem.
+
+### Baza danych
+Do zaprojektowania i implementacji aplikacji internetowej do wspomagania pracą zespołu wykorzystano nierelacyjną bazę danych MongoDB. Baza ta znana jest ze swojej
+elastyczności i łatwości skalowania. W przeciwieństwie do tradycyjnych relacyjnych baz
+danych, MongoDB przechowuje dane w formacie dokumentów dzięki czemu jest ona
+dobrze przystosowana do pracy z dużymi zbiorami i strukturami danych.
+
+## Wykorzystane API zewnętrzne
+### Cloudinary
+Cloudinary to platforma do zarządzania obrazami i plikami w chmurze, oferująca
+szeroki zakres interfejsów API RESTful i zestawów SDK, które umożliwiają aplikacjom interakcję z usługami przechowywania i przetwarzania plików (zwłaszcza multimedialnych) w chmurze. W projekcie aplikacji Cloudinary jest
+wykorzystywane do przechowywania zdjęć profilowych użytkowników oraz plików obrazów
+i dokumentów PDF udostępnianych w zadaniach. Wykorzystanie serwisu chmurowego w
+projekcie zwalnia serwer aplikacji oraz pamięć lokalną użytkownika od obciążenia związanego z przetwarzaniem i przechowywaniem plików. Dodatkową zaletą Cloudinary jest
+możliwość dynamicznego ujednolicania obrazów pod względem ich rozmiaru bądź jakości.
+Darmowy pakiet oferowany przez serwis w całości spełnia wymagania projektu w jego
+obecnej formie
+
+## Kwestie bezpieczeństwa
+W kontekście zapewnienia bezpieczeństwa w aplikacji, przyjęto szerego kluczowych
+środków, mających na celu ochronę danych użytkowników oraz zapewnienie stabilności i
+bezpieczeństwa systemu:
+
+- W celu ochrony poufności haseł użytkowników stosowane jest hashowanie przy użyciu
+biblioteki bcrypt.js. Jest to metoda kryptograficzna przekształcająca wprowadzone hasło
+w unikalny ciąg znaków, znacznie utrudniających ich odszyfrowanie.
+- Do uwierzytelniania i zarządzania sesjami użytkowników wykorzystywane są tokeny
+JWT, które przechowywane są w w bezpiecznych HTTPOnly cookies. Ta metoda zapobiega dostępowi do tokenów przez skrypty po stronie klienta, co jest istotne w kontekście
+ochrony przed atakami typu XSS.
+- Dodatkową ochronę przed atakami typu XSS wprowadza wykorzystanie headerów zawartych w pakiecie 'helmet'
+- Zastosowanie 'express-mongo-sanitize' - narzędzia, które chroni przed atakami typu 'NoSQL injection'. Blokuje możliwość edycji zapytań w bazie MongoDB poprzez usuwanie znaków specjalnych takich jak '$' lub '.' w polach wejściowych.
+- W celu ochrony przed atakami typu DoS zaimplementowano ograniczenie liczby zapytań
+do API. Dzięki temu zapobiega się nadmiernemu obciążeniu serwera przez zbyt dużą
+liczbę żądań w krótkim czasie.
+- Wykorzystano politykę CORS do zarządzania dostępem do zasobów na różnych domenach.
+
+Każda trasa zaimplementowana po stronie serwera, z nielicznymi wyjątkami takimi
+jak logowanie czy rejestracja, została wyposażona w mechanizmy zabezpieczające uniemożliwiające nieuprawniony dostęp. W tym kontekście, ochrona przed nieuprawnionym
+dostępem nie ogranicza się jedynie do weryfikacji posiadania ważnego tokena, co jest
+równoznaczne z uwierzytelnieniem użytkownika, ale również obejmuje bardziej szczegółowe kontrole uprawnień. Do tych celów wykorzystywane są dodatkowe warstwy pośrednie
+(middleware), które w zależności od konkretnej trasy mogą sprawdzać dodatkowe wymagania, takie jak rola użytkownika, jego przynależność do zespołu lub bycie twórcą zadania.
+
+Dodatkowe środki ochrony zostały także zaimplementowane w warstwie interfejsu
+użytkownika, aby zapewnić zabezpieczenie przed nieuprawnionym dostępem do różnych
+zasobów aplikacji. System ten został zaprojektowany w taki sposób, aby uniemożliwić
+dostęp do stron przeznaczonych dla określonych użytkowników, takich jak członkowie
+konkretnego zespołu, osoby o specyficznych rolach lub uprawnieniach, jeśli dany użytkownik nie posiada odpowiednich kwalifikacji. W przypadkach, gdy użytkownik próbuje
+uzyskać dostęp do nieistniejących adresów URL lub stron, dla których nie posiada odpowiednich uprawnień, aplikacja reaguje wyświetleniem odpowiedniej informacji o błędzie
+lub ograniczeniu dostępu. Ponadto, system automatycznie przekierowuje niezalogowanych
+użytkowników na stronę logowania, gdy próbują oni wejść na strony wymagające uwierzytelnienia.
+
+## Wyzwania napotkane podczas pracy nad projektem
+### JOI
+Jednym z wyzwań napotkanych podczas pracy nad projektem była pierwsza implementacja walidacji przy użyciu biblioteki Joi. Pomimo jej potężnych możliwości w definiowaniu
+szczegółowych schematów walidacyjnych, trudności wyniknęły z powodu początkowej nieuwagi przy ich projektowaniu. Z uwagi na rozpoczęcie pracy nad dodaniem walidacji po
+zakończeniu pierwszego testowania warstwy serwera, nowe schematy nie wskazywały na
+właściwe elementy zawarte w żądaniach HTTP co doprowadziło do problemów takich jak
+odrzucanie prawidłowych danych wejściowych. Problem został zidentyfikowany już przy
+pierwszej nieudanej próbie skorzystania z zintegrowanym z warstwą interfejsu punktem
+kontrolnym, jednak jego naprawa wymagała poprawy każdego utworzonego już schematu
+walidacyjnego.
+
+### Dodawanie zdjęć
+Większym wyzwaniem okazało się prawidłowe zaimplementowanie funkcjonalności dodawanie zdjęc profilowych użytkowników. Choć sama integracja z usługą Cloudinary
+przebiegła pomyślnie i zdjęcia prawidłowo były umieszczane w serwisie, problem pojawił
+się przy przypisywaniu adresu URL do właściwości profilePic w modelu użytkownika.
+Błąd ten wymagał zmiany zarówno w metodzie rejestracji istniejącej w warstwie klienta,
+jak i po stronie serwera. Rozwiązanie problemu wymagało segmentacji procesu na dwie
+części - rejestrację użytkownika i osobne przypisanie adresu URL do modelu użytkownika.
+
+### Powiadomienia
+Kolejnym problemem okazało się niewłaściwe wyświetlanie powiadomień. Używając
+gotowego komponentu Dropdown z biblioteki Ant Design, powiadomienia były wyświetlane w sposób wycentrowany i nie zajmowały całej przeznaczonej dla nich szerokości.
+Problem ten wynikał z domyślnych ustawień stylistycznych dla podanego komponentu.
+Wymagał jednak znacznie dokładniejszej analizy stylów widocznych w narzędziach deweloperskich przeglądarki i odpowiedniej ich modyfikacji niż przewidywano, z uwagi na dużą
+ilość zależności pomiędzy poszczególnymi elementami.
+
+### Hosting
+Z uwagi na brak dotychczasowego doświadczenia z hostowaniem aplikacji internetowych, dostosowanie programu tak, aby poprawnie uruchamiał się zarówno lokalnie jak i w usłudze hostingowej wymagało sporo czasu i wykorzystania metody prób i błędów. Z uwagi na specyfikę przeglądarek internetowych, niektóre z funkcji poprawnie działających lokalnie wymagały poprawy - często były to drobne, ale trudne do wykrycia błędy takie jak np. niepoprawny zapis metod związanych z ciasteczkami (przykład: 'SameSite: "none"' zamiast 'sameSite: "None"').
+
+## Perspektywy rozwoju
+### Rozwinięcie bezpieczeństwa aplikacji
+Wzmocnienie bezpieczeństwa poprzez dodanie funkcji weryfikacji adresu email przy
+rejestracji oraz możliwości resetowania lub zmiany hasła poprzez email poprawiłoby zarządzanie dostępem do konta użytkownika i zwiększyłoby ochronę przed nieautoryzowanym
+dostępem. 
+
+### Wykorzystanie protokołu OAuth
+OAuth (Open Authorization) to standard protokołu autoryzacji, który umożliwia aplikacjom dostęp do zasobów użytkownika w innych aplikacjach bez potrzeby udostępniania hasła. 
+OAuth jest używany w wielu aplikacjach internetowych, takich jak Google, Facebook, czy Twitter, aby umożliwić logowanie za pomocą konta zewnętrznego bez konieczności tworzenia nowego konta w danej aplikacji.
+Wykorzystanie tego protokołu w aplikacji ułatwiłoby użytkownikom uzyskanie dostępu do serwisu, jednocześnie zwiększając kwestie bezpieczeństwa.
+
+### Podział na rolę w zespołach
+Wprowadzenie zdefiniowanych ról dla pracowników zespołu, takich jak deweloper, analityk, stażysta, umożliwiłoby lepszą organizację pracy i zarządzanie uprawnieniami. Każda
+rola wewnątrz zespołu mogłaby mieć dostęp do innych funkcji, co wpłynęłoby na zwiększenie bezpieczeństwa i przejrzystości.
+
+###  Panel statystyk
+Wprowadzenie dodatkowego, rozbudowanego panelu zaawansowanych statystyk dotyczących ostatnich zmian wprowadzonych w zespole, projektach i zadaniach umożliwiłaby
+lepsze śledzenie postępów, analizowanie wydajności i podejmowanie decyzji na podstawie zebranych danych. Generowanie raportów z określonych przedziałów czasu jeszcze bardziej
+podwyższyłoby wartość analityczną aplikacji.
+
+### Integracja
+Implementacja integracji z innymi popularnymi narzędziami i systemami pozwoliłaby
+na zwiększenie funkcjonalności aplikacji oraz ułatwienie wymiany danych i synchronizacji
+zasobów.
