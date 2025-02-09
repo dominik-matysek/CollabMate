@@ -7,25 +7,24 @@ const Event = require("../models/event");
 
 const verifyToken = (req, res, next) => {
   try {
-    // Retrieve token from HttpOnly cookie
+    // retrieve token from httponly cookie
     const token = req.cookies.token;
-    console.log("Token from cookies:", token);
 
     if (!token) {
       return res.status(401).json({
-        message: "Brak autoryzacji. Test 1",
+        message: "Brak autoryzacji.",
       });
     }
     const decryptedToken = jwt.verify(token, process.env.jwt_secret);
 
-    // Attach the userId to the request for later use in route handlers
+    // attach the userId to the request for later use in route handlers
     req.userId = decryptedToken.userId;
     req.userRole = decryptedToken.userRole;
 
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      // Indicate that token has expired
+      // token has expired
       return res.status(401).json({ tokenExpired: true });
     }
     console.error(error);
@@ -42,17 +41,15 @@ const verifyAdmin = async (req, res, next) => {
       return res.status(401).json({ message: "Brak autoryzacji." });
     }
 
-    // Fetch the user from the database
     const user = await User.findById(req.userId);
     if (!user) {
       return res.status(404).json({ message: "Nie znaleziono użytkownika." });
     }
 
     if (user.role === "ADMIN") {
-      // User is an admin, allow the request to proceed
+      // allow the request to proceed
       next();
     } else {
-      // User is not an admin, send a 403
       res.status(403).json({ message: "Brak dostępu." });
     }
   } catch (error) {
@@ -67,17 +64,15 @@ const verifyLeader = async (req, res, next) => {
       return res.status(401).json({ message: "Brak autoryzacji." });
     }
 
-    // Fetch the user from the database
     const user = await User.findById(req.userId);
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
 
     if (user.role === "TEAM LEADER") {
-      // User is a team leader, allow the request to proceed
+      // User is a team leader
       next();
     } else {
-      // User is not an team leader, send a 403
       res.status(403).json({ message: "Brak dostępu." });
     }
   } catch (error) {
@@ -90,34 +85,26 @@ const verifyEventCreator = async (req, res, next) => {
   try {
     const userId = req.userId;
 
-    console.log("ID usera:", userId);
-
     if (!userId) {
       return res.status(401).json({ message: "Brak autoryzacji." });
     }
 
     const eventId = req.params.eventId || req.body.eventId;
 
-    console.log("ID eventu: ", eventId);
-
     const event = await Event.findById(eventId);
     if (!event) {
       return res.status(404).json({ message: "Nie znaleziono wydarzenia." });
     }
 
-    console.log("Event: ", event.createdBy);
-
-    // Fetch the user from the database
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "Nie znaleziono użytkownika." });
     }
 
     if (user.role === "TEAM LEADER" || userId == event.createdBy) {
-      // User is a team leader, allow the request to proceed
+      // User is a team leader
       next();
     } else {
-      // User is not an team leader, send a 403
       res.status(403).json({ message: "Brak dostępu." });
     }
   } catch (error) {
@@ -141,17 +128,15 @@ const verifyCreator = async (req, res, next) => {
       return res.status(404).json({ message: "Nie znaleziono zadania." });
     }
 
-    // Fetch the user from the database
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "Nie znaleziono użytkownika." });
     }
 
     if (user.role === "TEAM LEADER" || userId == task.createdBy) {
-      // User is a team leader, allow the request to proceed
+      // User is a team leader
       next();
     } else {
-      // User is not an team leader, send a 403
       res.status(403).json({ message: "Brak dostępu." });
     }
   } catch (error) {
@@ -312,11 +297,11 @@ const verifyAdminOrTeamMember = async (req, res, next) => {
     }
 
     if (user.role === "ADMIN") {
-      // User is an admin, proceed to the next middleware
+      // user is an admin, proceed to the next middleware
       return next();
     }
 
-    // If not admin, check team access
+    // if not admin, check team access
     await checkTeamAccess(req, res, next);
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error." });

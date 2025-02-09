@@ -22,16 +22,9 @@ const userSchema = new Schema(
 		},
 		password: {
 			type: String,
-			//google oauth
-			//required: true,
+			required: true,
 			minlength: 6,
 		},
-		//google oauth
-		googleId: {
-  			type: String,  // To store Google user ID for OAuth
-  			unique: true,
-		},
-
 		profilePic: {
 			type: String,
 			default:

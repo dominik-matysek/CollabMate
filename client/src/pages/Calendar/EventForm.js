@@ -61,8 +61,6 @@ function EventForm({
       if (response.success) {
         message.success(response.message);
         setSelectedMembers(null);
-        console.log("Detale eventu: ", eventDetails);
-        console.log("Detale eventu: ", eventDetails.title);
         const notificationPayload = {
           users: values.member,
           title: "Dodano cię do wydarzenia",

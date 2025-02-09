@@ -11,9 +11,6 @@ const usersSlice = createSlice({
 		SetUser(state, action) {
 			state.user = action.payload;
 		},
-		// SetAllUsers(state, action) {
-		// 	state.allUsers = action.payload;
-		// },
 		SetNotifications(state, action) {
 			state.notifications = action.payload;
 		},
@@ -43,7 +40,6 @@ const usersSlice = createSlice({
 
 export const {
 	SetUser,
-	SetAllUsers,
 	SetNotifications,
 	LogoutUser,
 	AddNotification,

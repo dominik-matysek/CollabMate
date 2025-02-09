@@ -6,8 +6,6 @@ const {
   loginValidation,
   updateValidation,
 } = require("../utils/userValidation");
-// google oauth
-const passport = require("passport"); 
 const logAction = require("../middlewares/logAction");
 
 // User registration
@@ -42,7 +40,7 @@ exports.register = async (req, res) => {
     await newUser.save();
 
     // Logs
-    const ipAddress = req.headers["x-forwarded-for"] || req.ip || req.connection.remoteAddress;
+    const ipAddress = (req.headers["x-forwarded-for"] || req.ip || req.connection.remoteAddress).split(",")[0].trim();
     await logAction(newUser._id, 'REGISTER', ipAddress);
 
     res.status(201).json({
@@ -95,7 +93,7 @@ exports.login = async (req, res) => {
     const refreshToken = jwt.sign(
       { userId: user._id, userRole: user.role },
       process.env.refresh_token_secret,
-      { expiresIn: "1d" } // Longer-lived refresh token
+      { expiresIn: "1d" } // Longer refresh token
     );
 
     res.cookie("token", token, {
@@ -127,148 +125,8 @@ exports.login = async (req, res) => {
   }
 };
 
-// // Google OAuth login initiation
-// exports.googleLogin = passport.authenticate("google", {
-//   scope: ["profile", "email"],
-// });
-
-// // Google OAuth callback
-// exports.googleCallback = (req, res, next) => {
-//   passport.authenticate("google", async (err, user, info) => {
-//     if (err || !user) {
-//       return res.status(400).json({ message: "Google authentication failed." });
-//     }
-
-//     try {
-//       // Generate JWT token
-//       const token = jwt.sign(
-//         { userId: user._id, userRole: user.role },
-//         process.env.jwt_secret,
-//         { expiresIn: "30m" }
-//       );
-
-//       // Generate JWT Refresh Token
-//       const refreshToken = jwt.sign(
-//         { userId: user._id, userRole: user.role },
-//         process.env.refresh_token_secret,
-//         { expiresIn: "1d" }
-//       );
-
-//       // Set tokens in cookies (optional, depending on your setup)
-//       res.cookie("token", token, {
-//         httpOnly: true,
-//         secure: true,
-//         sameSite: "None",
-//         maxAge: 30 * 60 * 1000, // 30 minutes
-//       });
-
-//       res.cookie("refreshToken", refreshToken, {
-//         httpOnly: true,
-//         secure: true,
-//         sameSite: "None",
-//         maxAge: 24 * 60 * 60 * 1000, // 1 day
-//       });
-
-//       // Send tokens in the response (for frontend use)
-//       res.status(200).json({
-//         success: true,
-//         message: "Successfully logged in with Google",
-//         data: {
-//           token,
-//           refreshToken,
-//           role: user.role,
-//           userId: user._id,
-//         },
-//       });
-//     } catch (error) {
-//       console.error("Error during Google OAuth callback:", error);
-//       res.status(500).json({ message: "Internal server error." });
-//     }
-//   })(req, res, next);
-// };
-
-//google oauth
-// exports.googleLogin = (req, res, next) => {
-//   passport.authenticate('google', { failureRedirect: '/login' }, (err, user, info) => {
-//     if (err || !user) {
-//       return res.status(400).json({ message: "Authentication failed" });
-//     }
-  
-//     // If login is successful, log the user in
-//     req.login(user, (loginErr) => {
-//       if (loginErr) {
-//         return res.status(500).json({ message: "Login failed" });
-//       }
-  
-//       // Once logged in, you can issue tokens, set cookies, etc.
-//       const token = jwt.sign({ userId: user._id, userRole: user.role }, process.env.jwt_secret, { expiresIn: "30m" });
-//       const refreshToken = jwt.sign({ userId: user._id, userRole: user.role }, process.env.refresh_token_secret, { expiresIn: "1d" });
-  
-//       res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "None", maxAge: 30 * 60 * 1000 });
-//       res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "None", maxAge: 24 * 60 * 60 * 1000 });
-  
-//       res.json({
-//         success: true,
-//         message: "Successfully logged in with Google",
-//         data: { role: user.role, userId: user._id },
-//       });
-//     });
-//   })(req, res);
-// };
-
-//google oauth
-exports.googleCallback = (req, res, next) => {
-  passport.authenticate("google", { failureRedirect: "/login" }, (err, user, info) => {
-    if (err || !user) {
-      return res.status(400).json({ message: "Authentication failed" });
-    }
-
-    // If login is successful, log the user in
-    req.login(user, (loginErr) => {
-      if (loginErr) {
-        return res.status(500).json({ message: "Login failed" });
-      }
-
-      // Once logged in, issue tokens and set cookies
-      const token = jwt.sign(
-        { userId: user._id, userRole: user.role },
-        process.env.jwt_secret,
-        { expiresIn: "30m" }
-      );
-
-      const refreshToken = jwt.sign(
-        { userId: user._id, userRole: user.role },
-        process.env.refresh_token_secret,
-        { expiresIn: "1d" }
-      );
-
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "None",
-        maxAge: 30 * 60 * 1000, // 30 minutes
-      });
-
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "None",
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
-      });
-
-      // Send a JSON response
-      res.json({
-        success: true,
-        message: "Successfully logged in with Google",
-        data: { role: user.role, userId: user._id },
-      });
-    });
-  })(req, res, next); // Pass req, res, and next to passport.authenticate
-};
-
 exports.logout = async (req, res) => {
   try {
-    // Logs there are optional
     // Extract token from cookies
     const token = req.cookies.token;
 
@@ -282,7 +140,7 @@ exports.logout = async (req, res) => {
         const user = await User.findById(decryptedToken.userId).select("firstName lastName email");
 
         if (user) {
-          const ipAddress = req.headers["x-forwarded-for"] || req.ip || req.connection.remoteAddress;
+          const ipAddress = (req.headers["x-forwarded-for"] || req.ip || req.connection.remoteAddress).split(",")[0].trim();
           await logAction(user._id, "LOGOUT", ipAddress);
         }
       } catch (err) {
@@ -519,7 +377,7 @@ exports.refreshToken = async (req, res) => {
     const accessToken = jwt.sign(
       { userId: decryptedToken.userId, userRole: decryptedToken.userRole },
       process.env.jwt_secret,
-      { expiresIn: "30m" } // Example expiration time
+      { expiresIn: "30m" } // expiration time
     );
 
     res.json({ accessToken });

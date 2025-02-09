@@ -27,7 +27,6 @@ function ProtectedPage({ children }) {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
 	let socket = null;
-	console.log("API URL:", BASE_URL);
 	const getUser = async () => {
 		try {
 			dispatch(SetLoading(true));

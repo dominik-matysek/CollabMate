@@ -46,14 +46,6 @@ const userService = {
 	refreshToken: async () => {
 		return apiRequest("POST", `${userAPI}/refresh-token`);
 	},
-
-	googleLogin: async () => {
-		return apiRequest("GET", `${userAPI}/auth/google`);
-	},
-
-	googleCallback: async () => {
-		return apiRequest("GET", `${userAPI}/auth/google/callback`);
-	},
 };
 
 export default userService;

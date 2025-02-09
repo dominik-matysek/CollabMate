@@ -1,4 +1,4 @@
-// Proste metody wykorzystywane w projekcie
+// Simple methods used for frontend side
 
 import moment from "moment";
 
